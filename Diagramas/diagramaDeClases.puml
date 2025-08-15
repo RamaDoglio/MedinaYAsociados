@@ -1,0 +1,40 @@
+@startuml Diagrama de Clases
+class Turno {
+    - nroTurno
+    - fechaHoraInicio
+    - fechaHoraFin
+    - estadoActual:Estado
+    - cliente:Cliente
+    - abogado:Abogado
+    - ultimoCambioEstado:CambioEstado
+    - motivoTurno
+    - observaciones
+}
+class Cliente {
+    - 
+}
+class Abogado {
+    -
+}
+class CambioEstado{
+    -
+}
+class Cobro {
+    -
+}
+class Estado{
+    -
+}
+class Direccion{
+
+}
+class Localidad{
+
+}
+class Provincia{
+
+}
+class TipoDNI{
+
+}
+@enduml
