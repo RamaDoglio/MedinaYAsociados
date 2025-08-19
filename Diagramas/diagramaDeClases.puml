@@ -7,34 +7,160 @@ class Turno {
     - cliente:Cliente
     - abogado:Abogado
     - ultimoCambioEstado:CambioEstado
-    - motivoTurno
+    - especialidad: especialidad
+    - cobro:Cobro
     - observaciones
+    + crear()
+    + modificar()
 }
+Turno --> Cobro
+Turno --> Estado
+Turno --> CambioEstado
+Turno --> Especialidad
+
+
+class Especialidad {
+    - nombre
+    - descripcion
+    + crear()
+    + mostrar()
+}
+
+class Persona{
+    - nombre
+    - apellido
+    - dni:TipoDni
+    - direccion:Direccion
+    - telefono
+    - email
+    + crear()
+    + mostrar()
+}
+
+Persona --> Direccion
+Persona --> TipoDni
+
+class TipoDni{
+    - nombre
+    + crear()
+    + mostrar()
+}
+
 class Cliente {
-    - 
+    - nroCliente
+    + crear()
+    + mostrar()
 }
+
+Cliente --|> Persona
+Cliente --> Turno
+
+
 class Abogado {
-    -
+    - matricula
+    + crear()
+    + mostrar()
+
 }
+
+Abogado --> Especialidad
+Abogado --|> Persona
+Abogado --> Turno
+
 class CambioEstado{
-    -
+    - fechaHoraInicio
+    - fechaHoraFin
+    + crear()
+    + mostrar()
 }
+
+CambioEstado --> Estado
+
 class Cobro {
-    -
+    - monto
+    - fechaCobro
+    - tipoCobro:TipoCobro
+    - saldoPendiente
+    - importeTotal
+    - estado:Estado
+    - detalleCobro:DetalleCobro
+    + calcularSaldoPendiente()
+    + calcularImporteTotal()
+    + crear()
+    + mostrar()
+
 }
+
+Cobro --> TipoCobro
+Cobro --> DetalleCobro
+Cobro --> Estado
+
+class DetalleCobro {
+    - fecha
+    - descripcion
+    - monto
+    + crear()
+    + mostrar()
+}
+
+class TipoCobro {
+    - nombre
+    - descripcion
+    + crear()
+    + mostrar()
+}
+
 class Estado{
-    -
+    - ambito
+    - valor
+    + crear()
+    + mostrar()
+    + setValor(valor)
+    + setAmbito(ambito)
+    + getValor()
+    + getAmbito()
 }
+
+note top of Estado : Los metodos de seteo \nse encuentran en esta clase \ny son extensibles a las demas clases
+
 class Direccion{
-
+    - calle
+    - numero
+    - piso
+    - departamento
+    - localidad:Localidad
+    - provincia:Provincia
+    - codigoPostal
+    + crear()
+    + mostrar()
 }
+
+Direccion --> Localidad
+
 class Localidad{
-
+    - nombre
+    - provincia:Provincia
+    + crear()
+    + mostrar()
 }
+
+Localidad --> Provincia
+
 class Provincia{
-
+    - nombre
+    - pais:Pais
+    + crear()
+    + mostrar()
 }
-class TipoDNI{
 
+Provincia --> Pais
+
+class Pais{
+    - nombre
+    + crear()
+    + mostrar()
 }
+
+
+
 @enduml
