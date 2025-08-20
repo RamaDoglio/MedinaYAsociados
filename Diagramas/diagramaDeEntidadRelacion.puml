@@ -1,0 +1,63 @@
+@startuml der
+hide circle
+
+entity Turno {
+    -nroTurno <<PK>>: SERIAL
+    -fechaHoraInicio: DATE
+    -fechaHoraFin: DATE
+    -observaciones: VARCHAR
+    -importeTotal: JUS
+    -cambioEstado <<FK>>: INTEGER
+    -especialidad <<FK>>: INTEGER
+    -cobro <<FK>>: INTEGER
+    -estadoActual <<FK>>: INTEGER
+}
+
+entity CambioEstado {
+    -nroCambioEstado <<PK>>: INTEGER
+    -fechaHoraInicio: DATE
+    -fechaHoraFin: DATE
+    -estadoCambioEstado <<FK>>: INTEGER
+}
+
+entity Abogado {
+    -matricula <<PK>>: VARCHAR
+    -nombre: VARCHAR
+    -apellido: VARCHAR
+    -dni: INTEGER
+    -direccion: VARCHAR
+    -telefono: INTEGER
+    -email: VARCHAR
+}
+
+entity Cliente {
+    -nroCliente: <<PK>> SERIAL
+    -nombre: VARCHAR
+    -apellido: VARCHAR
+    -dni: INTEGER
+    -direccion: VARCHAR
+    -telefono: INTEGER
+    -email: VARCHAR
+}
+
+entity Cobro {
+    -monto: INTEGER
+    -fechaCobro: DATE
+    -tipoCobro <<FK>>: INTEGER
+    -importeTotal: INTEGER
+    -estado <<FK>>: INTEGER
+    -detalleCobro <<FK>>: INTEGER
+}
+
+entity Especialidad {
+    -idEspecilidad <<PK>>: SERIAL
+    -nombre
+    -descripcion
+}
+
+entity TipoCobro {
+    -idTipoCobro <<PK>>: SERIAL
+    -nombre
+    -descripcion
+}
+@enduml
