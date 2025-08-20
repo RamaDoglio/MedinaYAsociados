@@ -1,0 +1,14 @@
+@startuml CicloEstadosTurno
+hide empty description
+[*] --> Reservado : Crear turno
+
+Reservado --> Confirmado : Cliente confirma
+Reservado --> Cancelado : Cliente/abogado cancela
+
+Confirmado --> Cancelado : Cliente/abogado cancela
+Confirmado --> Finalizado : Turno atendido
+
+Cancelado --> [*] : Cierre definitivo
+Finalizado --> [*] : Cierre definitivo
+
+@enduml

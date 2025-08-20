@@ -1,0 +1,34 @@
+@startuml CasoUsoTurnos
+
+left to right direction
+actor Cliente
+actor Abogado
+actor "Administrador" as Admin
+
+rectangle "Sistema de Gestión de Turnos" {
+  
+  (Reservar Turno) as reservar
+  (Cancelar Turno) as cancelar
+  (Consultar Turnos) as consultar
+  (Gestionar Estados de Turno) as estados
+  (Gestionar Especialidades) as especialidad
+  (Gestionar Abogados) as gestAbogado
+  (Gestionar Clientes) as gestCliente
+  (Gestionar Horarios) as gestHorarios
+  (Reprogramar Turno) as repro
+}
+
+Cliente --> reservar
+Cliente --> cancelar
+Cliente --> consultar
+
+
+Abogado --> consultar
+Abogado --> repro
+
+Admin --> gestAbogado
+Admin --> gestCliente
+Admin --> especialidad
+Admin --> estados
+Admin --> gestHorarios
+@enduml

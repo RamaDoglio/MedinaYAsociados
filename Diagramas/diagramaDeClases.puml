@@ -13,10 +13,11 @@ class Turno {
     + crear()
     + modificar()
 }
-Turno --> Cobro
-Turno --> Estado
-Turno --> CambioEstado
-Turno --> Especialidad
+Turno --> "1..* "Cobro
+Turno -> "1" Estado
+Turno -->"1..*" CambioEstado
+Turno --> "1" Especialidad
+Turno -left-> "1"Horario
 
 
 class Especialidad {
@@ -29,7 +30,7 @@ class Especialidad {
 class Persona{
     - nombre
     - apellido
-    - dni:TipoDni
+    - dni
     - direccion:Direccion
     - telefono
     - email
@@ -37,14 +38,7 @@ class Persona{
     + mostrar()
 }
 
-Persona --> Direccion
-Persona --> TipoDni
-
-class TipoDni{
-    - nombre
-    + crear()
-    + mostrar()
-}
+Persona -->"1" Direccion
 
 class Cliente {
     - nroCliente
@@ -52,8 +46,8 @@ class Cliente {
     + mostrar()
 }
 
-Cliente --|> Persona
-Cliente --> Turno
+Cliente -|> Persona
+Cliente -->"0..*" Turno
 
 
 class Abogado {
@@ -63,9 +57,9 @@ class Abogado {
 
 }
 
-Abogado --> Especialidad
-Abogado --|> Persona
-Abogado --> Turno
+Abogado -->"1..*" Especialidad
+Abogado -|> Persona
+Abogado -->"0..*" Turno
 
 class CambioEstado{
     - fechaHoraInicio
@@ -74,7 +68,7 @@ class CambioEstado{
     + mostrar()
 }
 
-CambioEstado --> Estado
+CambioEstado -->"1" Estado
 
 class Cobro {
     - monto
@@ -91,9 +85,9 @@ class Cobro {
 
 }
 
-Cobro --> TipoCobro
-Cobro --> DetalleCobro
-Cobro --> Estado
+Cobro -->"1" TipoCobro
+Cobro -->"1..*" DetalleCobro
+Cobro -->"1" Estado
 
 class DetalleCobro {
     - fecha
@@ -121,7 +115,7 @@ class Estado{
     + getAmbito()
 }
 
-note top of Estado : Los metodos de seteo \nse encuentran en esta clase \ny son extensibles a las demas clases
+note bottom of Estado : Los metodos de seteo \nse encuentran en esta clase \ny son extensibles a las demas clases
 
 class Direccion{
     - calle
@@ -129,38 +123,26 @@ class Direccion{
     - piso
     - departamento
     - localidad:Localidad
-    - provincia:Provincia
+    - provincia
+    + crear()
+    + mostrar()
+}
+
+Direccion -->"1" Localidad
+
+class Localidad{
+    - nombre
     - codigoPostal
     + crear()
     + mostrar()
 }
 
-Direccion --> Localidad
-
-class Localidad{
-    - nombre
-    - provincia:Provincia
+class Horario {
+    - hora
+    - estado
     + crear()
     + mostrar()
 }
 
-Localidad --> Provincia
-
-class Provincia{
-    - nombre
-    - pais:Pais
-    + crear()
-    + mostrar()
-}
-
-Provincia --> Pais
-
-class Pais{
-    - nombre
-    + crear()
-    + mostrar()
-}
-
-
-
+Horario --> "1"Estado
 @enduml

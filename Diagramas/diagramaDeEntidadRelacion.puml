@@ -7,7 +7,7 @@ entity Turno {
     -fechaHoraInicio: DATE
     -fechaHoraFin: DATE
     -observaciones: VARCHAR
-    -importeTotal: JUS
+    -importeTotal: INTEGER
     -cambioEstado <<FK>>: INTEGER
     -especialidad <<FK>>: INTEGER
     -cobro <<FK>>: INTEGER
@@ -32,7 +32,7 @@ entity Abogado {
 }
 
 entity Cliente {
-    -nroCliente: <<PK>> SERIAL
+    -idCliente: <<PK>> SERIAL
     -nombre: VARCHAR
     -apellido: VARCHAR
     -dni: INTEGER
@@ -52,25 +52,25 @@ entity Cobro {
 
 entity Especialidad {
     -idEspecilidad <<PK>>: SERIAL
-    -nombre
-    -descripcion
+    -nombre: VARCHAR
+    -descripcion: VARCHAR
 }
 
 entity TipoCobro {
     -idTipoCobro <<PK>>: SERIAL
-    -nombre
-    -descripcion
+    -nombre: VARCHAR
+    -descripcion: VARCHAR
 }
 
 entity Estado {
     -idEstado <<PK>>: SERIAL
-    -nombre
-    -descripcion
+    -nombre: VARCHAR
+    -descripcion: VARCHAR
 }
 
 entity TurnoXAbogado {
-    -idAbogado <<FK>>
-    -idTurno <<FK>>
+    -idAbogado <<FK>>: INTEGER
+    -idTurno <<FK>>: INTEGER
 }
 
 entity DetalleCobro {
@@ -81,19 +81,24 @@ entity DetalleCobro {
     - monto : DECIMAL
 }
 
+
+
 Turno ||--o{ Cobro
+Turno }o--|| Estado : "estadoActual"
+Turno ||--o{ CambioEstado : "historial"
+Turno ||--o{ TurnoXAbogado
+Turno ||--|| Especialidad
+
 Cobro }o--|| TipoCobro
 Cobro ||--o{ DetalleCobro
 
-Turno }o--|| Estado : "estadoActual"
-Turno ||--o{ CambioEstado : "historial"
+Abogado ||--o{ TurnoXAbogado
+Abogado ||--|{ Especialidad
+
 CambioEstado }o--|| Estado : "estado aplicado"
 
-Turno ||--o{ TurnoXAbogado
-Abogado ||--o{ TurnoXAbogado
 Cliente ||--o{ Turno
 
-Abogado ||--|{ Especialidad
 
 
 @enduml
