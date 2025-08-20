@@ -1,5 +1,6 @@
 @startuml der
 hide circle
+hide empty method
 
 entity Turno {
     -nroTurno <<PK>>: SERIAL
@@ -60,4 +61,39 @@ entity TipoCobro {
     -nombre
     -descripcion
 }
+
+entity Estado {
+    -idEstado <<PK>>: SERIAL
+    -nombre
+    -descripcion
+}
+
+entity TurnoXAbogado {
+    -idAbogado <<FK>>
+    -idTurno <<FK>>
+}
+
+entity DetalleCobro {
+    - idDetalleCobro <<PK>> : SERIAL
+    - idCobro <<FK>> : INTEGER
+    - fecha : DATE
+    - descripcion : VARCHAR
+    - monto : DECIMAL
+}
+
+Turno ||--o{ Cobro
+Cobro }o--|| TipoCobro
+Cobro ||--o{ DetalleCobro
+
+Turno }o--|| Estado : "estadoActual"
+Turno ||--o{ CambioEstado : "historial"
+CambioEstado }o--|| Estado : "estado aplicado"
+
+Turno ||--o{ TurnoXAbogado
+Abogado ||--o{ TurnoXAbogado
+Cliente ||--o{ Turno
+
+Abogado ||--|{ Especialidad
+
+
 @enduml
