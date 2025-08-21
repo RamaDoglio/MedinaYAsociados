@@ -1,8 +1,6 @@
 @startuml Diagrama de Clases
 class Turno {
     - nroTurno
-    - fechaHoraInicio
-    - fechaHoraFin
     - estadoActual:Estado
     - cliente:Cliente
     - abogado:Abogado
@@ -52,9 +50,9 @@ Cliente -->"0..*" Turno
 
 class Abogado {
     - matricula
+    - especialidad: Especialidad
     + crear()
     + mostrar()
-
 }
 
 Abogado -->"1..*" Especialidad
@@ -71,7 +69,7 @@ class CambioEstado{
 CambioEstado -->"1" Estado
 
 class Cobro {
-    - monto
+    - montoTotal
     - fechaCobro
     - tipoCobro:TipoCobro
     - saldoPendiente
@@ -86,7 +84,7 @@ class Cobro {
 }
 
 Cobro -->"1" TipoCobro
-Cobro -->"1..*" DetalleCobro
+Cobro -->"0..*" DetalleCobro
 Cobro -->"1" Estado
 
 class DetalleCobro {
@@ -140,6 +138,8 @@ class Localidad{
 class Horario {
     - hora
     - estado
+    - fechaHoraInicio
+    - fechaHoraFin
     + crear()
     + mostrar()
 }
