@@ -70,10 +70,7 @@ class CambioEstado{
 CambioEstado -->"1" Estado
 
 class Cobro {
-    - montoTotal
     - fechaCobro
-    - tipoCobro:TipoCobro
-    - saldoPendiente
     - importeTotal
     - estado:Estado
     - detalleCobro:DetalleCobro
@@ -84,7 +81,6 @@ class Cobro {
 
 }
 
-Cobro -->"1" TipoCobro
 Cobro -->"0..*" DetalleCobro
 Cobro -->"1" Estado
 
@@ -92,9 +88,12 @@ class DetalleCobro {
     - fecha
     - descripcion
     - monto
+    - tipoCobro: TipoCobro
     + crear()
     + mostrar()
 }
+
+DetalleCobro --> "1" TipoCobro
 
 class TipoCobro {
     - nombre
