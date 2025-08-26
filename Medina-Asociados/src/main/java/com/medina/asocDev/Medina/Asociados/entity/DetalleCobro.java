@@ -18,5 +18,7 @@ public class DetalleCobro {
 
     private String descripcionCobro;
 
-    private Float monto;
+    private Float subTotal;
+
+    private TipoCobro tipoCobro;
 }

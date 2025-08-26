@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Entity
 @Table(name="cobros")
@@ -12,9 +15,9 @@ public class Cobro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCobro;
 
-    private Float montoTotal;
+    private Float importeTotal;
 
     private Estado estadoActual;
 
-    private
+    private List<DetalleCobro> detalleCobroList= new ArrayList<>();
 }

@@ -1,23 +1,22 @@
 package com.medina.asocDev.Medina.Asociados.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.hibernate.validator.internal.util.privilegedactions.LoadClass;
 
 import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name="horarios")
-public class Horario {
+@Table(name="historialesTurno")
+public class HistorialTurno {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idHorario;
+    private Long idHistorial;
 
     private LocalDateTime fechaHoraInicio;
 
     private LocalDateTime fechaHoraFin;
 
-    private Estado estadoHorario;
+    private Estado estadoHistorial;
 }

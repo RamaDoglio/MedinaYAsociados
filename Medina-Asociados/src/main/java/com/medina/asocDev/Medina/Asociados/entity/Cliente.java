@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Entity
 @Table(name="clientes")
@@ -35,4 +38,6 @@ public class Cliente {
 
     @NotBlank(message = "La contraseña no debe estar en blanco")
     private String password;
+
+    private List<Turno> listaTurnos= new ArrayList<>();
 }
