@@ -26,6 +26,8 @@ public class Cliente {
     @Column(unique = true)
     private Integer DNI;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "idDireccion", referencedColumnName = "idDireccion")
     private Direccion direccion;
 
     @NotBlank(message = "El número de telefono no debe estar en blanco")

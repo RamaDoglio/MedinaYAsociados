@@ -3,6 +3,7 @@ package com.medina.asocDev.Medina.Asociados.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -16,13 +17,16 @@ public class Direccion {
     @NotBlank(message = "La calle no debe estar en blanco")
     private String calle;
 
-    @NotBlank(message = "El número no debe estar en blanco")
+    @NotNull(message = "El número no debe estar en blanco")
     private Integer numeroCalle;
 
-    @NotBlank(message = "El departamento no debe estar en blanco")
     private String dpto;
 
+    private String piso;
+
     @NotBlank(message = "La localidad no debe estar en blanco")
+    @ManyToOne
+    @JoinColumn(name = "idLocalidad")
     private Localidad localidad;
 
     private String provincia="Córdoba";
