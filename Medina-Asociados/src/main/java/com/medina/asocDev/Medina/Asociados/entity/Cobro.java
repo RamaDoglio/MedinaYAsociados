@@ -17,7 +17,7 @@ public class Cobro {
 
     private Float importeTotal;
 
-    private Estado estadoActual;
-
-    private List<DetalleCobro> detalleCobroList= new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "idEstado", nullable = false)
+    private Estado estadoCobro;
 }

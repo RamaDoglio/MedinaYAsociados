@@ -18,5 +18,7 @@ public class HistorialTurno {
 
     private LocalDateTime fechaHoraFin;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "idEstado", nullable = false)
     private Estado estadoHistorial;
 }

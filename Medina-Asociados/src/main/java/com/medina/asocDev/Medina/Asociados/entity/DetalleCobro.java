@@ -14,11 +14,17 @@ public class DetalleCobro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDetalleCobro;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "idCobro", nullable = false)
+    private Cobro cobro;
+
     private LocalDateTime fecha;
 
     private String descripcionCobro;
 
     private Float subTotal;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "idTipoCobro", nullable = false)
     private TipoCobro tipoCobro;
 }

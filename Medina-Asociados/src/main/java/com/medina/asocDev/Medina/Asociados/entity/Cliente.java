@@ -41,5 +41,6 @@ public class Cliente {
     @NotBlank(message = "La contraseña no debe estar en blanco")
     private String password;
 
+    @OneToMany(mappedBy = "clienteTurno", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Turno> listaTurnos= new ArrayList<>();
 }

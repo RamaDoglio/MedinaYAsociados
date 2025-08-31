@@ -21,16 +21,23 @@ public class Turno {
     @JoinColumn(name = "idEspecialidad", referencedColumnName = "idEspecialidad")
     private Especialidad especialidad;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "idCobro", referencedColumnName = "idCobro")
     private Cobro cobro;
 
     private String observaciones;
 
     private HorarioTurno horarioTurno;
 
+    @ManyToOne
+    @JoinColumn(name = "iDCliente")
     private Cliente clienteTurno;
+
     @ManyToOne
     @JoinColumn(name = "iDAbogado")
     private Abogado abogadoTurno;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "idTurno")
     private List<HistorialTurno> historialTurno= new ArrayList<>();
 }
