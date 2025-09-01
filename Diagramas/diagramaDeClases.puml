@@ -4,18 +4,21 @@ class Turno {
     - estadoActual:Estado
     - cliente:Cliente
     - abogado:Abogado
-    - ultimoCambioEstado:CambioEstado
-    - especialidad: especialidad
+    - ultimoHistorialTurno:HistorialTurno
+    - especialidad: Especialidad
     - cobro:Cobro
+    - horario: HorarioTurno
     - observaciones
     + crear()
     + modificar()
 }
 Turno --> "1..* "Cobro
 Turno -> "1" Estado
-Turno -->"1..*" CambioEstado
+Turno -->"1..*" HistorialTurno
 Turno --> "1" Especialidad
-Turno -left-> "1"Horario
+Turno -left-> "1"HorarioTurno
+Turno ..> Cliente
+Turno ..> Abogado
 
 
 class Especialidad {
@@ -48,7 +51,6 @@ class Cliente {
 Cliente -|> Persona
 Cliente -->"0..*" Turno
 
-
 class Abogado {
     - matricula
     - especialidad: Especialidad
@@ -60,17 +62,17 @@ Abogado -->"1..*" Especialidad
 Abogado -|> Persona
 Abogado -->"0..*" Turno
 
-class CambioEstado{
+class HistorialTurno{
     - fechaHoraInicio
     - fechaHoraFin
     + crear()
     + mostrar()
 }
 
-CambioEstado -->"1" Estado
+HistorialTurno -->"1" Estado
 
 class Cobro {
-    - fechaCobro
+    - fechaHoraCobro
     - importeTotal
     - estado:Estado
     - detalleCobro:DetalleCobro
@@ -81,7 +83,7 @@ class Cobro {
 
 }
 
-Cobro -->"0..*" DetalleCobro
+Cobro o--"1..*" DetalleCobro
 Cobro -->"1" Estado
 
 class DetalleCobro {
@@ -135,14 +137,17 @@ class Localidad{
     + mostrar()
 }
 
-class Horario {
+class HorarioTurno {
     - hora
+    - fecha
     - estado
     - fechaHoraInicio
     - fechaHoraFin
     + crear()
     + mostrar()
 }
+note top of HorarioTurno : La fecha podria ir en \nesta clase o en la clase Turno
+note bottom of HorarioTurno: La duracion del turno \nes de 45 minutos
 
-Horario --> "1"Estado
+HorarioTurno --> "1"Estado
 @enduml

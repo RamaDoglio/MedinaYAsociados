@@ -1,4 +1,4 @@
-@startuml der
+@startuml derMedinaYAsociados
 hide circle
 hide empty method
 
@@ -12,13 +12,6 @@ entity Turno {
     -especialidad <<FK>>: INTEGER
     -cobro <<FK>>: INTEGER
     -estadoActual <<FK>>: INTEGER
-}
-
-entity CambioEstado {
-    -nroCambioEstado <<PK>>: INTEGER
-    -fechaHoraInicio: DATE
-    -fechaHoraFin: DATE
-    -estadoCambioEstado <<FK>>: INTEGER
 }
 
 entity Abogado {
@@ -42,12 +35,9 @@ entity Cliente {
 }
 
 entity Cobro {
-    -monto: INTEGER
     -fechaCobro: DATE
-    -tipoCobro <<FK>>: INTEGER
     -importeTotal: INTEGER
-    -estado <<FK>>: INTEGER
-    -detalleCobro <<FK>>: INTEGER
+    -estadoCobro <<FK>>: INTEGER
 }
 
 entity Especialidad {
@@ -68,11 +58,6 @@ entity Estado {
     -descripcion: VARCHAR
 }
 
-entity TurnoXAbogado {
-    -idAbogado <<FK>>: INTEGER
-    -idTurno <<FK>>: INTEGER
-}
-
 entity DetalleCobro {
     - idDetalleCobro <<PK>> : SERIAL
     - idCobro <<FK>> : INTEGER
@@ -81,24 +66,67 @@ entity DetalleCobro {
     - monto : DECIMAL
 }
 
+entity Direccion {
+    -idDireccion <<PK>>: SERIAL
+    -calle: VARCHAR
+    -numero: INTEGER
+    -piso: INTEGER
+    -departamento: VARCHAR
+    -localidad <<FK>>: INTEGER
+    -provincia: VARCHAR
+    -codigoPostal: INTEGER
+}
 
+entity Localidad {
+    -idLocalidad <<PK>>: SERIAL
+    -nombre: VARCHAR
+    -codigoPostal: INTEGER
+}
 
-Turno ||--o{ Cobro
+entity HorarioTurno {
+    -idHorarioTurno <<PK>>: SERIAL
+    -idTurno <<FK>>: INTEGER
+    -fecha: DATE
+    -horaInicio: TIME
+    -horaFin: TIME
+}
+
+entity HistorialTurno {
+    -idHistorialTurno <<PK>>: SERIAL
+    -idTurno <<FK>>: INTEGER
+    -fechaHoraInicio: DATE
+    -fechaHoraFin: DATE
+    -estadoHistorial <<FK>>: INTEGER
+}
+
+entity AbogadoXEspecialidad{
+    -idAbogado <<FK>>: INTEGER
+    -idEspecialidad <<FK>>: INTEGER
+}
+
+Turno ||--|| Cobro 
 Turno }o--|| Estado : "estadoActual"
-Turno ||--o{ CambioEstado : "historial"
-Turno ||--o{ TurnoXAbogado
+Turno ||--|{ HistorialTurno
 Turno ||--|| Especialidad
+Turno ||--|| HorarioTurno
+Turno }o--|| Abogado
 
-Cobro }o--|| TipoCobro
 Cobro ||--o{ DetalleCobro
-
-Abogado ||--o{ TurnoXAbogado
-Abogado ||--|{ Especialidad
-
-CambioEstado }o--|| Estado : "estado aplicado"
+Cobro }o--|| Estado
 
 Cliente ||--o{ Turno
+Cliente }--|| Direccion
 
 
+DetalleCobro }o--|| TipoCobro
+
+HistorialTurno }o--||Estado
+
+HorarioTurno }o--||Estado
+
+AbogadoXEspecialidad }o-up-|| Especialidad
+AbogadoXEspecialidad }o-up-|| Abogado
+
+Direccion }o--|| Localidad
 
 @enduml
