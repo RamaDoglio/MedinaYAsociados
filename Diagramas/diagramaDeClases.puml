@@ -1,13 +1,12 @@
 @startuml Diagrama de Clases
 class Turno {
-    - nroTurno
+    - idTurno
     - estadoActual:Estado
-    - cliente:Cliente
-    - abogado:Abogado
     - ultimoHistorialTurno:HistorialTurno
     - especialidad: Especialidad
     - cobro:Cobro
     - horario: HorarioTurno
+    - usuario: Usuario
     - observaciones
     + crear()
     + modificar()
@@ -17,9 +16,7 @@ Turno -> "1" Estado
 Turno -->"1..*" HistorialTurno
 Turno --> "1" Especialidad
 Turno -left-> "1"HorarioTurno
-Turno ..> Cliente
-Turno ..> Abogado
-
+Turno ..> "1..*"Usuario
 
 class Especialidad {
     - nombre
@@ -28,39 +25,50 @@ class Especialidad {
     + mostrar()
 }
 
-class Persona{
+class Usuario{
     - nombre
     - apellido
     - dni
     - direccion:Direccion
     - telefono
     - email
+    - rol: Rol
     - contraseña
+    - turnos: Turno
     + crear()
     + mostrar()
 }
 
-Persona -->"1" Direccion
+Usuario -->"1" Direccion
+Usuario -->"1" Rol
+Usuario -->"1..*" Turno
 
-class Cliente {
-    - nroCliente
+class Rol{
+    - nombre
+    - descripcion
     + crear()
     + mostrar()
 }
 
-Cliente -|> Persona
-Cliente -->"0..*" Turno
+Rol--> "1..*" Permisos
+
+class Permisos {
+    - nombre
+    - descripcion
+    + crear()
+    + mostrar()
+}
 
 class Abogado {
     - matricula
     - especialidad: Especialidad
+    - usuario: Usuario
     + crear()
     + mostrar()
 }
 
 Abogado -->"1..*" Especialidad
-Abogado -|> Persona
-Abogado -->"0..*" Turno
+Abogado -->"1"Usuario
 
 class HistorialTurno{
     - fechaHoraInicio
