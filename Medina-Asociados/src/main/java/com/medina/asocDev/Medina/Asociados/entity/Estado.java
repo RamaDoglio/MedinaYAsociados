@@ -13,5 +13,5 @@ public class Estado {
 
     private String ambito;
 
-    private String valor;
+    private String nombreEstado;
 }
