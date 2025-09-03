@@ -3,36 +3,23 @@ hide circle
 hide empty method
 
 entity Turno {
-    -nroTurno <<PK>>: SERIAL
+    -idTurno <<PK>>: SERIAL
     -fechaHoraInicio: DATE
     -fechaHoraFin: DATE
     -observaciones: VARCHAR
     -importeTotal: INTEGER
-    -cambioEstado <<FK>>: INTEGER
+    -HistorialTurno <<FK>>: INTEGER
     -especialidad <<FK>>: INTEGER
     -cobro <<FK>>: INTEGER
     -estadoActual <<FK>>: INTEGER
+    -usuario <<FK>>: INTEGER
 }
 
 entity Abogado {
-    -matricula <<PK>>: VARCHAR
-    -nombre: VARCHAR
-    -apellido: VARCHAR
-    -dni: INTEGER
-    -direccion: VARCHAR
-    -telefono: INTEGER
-    -email: VARCHAR
+    -idAbogado <<PK>>: SERIAL
+    -matricula: VARCHAR
 }
 
-entity Cliente {
-    -idCliente: <<PK>> SERIAL
-    -nombre: VARCHAR
-    -apellido: VARCHAR
-    -dni: INTEGER
-    -direccion: VARCHAR
-    -telefono: INTEGER
-    -email: VARCHAR
-}
 
 entity Cobro {
     -fechaCobro: DATE
@@ -100,8 +87,28 @@ entity HistorialTurno {
 }
 
 entity AbogadoXEspecialidad{
+    -idAbogadoXEspecialidad <<PK>>: SERIAL
     -idAbogado <<FK>>: INTEGER
     -idEspecialidad <<FK>>: INTEGER
+}
+
+entity Usuario{
+    -idUsuario <<PK>>: SERIAL
+    -nombre: VARCHAR
+    -apellido: VARCHAR
+    -dni: INTEGER
+    -direccion: VARCHAR
+    -telefono: INTEGER
+    -email: VARCHAR
+    -rol <<FK>>: INTEGER
+    -abogado <<FK>>: INTEGER
+    -direccion <<FK>>: INTEGER
+}
+
+entity TurnoXUsuario{
+    -idTurnoXUsuario <<PK>>: SERIAL
+    -turno <<FK>>: INTEGER
+    -usuario <<FK>>: INTEGER
 }
 
 Turno ||--|| Cobro 
@@ -114,8 +121,6 @@ Turno }o--|| Abogado
 Cobro ||--o{ DetalleCobro
 Cobro }o--|| Estado
 
-Cliente ||--o{ Turno
-Cliente }--|| Direccion
 
 
 DetalleCobro }o--|| TipoCobro
@@ -129,4 +134,6 @@ AbogadoXEspecialidad }o-up-|| Abogado
 
 Direccion }o--|| Localidad
 
+Turno ||--o{ TurnoXUsuario
+Usuario ||--o{ TurnoXUsuario
 @enduml
