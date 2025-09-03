@@ -43,19 +43,44 @@ public class UsuarioService {
         String hashedPassword = new BCryptPasswordEncoder().encode(usuario.getPassword());
         usuario.setPassword(hashedPassword);
 
+        // Asignar automáticamente el rol CLIENTE
+        Rol rolCliente = rolRepository.findByNombre("CLIENTE")
+                .orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado"));
+        usuario.setRol(rolCliente);
+        
         // Guardar en BD
         return usuarioRepository.save(usuario);
     }
 
     public Usuario save(Usuario usuario) {
-        // Asignar automáticamente el rol CLIENTE
-        Rol rolCliente = rolRepository.findByNombre("CLIENTE")
-                .orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado"));
-        usuario.setRol(rolCliente);
         return usuarioRepository.save(usuario);
     }
 
     public void deleteById(Long id) {
         usuarioRepository.deleteById(id);
     }
+
+    public Usuario update(Long id, Usuario usuarioDetails) {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // Validar email único (excepto para el propio usuario)
+        usuarioRepository.findByEmail(usuarioDetails.getEmail())
+            .filter(u -> !u.getIdUsuario().equals(id))
+            .ifPresent(_ -> { throw new RuntimeException("El correo electrónico ya está registrado"); });
+
+        // Validar dni único (excepto para el propio usuario)
+        usuarioRepository.findByDni(usuarioDetails.getDni())
+            .filter(u -> !u.getIdUsuario().equals(id))
+            .ifPresent(_ -> { throw new RuntimeException("El DNI ya está registrado"); });
+
+        usuario.setNombre(usuarioDetails.getNombre());
+        usuario.setApellido(usuarioDetails.getApellido());
+        usuario.setDni(usuarioDetails.getDni());
+        usuario.setTelefono(usuarioDetails.getTelefono());
+        usuario.setEmail(usuarioDetails.getEmail());
+        usuario.setPassword(usuarioDetails.getPassword());
+        // El rol se mantiene como CLIENTE
+
+        return usuarioRepository.save(usuario);
+        }
 }

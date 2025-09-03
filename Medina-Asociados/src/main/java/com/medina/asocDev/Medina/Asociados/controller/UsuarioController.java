@@ -71,20 +71,21 @@ public class UsuarioController {
 
 	// Actualizar cliente
 	@PutMapping("/{id}")
-	public ResponseEntity<Usuario> updateUsuario(@PathVariable Long id, @RequestBody Usuario usuarioDetails) {
-		Optional<Usuario> usuarioOptional = usuarioService.findById(id);
-		if (usuarioOptional.isEmpty()) {
-			return ResponseEntity.notFound().build();
+	public ResponseEntity<Usuario> updateUsuario(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO) {
+		Usuario usuarioDetails = new Usuario();
+		usuarioDetails.setNombre(usuarioDTO.getNombre());
+		usuarioDetails.setApellido(usuarioDTO.getApellido());
+		usuarioDetails.setDni(usuarioDTO.getDni() != null ? usuarioDTO.getDni().toString() : null);
+		usuarioDetails.setTelefono(usuarioDTO.getTelefono() != null ? usuarioDTO.getTelefono().toString() : null);
+		usuarioDetails.setEmail(usuarioDTO.getEmail());
+		usuarioDetails.setPassword(usuarioDTO.getPassword());
+		// Si necesitas actualizar dirección, deberías mapearla aquí
+		try {
+			Usuario actualizado = usuarioService.updateUsuario(id, usuarioDetails);
+			return ResponseEntity.ok(actualizado);
+		} catch (RuntimeException e) {
+			return ResponseEntity.badRequest().build();
 		}
-		Usuario usuario = usuarioOptional.get();
-		usuario.setNombre(usuarioDetails.getNombre());
-		usuario.setApellido(usuarioDetails.getApellido());
-		usuario.setDni(usuarioDetails.getDni());
-		usuario.setTelefono(usuarioDetails.getTelefono());
-		usuario.setEmail(usuarioDetails.getEmail());
-		usuario.setPassword(usuarioDetails.getPassword());
-		// No se permite modificar turnos ni rol abogado desde aquí
-		return ResponseEntity.ok(usuarioService.save(usuario));
 	}
 
 	// Eliminar cliente
