@@ -19,30 +19,16 @@ public class Abogado {
     @Column(unique = true)
     private String matricula;
 
-    @NotBlank(message = "El nombre no debe estar en blanco")
-    private String nombre;
+    private Long idUsuario; // mismo ID que Usuario
 
-    @NotBlank(message = "El apellido no debe estar en blanco")
-    private String apellido;
-
-    @NotBlank(message = "El DNI no debe estar en blanco")
-    @Column(unique = true)
-    private Integer DNI;
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "idUsuario")
+    private Usuario usuario;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "idDireccion", referencedColumnName = "idDireccion")
     private Direccion direccion;
-
-    @NotBlank(message = "El número de telefono no debe estar en blanco")
-    @Column(unique = true)
-    private String telefono;
-
-    @NotBlank(message = "El email no debe estar en blanco")
-    @Column(unique = true)
-    private String email;
-
-    @NotBlank(message = "La contraseña no debe estar en blanco")
-    private String password;
 
     @OneToMany(mappedBy = "abogadoTurno", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Turno> turnosAbogado= new ArrayList<>();

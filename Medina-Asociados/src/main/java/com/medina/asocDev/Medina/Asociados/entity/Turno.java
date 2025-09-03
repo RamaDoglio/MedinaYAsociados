@@ -30,12 +30,12 @@ public class Turno {
     private HorarioTurno horarioTurno;
 
     @ManyToOne
-    @JoinColumn(name = "iDCliente")
-    private Cliente clienteTurno;
+    @JoinColumn(name = "iDUsuario")
+    private Usuario clienteTurno;
 
     @ManyToOne
-    @JoinColumn(name = "iDAbogado")
-    private Abogado abogadoTurno;
+    @JoinColumn(name = "iDUsuario")
+    private Usuario abogadoTurno;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "idTurno")

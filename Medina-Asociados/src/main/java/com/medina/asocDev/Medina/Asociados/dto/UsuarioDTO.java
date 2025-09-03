@@ -1,6 +1,5 @@
+package com.medina.asocDev.Medina.Asociados.dto;
 import java.util.List;
-
-import com.medina.asocDev.Medina.Asociados.entity.Abogado;
 
 public class UsuarioDTO{
     private Long idUsuario;
@@ -12,5 +11,5 @@ public class UsuarioDTO{
     private String email;
     private RolDTO rol;
     private List<TurnoDTO> turnos; // Agregado para reflejar la relación con Turno
-    private AbogadoDTO abogado;
+    private AbogadoDTO abogado; // Esto no iria ya que el dato lo tendria la clase abogado
 }

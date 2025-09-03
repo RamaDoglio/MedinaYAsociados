@@ -34,3 +34,4 @@ build/
 
 ## Otros archivos ##
 .env.db
+out/

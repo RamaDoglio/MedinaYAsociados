@@ -3,6 +3,8 @@ package com.medina.asocDev.Medina.Asociados.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CobroDTO {
@@ -10,7 +12,7 @@ public class CobroDTO {
     private Long idCobro;
     private Float importeTotal;
     private EstadoDTO estadoCobro;
-    private Date fechaCobro;
+    private LocalDateTime fechaCobro;
     private DetalleCobroDTO detalleCobro;
 
 }

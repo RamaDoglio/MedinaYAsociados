@@ -105,10 +105,28 @@ entity Usuario{
     -direccion <<FK>>: INTEGER
 }
 
+entity Rol {
+    -idRol <<PK>>: SERIAL
+    -nombre
+    -descripcion
+}
+
+entity Permiso{
+    -idPermiso <<PK>>: SERIAL
+    -nombre: VARCHAR
+    -descripcion: VARCHAR
+}
+
 entity TurnoXUsuario{
-    -idTurnoXUsuario <<PK>>: SERIAL
-    -turno <<FK>>: INTEGER
-    -usuario <<FK>>: INTEGER
+    -idTurnoXidUsuario <<PK>>
+    -idTurno <<FK>>: INTEGER
+    -idUsuario <<FK>>: INTEGER
+    -rolTurno 
+}
+
+entity RolxPermiso{
+    -idRol <<FK>>: INTEGER
+    -idPermiso <<FK>>: INTEGER
 }
 
 Turno ||--|| Cobro 
@@ -120,8 +138,6 @@ Turno }o--|| Abogado
 
 Cobro ||--o{ DetalleCobro
 Cobro }o--|| Estado
-
-
 
 DetalleCobro }o--|| TipoCobro
 
@@ -136,4 +152,10 @@ Direccion }o--|| Localidad
 
 Turno ||--o{ TurnoXUsuario
 Usuario ||--o{ TurnoXUsuario
+
+Usuario ||--|| Direccion
+
+Usuario }|--|| Rol
+RolxPermiso }|--|| Permiso
+RolxPermiso }|--|| Rol
 @enduml
