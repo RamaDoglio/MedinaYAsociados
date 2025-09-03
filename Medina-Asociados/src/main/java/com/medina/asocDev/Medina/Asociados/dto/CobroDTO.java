@@ -10,5 +10,7 @@ public class CobroDTO {
     private Long idCobro;
     private Float importeTotal;
     private EstadoDTO estadoCobro;
+    private Date fechaCobro;
+    private DetalleCobroDTO detalleCobro;
 
 }

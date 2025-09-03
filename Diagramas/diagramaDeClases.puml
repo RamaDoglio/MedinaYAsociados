@@ -72,6 +72,7 @@ Abogado -->"1..*" Especialidad
 class HistorialTurno{
     - fechaHoraInicio
     - fechaHoraFin
+    - estado: Estado
     + crear()
     + mostrar()
 }

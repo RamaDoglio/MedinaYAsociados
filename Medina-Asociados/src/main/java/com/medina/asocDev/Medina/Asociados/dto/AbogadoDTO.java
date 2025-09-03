@@ -12,13 +12,6 @@ import java.util.List;
 public class AbogadoDTO {
 
     private String matricula;
-    private String nombre;
-    private String apellido;
-    private Integer DNI;
-    private DireccionDTO direccion;
-    private String telefono;
-    private String email;
-    private List<TurnoDTO> turnosAbogado= new ArrayList<>();
     private List<EspecialidadDTO> especialidadesAbogado= new ArrayList<>();
 
 }

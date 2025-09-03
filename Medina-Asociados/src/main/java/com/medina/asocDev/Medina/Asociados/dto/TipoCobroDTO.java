@@ -8,6 +8,6 @@ import lombok.Data;
 public class TipoCobroDTO {
 
     private String nombreTipoCobro;
-    private String descTipoCobro;
+    private String descripcionTipoCobro;
 
 }
