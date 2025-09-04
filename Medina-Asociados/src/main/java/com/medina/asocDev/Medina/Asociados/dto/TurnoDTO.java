@@ -17,8 +17,8 @@ public class TurnoDTO {
     private CobroDTO cobro;
     private String observaciones;
     private HorarioTurnoDTO horarioTurno;
-    private ClienteDTO clienteTurno;
     private AbogadoDTO abogadoTurno;
+    private UsuarioDTO usuarioTurno;
     private List<HistorialTurnoDTO> historialTurno= new ArrayList<>();
 
 }

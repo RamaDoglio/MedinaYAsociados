@@ -81,7 +81,7 @@ public class UsuarioController {
 		usuarioDetails.setPassword(usuarioDTO.getPassword());
 		// Si necesitas actualizar dirección, deberías mapearla aquí
 		try {
-			Usuario actualizado = usuarioService.updateUsuario(id, usuarioDetails);
+			Usuario actualizado = usuarioService.update(id, usuarioDetails);
 			return ResponseEntity.ok(actualizado);
 		} catch (RuntimeException e) {
 			return ResponseEntity.badRequest().build();
