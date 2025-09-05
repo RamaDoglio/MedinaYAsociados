@@ -14,6 +14,8 @@ public class Turno {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTurno;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idEstado", nullable = false)
     private Estado estadoActual;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -36,7 +38,6 @@ public class Turno {
     @JoinColumn(name = "iDUsuario")
     private Usuario abogadoTurno;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "idTurno")
-    private List<HistorialTurno> historialTurno= new ArrayList<>();
+    @OneToMany(mappedBy = "turno", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HistorialTurno> historialTurno = new ArrayList<>();
 }

@@ -61,7 +61,6 @@ entity Direccion {
     -departamento: VARCHAR
     -localidad <<FK>>: INTEGER
     -provincia: VARCHAR
-    -codigoPostal: INTEGER
 }
 
 entity Localidad {

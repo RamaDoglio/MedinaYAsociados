@@ -17,5 +17,7 @@ public class HorarioTurno {
 
     private LocalDateTime fechaHoraFin;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idEstado", nullable = false)
     private Estado estadoHorario;
 }

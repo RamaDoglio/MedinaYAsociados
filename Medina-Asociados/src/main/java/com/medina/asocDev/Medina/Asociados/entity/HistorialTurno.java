@@ -14,6 +14,10 @@ public class HistorialTurno {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idHistorial;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "idTurno", nullable = false)
+    private Turno turno;
+
     private LocalDateTime fechaHoraInicio;
 
     private LocalDateTime fechaHoraFin;
