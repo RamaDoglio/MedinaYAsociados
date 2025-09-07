@@ -4,19 +4,20 @@ hide empty method
 
 entity Turno {
     -idTurno <<PK>>: SERIAL
-    -fechaHoraInicio: DATE
-    -fechaHoraFin: DATE
-    -observaciones: VARCHAR
+    -observacionesCliente: VARCHAR
+    -observacionesAbogado: VARCHAR
     -importeTotal: INTEGER
     -HistorialTurno <<FK>>: INTEGER
     -especialidad <<FK>>: INTEGER
     -cobro <<FK>>: INTEGER
     -estadoActual <<FK>>: INTEGER
-    -usuario <<FK>>: INTEGER
+    -clienteTurno <<FK>>: INTEGER
+    -abogadoTurno <<FK>>: INTEGER
 }
 
 entity Abogado {
     -idAbogado <<PK>>: SERIAL
+    -idUsuario <<FK>>: INTEGER
     -matricula: VARCHAR
 }
 
@@ -98,7 +99,6 @@ entity Usuario{
     -telefono: INTEGER
     -email: VARCHAR
     -rol <<FK>>: INTEGER
-    -abogado <<FK>>: INTEGER
     -direccion <<FK>>: INTEGER
 }
 
@@ -124,7 +124,6 @@ Turno }o--|| Estado : "estadoActual"
 Turno ||--|{ HistorialTurno
 Turno ||--|| Especialidad
 Turno ||--|| HorarioTurno
-Turno }o--|| Abogado
 
 Cobro ||--o{ DetalleCobro
 Cobro }o--|| Estado
@@ -142,6 +141,7 @@ Direccion }o--|| Localidad
 
 Usuario ||--|| Direccion
 Usuario ||--|{ Turno
+Usuario ||--|| Abogado
 
 Usuario }|--|| Rol
 RolxPermiso }|--|| Permiso

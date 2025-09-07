@@ -19,8 +19,6 @@ public class Abogado {
     @Column(unique = true)
     private String matricula;
 
-    private Long idUsuario; // mismo ID que Usuario
-
     @OneToOne
     @MapsId
     @JoinColumn(name = "idUsuario")
@@ -29,9 +27,6 @@ public class Abogado {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "idDireccion", referencedColumnName = "idDireccion")
     private Direccion direccion;
-
-    @OneToMany(mappedBy = "abogadoTurno", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Turno> turnosAbogado= new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
