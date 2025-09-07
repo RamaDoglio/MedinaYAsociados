@@ -72,9 +72,7 @@ entity Localidad {
 entity HorarioTurno {
     -idHorarioTurno <<PK>>: SERIAL
     -idTurno <<FK>>: INTEGER
-    -fecha: DATE
-    -horaInicio: TIME
-    -horaFin: TIME
+    -fechHoraInicio: TIME
 }
 
 entity HistorialTurno {
@@ -116,13 +114,6 @@ entity Permiso{
     -descripcion: VARCHAR
 }
 
-entity TurnoXUsuario{
-    -idTurnoXidUsuario <<PK>>
-    -idTurno <<FK>>: INTEGER
-    -idUsuario <<FK>>: INTEGER
-    -rolTurno 
-}
-
 entity RolxPermiso{
     -idRol <<FK>>: INTEGER
     -idPermiso <<FK>>: INTEGER
@@ -149,10 +140,8 @@ AbogadoXEspecialidad }o-up-|| Abogado
 
 Direccion }o--|| Localidad
 
-Turno ||--o{ TurnoXUsuario
-Usuario ||--o{ TurnoXUsuario
-
 Usuario ||--|| Direccion
+Usuario ||--|{ Turno
 
 Usuario }|--|| Rol
 RolxPermiso }|--|| Permiso

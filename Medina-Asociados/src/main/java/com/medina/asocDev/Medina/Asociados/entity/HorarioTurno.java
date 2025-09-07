@@ -13,9 +13,10 @@ public class HorarioTurno {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idHorario;
 
-    private LocalDateTime fechaHoraInicio;
+    @OneToOne(mappedBy = "horarioTurno")
+    private Turno turno;
 
-    private LocalDateTime fechaHoraFin;
+    private LocalDateTime fechaHoraInicio;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idEstado", nullable = false)

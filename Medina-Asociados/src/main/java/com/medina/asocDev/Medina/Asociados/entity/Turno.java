@@ -28,14 +28,16 @@ public class Turno {
 
     private String observaciones;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "idHorarioTurno", referencedColumnName = "idHorarioTurno")
     private HorarioTurno horarioTurno;
 
     @ManyToOne
-    @JoinColumn(name = "iDUsuario")
+    @JoinColumn(name = "idCliente")
     private Usuario clienteTurno;
 
     @ManyToOne
-    @JoinColumn(name = "iDUsuario")
+    @JoinColumn(name = "idAbogado")
     private Usuario abogadoTurno;
 
     @OneToMany(mappedBy = "turno", cascade = CascadeType.ALL, orphanRemoval = true)

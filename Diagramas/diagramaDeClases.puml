@@ -158,4 +158,5 @@ note top of HorarioTurno : La fecha podria ir en \nesta clase o en la clase Turn
 note bottom of HorarioTurno: La duracion del turno \nes de 45 minutos
 
 HorarioTurno --> "1"Estado
+HorarioTurno ..> "1"Turno
 @enduml
