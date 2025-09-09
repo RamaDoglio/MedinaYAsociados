@@ -37,7 +37,7 @@ public class Usuario {
     @JoinColumn(name = "idRol", nullable = false)
     private Rol rol;
 
-    @OneToMany(mappedBy = "iDTurno", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "clienteTurno", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Turno> listaTurnos= new ArrayList<>();
 
     // Getters y Setters

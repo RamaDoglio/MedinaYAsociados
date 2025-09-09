@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface HistorialTurnoRepository extends JpaRepository<HistorialTurno,Long> {
 
-    List<HistorialTurno> findByTurno(Long iDTurno);
+    List<HistorialTurno> findByTurno_IdTurno(Long iDTurno);
 
     Optional<HistorialTurno> findByTurno_IdTurnoAndFechaHoraFinIsNull(Long iDTurno);
 }

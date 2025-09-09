@@ -11,8 +11,8 @@ import java.util.Optional;
 
 public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
-    @Query("SELECT t FROM Turno t JOIN FETCH t.historialTurno WHERE t.iDTurno = :iDTurno")
-    Optional<Turno> findTurnoConHistorial(@Param("iDTurno") Long iDTurno);
+        @Query("SELECT t FROM Turno t JOIN FETCH t.historialTurno WHERE t.idTurno = :idTurno")
+        Optional<Turno> findTurnoConHistorial(@Param("idTurno") Long idTurno);
 
     // 🔹 1. Listar todos los turnos de un cliente
     List<Turno> findByClienteTurno_IdUsuario(Long idCliente);
@@ -25,8 +25,8 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
             Long idAbogado, LocalDateTime fecha);
 
     // 🔹 4. Turnos por estado (ej: Reservado, Cancelado, Terminado)
-    @Query("SELECT t FROM Turno t WHERE t.estadoActual.estadoNombre = :nombre")
-    List<Turno> findByEstadoActualNombre(@Param("nombre") String nombre);
+    @Query("SELECT t FROM Turno t WHERE t.estadoActual.nombreEstado = :nombre")
+    List<Turno> findByEstadoActualNombre(@Param("nombre") String nombreEstado);
 
     // 🔹 5. Turnos de un abogado en una fecha específica
     @Query("SELECT t FROM Turno t " +
@@ -41,5 +41,11 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
             Long idCliente, LocalDateTime desde, LocalDateTime hasta);
 
     // 🔹 7. Buscar turnos por especialidad
-    List<Turno> findByEspecialidad_Nombre(String nombreEspecialidad);
+
+    List<Turno> findByEspecialidad_NombreEspecialidad(String nombreEspecialidad);
+
+
+    // 🔹 8. Buscar turnos por id
+// Buscar un turno por su ID (usando Optional para reflejar la unicidad)
+Optional<Turno> findByIdTurno(Long idTurno);
 }

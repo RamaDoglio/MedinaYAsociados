@@ -12,7 +12,7 @@ import java.util.List;
 public class Turno {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long iDTurno;
+    private Long idTurno;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idEstado", nullable = false)
