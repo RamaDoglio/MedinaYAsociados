@@ -13,5 +13,4 @@ public class DireccionDTO {
     private String piso;
     private LocalidadDTO localidad;
     private String provincia="Córdoba";
-
 }

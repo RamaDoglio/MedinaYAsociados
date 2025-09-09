@@ -11,13 +11,11 @@ import java.util.List;
 public interface HorarioTurnoRepository extends JpaRepository<HorarioTurno, Long> {
 
     // Buscar los horarios de un abogado en un día específico que estén ocupados
-    @Query("SELECT h FROM HorarioTurno h " +
-            "JOIN h.turno t " +
+    @Query("SELECT h FROM HorarioTurno h JOIN h.turno t " +
             "WHERE t.abogadoTurno.id = :idAbogado " +
             "AND DATE(h.fechaHoraInicio) = :fecha " +
-            "AND t.estadoActual.nombre <> 'CANCELADO'")
+            "AND t.estadoActual.nombreEstado <> 'CANCELADO'")
     List<HorarioTurno> findHorariosOcupadosPorAbogadoEnFecha(
             @Param("idAbogado") Long idAbogado,
-            @Param("fecha") LocalDateTime fecha
-    );
+            @Param("fecha") LocalDateTime fecha);
 }

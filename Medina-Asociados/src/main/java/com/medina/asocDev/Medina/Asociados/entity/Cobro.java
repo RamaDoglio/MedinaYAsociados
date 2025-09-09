@@ -11,6 +11,9 @@ public class Cobro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCobro;
 
+    @OneToOne(mappedBy = "cobro")
+    private Turno turno;
+
     private Float importeTotal;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class HorarioTurno {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idHorario;
+    private Long idHorarioTurno;
 
     @OneToOne(mappedBy = "horarioTurno")
     private Turno turno;

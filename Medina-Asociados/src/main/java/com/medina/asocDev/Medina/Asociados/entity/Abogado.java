@@ -24,10 +24,6 @@ public class Abogado {
     @JoinColumn(name = "idUsuario")
     private Usuario usuario;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "idDireccion", referencedColumnName = "idDireccion")
-    private Direccion direccion;
-
     @ManyToMany
     @JoinTable(
             name = "abogadoXespecialidad",

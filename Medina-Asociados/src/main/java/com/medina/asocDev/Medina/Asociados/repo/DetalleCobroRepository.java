@@ -11,9 +11,6 @@ import java.util.List;
 public interface DetalleCobroRepository extends JpaRepository<DetalleCobro, Long> {
 
     // Obtener todos los detalles de cobro de un turno
-    @Query("SELECT dc FROM DetalleCobro dc " +
-            "JOIN dc.cobro c " +
-            "JOIN Turno t ON t.cobro = c " +
-            "WHERE t.idTurno = :idTurno")
-    List<DetalleCobro> findByTurnoId(@Param("idTurno") Long idTurno);
+    @Query("SELECT dc FROM DetalleCobro dc WHERE dc.cobro.turno.iDTurno = :iDTurno")
+    List<DetalleCobro> findByTurnoId(@Param("iDTurno") Long iDTurno);
 }

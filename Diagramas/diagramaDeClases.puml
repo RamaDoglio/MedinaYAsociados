@@ -150,7 +150,6 @@ class HorarioTurno {
     - fecha
     - estado
     - fechaHoraInicio
-    - fechaHoraFin
     + crear()
     + mostrar()
 }

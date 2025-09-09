@@ -1,9 +1,11 @@
 package com.medina.asocDev.Medina.Asociados.entity;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
@@ -24,6 +26,10 @@ public class Usuario {
 
     @Column(unique = true)
     private String email;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "idDireccion", referencedColumnName = "idDireccion")
+    private Direccion direccion;
 
     private String password;
 
