@@ -1,62 +1,49 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
-import com.medina.asocDev.Medina.Asociados.entity.Abogado;
-import com.medina.asocDev.Medina.Asociados.repo.AbogadoRepository;
+import com.medina.asocDev.Medina.Asociados.dto.AbogadoDTO;
+import com.medina.asocDev.Medina.Asociados.service.AbogadoServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Optional;
 
+@RestController
+@RequestMapping("/api/abogados")
 public class AbogadoController {
-    @RestController
-    @RequestMapping("/api/abogados")
-    public class AbogadoController {
 
-        @Autowired
-        private AbogadoRepository abogadoRepository;
+	@Autowired
+	private AbogadoServices abogadoServices;
 
-        @GetMapping
-        public List<Abogado> getAllAbogados() {
-            return abogadoRepository.findAll();
-        }
+	@PostMapping("/usuario/{idUsuario}")
+	public ResponseEntity<AbogadoDTO> createAbogado(@PathVariable Long idUsuario, @RequestBody AbogadoDTO abogadoDTO) {
+		AbogadoDTO creado = abogadoServices.createAbogado(idUsuario, abogadoDTO);
+		if (creado == null) return ResponseEntity.badRequest().build();
+		return ResponseEntity.ok(creado);
+	}
 
-        @GetMapping("/{id}")
-        public ResponseEntity<Abogado> getAbogadoById(@PathVariable Long id) {
-            Optional<Abogado> abogado = abogadoRepository.findById(id);
-            return abogado.map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
-        }
+	@GetMapping
+	public ResponseEntity<List<AbogadoDTO>> getAll() {
+		return ResponseEntity.ok(abogadoServices.getAll());
+	}
 
-        @PostMapping
-        public Abogado createAbogado(@RequestBody Abogado abogado) {
-            return abogadoRepository.save(abogado);
-        }
+	@GetMapping("/{id}")
+	public ResponseEntity<AbogadoDTO> getAbogadoById(@PathVariable Long id) {
+		AbogadoDTO abogado = abogadoServices.getAbogadoById(id);
+		if (abogado == null) return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(abogado);
+	}
 
-        @PutMapping("/{id}")
-        public ResponseEntity<Abogado> updateAbogado(@PathVariable Long id, @RequestBody Abogado abogadoDetails) {
-            Optional<Abogado> optionalAbogado = abogadoRepository.findById(id);
-            if (!optionalAbogado.isPresent()) {
-                return ResponseEntity.notFound().build();
-            }
-            Abogado abogado = optionalAbogado.get();
-            abogado.setNombre(abogadoDetails.getNombre());
-            abogado.setApellido(abogadoDetails.getApellido());
-            abogado.setEspecialidad(abogadoDetails.getEspecialidad());
-            // agrega aquí otros campos según tu modelo
+	@PutMapping("/{id}")
+	public ResponseEntity<AbogadoDTO> updateAbogado(@PathVariable Long id, @RequestBody AbogadoDTO abogadoDTO) {
+		AbogadoDTO actualizado = abogadoServices.updateAbogado(id, abogadoDTO);
+		if (actualizado == null) return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(actualizado);
+	}
 
-            Abogado updatedAbogado = abogadoRepository.save(abogado);
-            return ResponseEntity.ok(updatedAbogado);
-        }
-
-        @DeleteMapping("/{id}")
-        public ResponseEntity<Void> deleteAbogado(@PathVariable Long id) {
-            if (!abogadoRepository.existsById(id)) {
-                return ResponseEntity.notFound().build();
-            }
-            abogadoRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-    }
-
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteAbogado(@PathVariable Long id) {
+		boolean borrado = abogadoServices.deleteAbogado(id);
+		if (borrado) return ResponseEntity.noContent().build();
+		else return ResponseEntity.notFound().build();
+	}
 }

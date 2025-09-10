@@ -7,7 +7,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 
 public class EstadoDTO {
-
+    private Long idEstado;
     private String ambito;
     private String valor;
 }

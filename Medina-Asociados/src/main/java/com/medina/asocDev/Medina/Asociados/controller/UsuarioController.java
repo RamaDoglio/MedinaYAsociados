@@ -15,19 +15,19 @@ public class UsuarioController {
 	private UsuarioServices usuarioService;
 
 	@PostMapping
-	public ResponseEntity<UsuarioDTO> crearUsuario(@RequestBody UsuarioDTO usuarioDTO) {
-		UsuarioDTO usuarioCreado = usuarioService.crearUsuarioCliente(usuarioDTO);
+	public ResponseEntity<UsuarioDTO> createUsuario(@RequestBody UsuarioDTO usuarioDTO) {
+		UsuarioDTO usuarioCreado = usuarioService.createUsuario(usuarioDTO);
 		return ResponseEntity.ok(usuarioCreado);
 	}
 
 	@GetMapping
-	public ResponseEntity<List<UsuarioDTO>> obtenerTodos() {
-		return ResponseEntity.ok(usuarioService.obtenerTodos());
+	public ResponseEntity<List<UsuarioDTO>> getAllUsers() {
+		return ResponseEntity.ok(usuarioService.getAllUsers());
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<UsuarioDTO> obtenerPorId(@PathVariable Long id) {
-		UsuarioDTO usuario = usuarioService.obtenerPorId(id);
+	public ResponseEntity<UsuarioDTO> getUserById(@PathVariable Long id) {
+		UsuarioDTO usuario = usuarioService.getUserById(id);
 		if (usuario == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -35,8 +35,8 @@ public class UsuarioController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<UsuarioDTO> modificarUsuario(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO) {
-		UsuarioDTO actualizado = usuarioService.modificarUsuario(id, usuarioDTO);
+	public ResponseEntity<UsuarioDTO> updateUser(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO) {
+		UsuarioDTO actualizado = usuarioService.updateUser(id, usuarioDTO);
 		if (actualizado == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -44,8 +44,8 @@ public class UsuarioController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> borrarUsuario(@PathVariable Long id) {
-		boolean borrado = usuarioService.borrarUsuario(id);
+	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+		boolean borrado = usuarioService.deleteUser(id);
 		if (borrado) {
 			return ResponseEntity.noContent().build();
 		} else {
