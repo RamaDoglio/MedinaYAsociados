@@ -1,12 +1,12 @@
-import com.medina.asocDev.Medina.Asociados.model.Abogado;
-import com.medina.asocDev.Medina.Asociados.repository.AbogadoRepository;
+package com.medina.asocDev.Medina.Asociados.controller;
+
+import com.medina.asocDev.Medina.Asociados.entity.Abogado;
+import com.medina.asocDev.Medina.Asociados.repo.AbogadoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
-
-package com.medina.asocDev.Medina.Asociados.controller;
 
 public class AbogadoController {
     @RestController

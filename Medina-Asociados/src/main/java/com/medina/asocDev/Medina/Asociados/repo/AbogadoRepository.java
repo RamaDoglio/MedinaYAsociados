@@ -11,5 +11,4 @@ public interface AbogadoRepository extends JpaRepository<Abogado, Long> {
     Optional<Abogado> findByUsuario_IdUsuario(Long idUsuario);
     Optional<Abogado> findByMatricula(String matricula);
     Optional<Abogado> findByEspecialidad(String especialidad);
-
 }
