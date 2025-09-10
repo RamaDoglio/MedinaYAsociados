@@ -7,6 +7,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DireccionDTO {
 
+    private Long idDireccion;
     private String calle;
     private Integer numeroCalle;
     private String dpto;

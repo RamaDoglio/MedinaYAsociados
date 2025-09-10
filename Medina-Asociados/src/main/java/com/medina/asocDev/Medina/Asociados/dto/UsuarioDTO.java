@@ -10,12 +10,11 @@ public class UsuarioDTO{
     private Long idUsuario;
     private String nombre;
     private String apellido;
-    private Integer dni;
+    private String dni;
     private DireccionDTO direccion;
-    private Integer telefono;
+    private String telefono;
     private String email;
     private String password;
     private RolDTO rol;
     private List<TurnoDTO> turnos; // Agregado para reflejar la relación con Turno
-    private AbogadoDTO abogado; // Esto no iria ya que el dato lo tendria la clase abogado
 }

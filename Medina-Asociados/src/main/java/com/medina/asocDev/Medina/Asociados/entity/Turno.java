@@ -26,7 +26,9 @@ public class Turno {
     @JoinColumn(name = "idCobro", referencedColumnName = "idCobro")
     private Cobro cobro;
 
-    private String observaciones;
+    private String observacionesCliente;
+
+    private String observacionesAbogado;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "idHorarioTurno", referencedColumnName = "idHorarioTurno")

@@ -15,7 +15,7 @@ public class TurnoDTO {
     private EstadoDTO estadoActual;
     private EspecialidadDTO especialidad;
     private CobroDTO cobro;
-    private String observaciones;
+    private String observacionesCliente;
     private HorarioTurnoDTO horarioTurno;
     private AbogadoDTO abogadoTurno;
     private UsuarioDTO usuarioTurno;
