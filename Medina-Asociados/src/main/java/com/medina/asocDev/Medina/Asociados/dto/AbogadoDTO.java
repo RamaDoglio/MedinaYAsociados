@@ -11,6 +11,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AbogadoDTO {
 
+    private Long idAbogado;
+    private UsuarioDTO usuario;
     private String matricula;
     private List<EspecialidadDTO> especialidadesAbogado= new ArrayList<>();
 

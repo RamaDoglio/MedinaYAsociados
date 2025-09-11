@@ -75,12 +75,9 @@ public class Utils {
     }
 
     public static UsuarioDTO mapUsuarioEntityToDTOxTurnos(Usuario usuario){
-        UsuarioDTO userDTO = new UsuarioDTO();
+        UsuarioDTO userDTO;
 
-        userDTO.setIdUsuario(usuario.getIdUsuario());
-        userDTO.setNombre(usuario.getNombre());
-        userDTO.setEmail(usuario.getEmail());
-        userDTO.setTelefono(usuario.getTelefono());
+        userDTO = mapUserEntityToUserDTO(usuario);
 
         if (usuario.getRol() != null) {
             userDTO.setRol(mapRolEntityToRolDTO(usuario.getRol()));
@@ -101,7 +98,7 @@ public class Utils {
         return userDTO;
     }
 
-    private EstadoDTO mapEstadoEntityToDTO(Estado estado){
+    private static EstadoDTO mapEstadoEntityToDTO(Estado estado){
         EstadoDTO estadoDTO = new EstadoDTO();
 
         estadoDTO.setIdEstado(estado.getIdEstado());
@@ -111,7 +108,7 @@ public class Utils {
         return estadoDTO;
     }
 
-    private TipoCobroDTO mapTipoCobroEntityToDTO(TipoCobro tipoCobro){
+    private static TipoCobroDTO mapTipoCobroEntityToDTO(TipoCobro tipoCobro){
         TipoCobroDTO tipoCobroDTO = new TipoCobroDTO();
 
         tipoCobroDTO.setIdTipoCobro(tipoCobro.getIdTipoCobro());
@@ -121,7 +118,7 @@ public class Utils {
         return tipoCobroDTO;
     }
 
-    private EspecialidadDTO mapEspecialidadEntityToDTO(Especialidad especialidad){
+    private static EspecialidadDTO mapEspecialidadEntityToDTO(Especialidad especialidad){
         EspecialidadDTO especialidadDTO = new EspecialidadDTO();
 
         especialidadDTO.setIdEspecialidad(especialidad.getIdEspecialidad());
@@ -131,15 +128,76 @@ public class Utils {
         return especialidadDTO;
     }
 
-    private HistorialTurnoDTO mapHistorialTurnoEntityToDTO(HistorialTurno historialTurno){
+    private static HistorialTurnoDTO mapHistorialTurnoEntityToDTO(HistorialTurno historialTurno){
         HistorialTurnoDTO historialTurnoDTO = new HistorialTurnoDTO();
 
         historialTurnoDTO.setIdHistorial(historialTurno.getIdHistorial());
-        historialTurnoDTO.setEstadoHistorial();
+        historialTurnoDTO.setEstadoHistorial(mapEstadoEntityToDTO(historialTurno.getEstadoHistorial()));
         historialTurnoDTO.setFechaHoraInicio(historialTurno.getFechaHoraInicio());
         historialTurnoDTO.setFechaHoraFin(historialTurno.getFechaHoraFin());
-        historialTurnoDTO.setTurno(historialTurno.getTurno());
+        historialTurnoDTO.setTurno(mapTurnoEntityToDTO(historialTurno.getTurno()));
 
         return historialTurnoDTO;
+    }
+
+    private static AbogadoDTO mapAbogadoEntityToDTOxUsuario(Abogado abogado){
+        AbogadoDTO abogadoDTO = new AbogadoDTO();
+
+        abogadoDTO.setUsuario(mapUserEntityToUserDTO(abogado.getUsuario()));
+        abogadoDTO.setIdAbogado(abogado.getIdAbogado());
+        abogadoDTO.setMatricula(abogado.getMatricula());
+
+        return abogadoDTO;
+    }
+
+    private static AbogadoDTO mapAbogadoEntityToDTOxEspecialidad(Abogado abogado){
+        AbogadoDTO abogadoDTO;
+
+        abogadoDTO=mapAbogadoEntityToDTOxUsuario(abogado);
+
+        if (abogado.getEspecialidadesAbogado() != null) {
+            List<EspecialidadDTO> especialidadDTO = abogado.getEspecialidadesAbogado()
+                    .stream()
+                    .map(Utils::mapEspecialidadEntityToDTO)
+                    .toList();
+            abogadoDTO.setEspecialidadesAbogado(especialidadDTO);
+        }
+
+        return abogadoDTO;
+    }
+
+    private static HorarioTurnoDTO mapHorarioTurnoEntityToDTO(HorarioTurno horarioTurno){
+        HorarioTurnoDTO horarioTurnoDTO = new HorarioTurnoDTO();
+
+        horarioTurnoDTO.setIdHorarioTurno(horarioTurno.getIdHorarioTurno());
+        horarioTurnoDTO.setTurno(mapTurnoEntityToDTO(horarioTurno.getTurno()));
+        horarioTurnoDTO.setEstadoHorario(mapEstadoEntityToDTO(horarioTurno.getEstadoHorario()));
+        horarioTurnoDTO.setFechaHoraInicio(horarioTurno.getFechaHoraInicio());
+
+        return horarioTurnoDTO;
+    }
+
+    private static CobroDTO mapCobroEntityToDTO(Cobro cobro){
+        CobroDTO cobroDTO = new CobroDTO();
+
+        cobroDTO.setIdCobro(cobro.getIdCobro());
+        cobroDTO.setEstadoCobro(mapEstadoEntityToDTO(cobro.getEstadoCobro()));
+        cobroDTO.setTurno(mapTurnoEntityToDTO(cobro.getTurno()));
+        cobroDTO.setImporteTotal(cobro.getImporteTotal());
+
+        return cobroDTO;
+    }
+
+    private static DetalleCobroDTO mapDetalleCobroEntityToDTO(DetalleCobro detalleCobro){
+        DetalleCobroDTO detalleCobroDTO = new DetalleCobroDTO();
+
+        detalleCobroDTO.setIdDetalleCobro(detalleCobro.getIdDetalleCobro());
+        detalleCobroDTO.setIdCobro(mapCobroEntityToDTO(detalleCobro.getCobro()));
+        detalleCobroDTO.setDescripcionCobro(detalleCobro.getDescripcionCobro());
+        detalleCobroDTO.setTipoCobro(mapTipoCobroEntityToDTO(detalleCobro.getTipoCobro()));
+        detalleCobroDTO.setFecha(detalleCobro.getFecha());
+        detalleCobroDTO.setSubTotal(detalleCobro.getSubTotal());
+
+        return detalleCobroDTO;
     }
 }

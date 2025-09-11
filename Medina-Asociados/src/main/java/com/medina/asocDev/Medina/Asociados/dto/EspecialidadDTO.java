@@ -7,6 +7,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EspecialidadDTO {
 
+    private Long idEspecialidad;
     private String nombreEspecialidad;
     private String descripcionEspecialidad;
 

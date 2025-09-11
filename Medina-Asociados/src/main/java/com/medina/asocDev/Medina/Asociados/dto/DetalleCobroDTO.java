@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class DetalleCobroDTO {
 
     private Long idDetalleCobro;
-    private Long idCobro;
+    private CobroDTO idCobro;
     private LocalDateTime fecha;
     private String descripcionCobro;
     private Float subTotal;

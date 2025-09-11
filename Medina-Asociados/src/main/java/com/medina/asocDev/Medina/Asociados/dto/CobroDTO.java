@@ -10,9 +10,8 @@ import java.time.LocalDateTime;
 public class CobroDTO {
 
     private Long idCobro;
+    private TurnoDTO turno;
     private Float importeTotal;
     private EstadoDTO estadoCobro;
-    private LocalDateTime fechaCobro;
-    private DetalleCobroDTO detalleCobro;
 
 }

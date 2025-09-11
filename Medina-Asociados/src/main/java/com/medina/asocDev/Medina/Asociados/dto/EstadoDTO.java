@@ -9,5 +9,5 @@ import lombok.Data;
 public class EstadoDTO {
     private Long idEstado;
     private String ambito;
-    private String valor;
+    private String nombreEstado;
 }

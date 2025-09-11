@@ -9,8 +9,10 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class HistorialTurnoDTO {
 
+    private Long idHistorial;
     private LocalDateTime fechaHoraInicio;
     private LocalDateTime fechaHoraFin;
     private EstadoDTO estadoHistorial;
+    private TurnoDTO turno;
 
 }
