@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class CobroServices {
+public class CobroService {
 
 
 	@Autowired
@@ -75,7 +75,7 @@ public class CobroServices {
 		if (cobro.getEstadoCobro() != null) {
 			EstadoDTO estadoDTO = new EstadoDTO();
 			estadoDTO.setIdEstado(cobro.getEstadoCobro().getIdEstado());
-			estadoDTO.setValor(cobro.getEstadoCobro().getNombreEstado());
+			estadoDTO.setEstadoCobro(cobro.getEstadoCobro().getNombreEstado());
 			estadoDTO.setAmbito(cobro.getEstadoCobro().getAmbito());
 			dto.setEstadoCobro(estadoDTO);
 		}

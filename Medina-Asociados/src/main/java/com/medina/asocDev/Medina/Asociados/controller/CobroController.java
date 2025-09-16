@@ -1,7 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
 import com.medina.asocDev.Medina.Asociados.dto.CobroDTO;
-import com.medina.asocDev.Medina.Asociados.service.CobroServices;
+import com.medina.asocDev.Medina.Asociados.service.CobroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import java.util.List;
 public class CobroController {
 
 	@Autowired
-	private CobroServices cobroServices;
+	private CobroService cobroServices;
 
 	@PostMapping
 	public ResponseEntity<CobroDTO> createCobro(@RequestBody CobroDTO cobroDTO) {

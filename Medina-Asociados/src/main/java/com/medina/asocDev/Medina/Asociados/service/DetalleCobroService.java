@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 @Service
-public class DetalleCobroServices {
+public class DetalleCobroService {
 
     @Autowired
     private DetalleCobroRepository detalleCobroRepository;
