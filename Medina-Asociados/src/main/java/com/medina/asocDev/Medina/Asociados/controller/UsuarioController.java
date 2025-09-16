@@ -1,7 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
 import com.medina.asocDev.Medina.Asociados.dto.UsuarioDTO;
-import com.medina.asocDev.Medina.Asociados.service.UsuarioServices;
+import com.medina.asocDev.Medina.Asociados.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import java.util.List;
 public class UsuarioController {
 
 	@Autowired
-	private UsuarioServices usuarioService;
+	private UsuarioService usuarioService;
 
 	@PostMapping
 	public ResponseEntity<UsuarioDTO> createUsuario(@RequestBody UsuarioDTO usuarioDTO) {

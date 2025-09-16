@@ -1,7 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
 import com.medina.asocDev.Medina.Asociados.dto.AbogadoDTO;
-import com.medina.asocDev.Medina.Asociados.service.AbogadoServices;
+import com.medina.asocDev.Medina.Asociados.service.AbogadoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import java.util.List;
 public class AbogadoController {
 
 	@Autowired
-	private AbogadoServices abogadoServices;
+	private AbogadoService abogadoServices;
 
 	@PostMapping("/usuario/{idUsuario}")
 	public ResponseEntity<AbogadoDTO> createAbogado(@PathVariable Long idUsuario, @RequestBody AbogadoDTO abogadoDTO) {

@@ -11,7 +11,7 @@ import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 import com.medina.asocDev.Medina.Asociados.repo.UsuarioRepository;
 
 @Service
-public class UsuarioServices {
+public class UsuarioService {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;

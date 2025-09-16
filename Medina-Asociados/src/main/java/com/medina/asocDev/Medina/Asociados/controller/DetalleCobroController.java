@@ -1,7 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
 import com.medina.asocDev.Medina.Asociados.dto.DetalleCobroDTO;
-import com.medina.asocDev.Medina.Asociados.service.DetalleCobroServices;
+import com.medina.asocDev.Medina.Asociados.service.DetalleCobroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import java.util.List;
 public class DetalleCobroController {
 
     @Autowired
-    private DetalleCobroServices detalleCobroServices;
+    private DetalleCobroService detalleCobroServices;
 
     @PostMapping
     public ResponseEntity<DetalleCobroDTO> createDetalleCobro(@RequestBody DetalleCobroDTO dto) {
