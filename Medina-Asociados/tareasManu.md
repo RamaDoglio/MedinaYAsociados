@@ -4,13 +4,13 @@
 
 - [x] especialidad
 - [x] Estado
-- [ ] Historial Turno
-- [ ] Horario Turno
+- [x] Historial Turno
+- [x] Horario Turno
 - [ ] Localidad
 - [ ] TipoCobro
 - [ ] Turno
-- [ ] Permiso
-- [ ] Rol
+- [x] Permiso
+- [x] Rol
 
 # Notas Copilot
 
