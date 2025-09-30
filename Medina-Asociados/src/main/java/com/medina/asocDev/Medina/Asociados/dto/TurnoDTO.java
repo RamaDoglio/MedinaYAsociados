@@ -12,14 +12,14 @@ import java.util.List;
 public class TurnoDTO {
 
     private Long idTurno;
-    private EstadoDTO estadoActual;
-    private EspecialidadDTO especialidad;
-    private CobroDTO cobro;
+    private Long idEstado;
+    private Long idEspecialidad;
+    private Long idCobro;
     private String observacionesCliente;
     private String observacionesAbogado;
-    private HorarioTurnoDTO horarioTurno;
-    private UsuarioDTO abogadoTurno;
-    private UsuarioDTO usuarioTurno;
-    private List<HistorialTurnoDTO> historialTurno= new ArrayList<>();
+    private Long idHorarioTurno;
+    private Long abogadoTurno;
+    private Long usuarioTurno;
+    private List<Long> historialTurno;
 
 }

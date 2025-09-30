@@ -2,7 +2,14 @@ package com.medina.asocDev.Medina.Asociados.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.medina.asocDev.Medina.Asociados.entity.Direccion;
+import com.medina.asocDev.Medina.Asociados.entity.Localidad;
+import com.medina.asocDev.Medina.Asociados.entity.Rol;
+import com.medina.asocDev.Medina.Asociados.repo.RolRepository;
+import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,52 +23,55 @@ public class UsuarioService {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 
+	private RolRepository rolRepository;
+
+
 	public UsuarioDTO createUsuario(UsuarioDTO usuarioDTO) {
-		Usuario usuario = new Usuario();
-		usuario.setNombre(usuarioDTO.getNombre());
-		usuario.setApellido(usuarioDTO.getApellido());
-		usuario.setDni(usuarioDTO.getDni() != null ? usuarioDTO.getDni().toString() : null);
-		usuario.setTelefono(usuarioDTO.getTelefono() != null ? usuarioDTO.getTelefono().toString() : null);
-		usuario.setEmail(usuarioDTO.getEmail());
-		usuario.setPassword(usuarioDTO.getPassword());
+		// Buscamos el rol por id, lanzando excepción si no existe
+		Rol rol = rolRepository.findById(usuarioDTO.getRol().getIdRol())
+				.orElseThrow(() -> new RuntimeException(
+						"Rol no encontrado con id " + usuarioDTO.getRol().getIdRol()));
+
+		// Si viene dirección, la mapeamos; si no, dejamos null
+		Direccion direccion = null;
+		if (usuarioDTO.getDireccion() != null) {
+			direccion = new Direccion();
+			direccion.setCalle(usuarioDTO.getDireccion().getCalle());
+			direccion.setNumeroCalle(usuarioDTO.getDireccion().getNumeroCalle());
+
+			// Localidad
+			if (usuarioDTO.getDireccion().getLocalidad() != null) {
+				Localidad localidad = new Localidad();
+				localidad.setIdLocalidad(usuarioDTO.getDireccion().getLocalidad().getIdLocalidad());
+				localidad.setNombreLocalidad(usuarioDTO.getDireccion().getLocalidad().getNombreLocalidad());
+				localidad.setCodigoPostal(usuarioDTO.getDireccion().getLocalidad().getCodigoPostal());
+				direccion.setLocalidad(localidad);
+			}
+		}
+
+		// Creamos la entidad Usuario usando el mapper
+		Usuario usuario = Utils.mapUsuarioDTOToEntity(usuarioDTO, rol, direccion);
+
+		// Guardamos en la DB
 		Usuario usuarioGuardado = usuarioRepository.save(usuario);
-		UsuarioDTO dto = new UsuarioDTO();
-		dto.setIdUsuario(usuarioGuardado.getIdUsuario());
-		dto.setNombre(usuarioGuardado.getNombre());
-		dto.setApellido(usuarioGuardado.getApellido());
-		dto.setDni(usuarioGuardado.getDni() != null ? Integer.valueOf(usuarioGuardado.getDni()) : null);
-		dto.setTelefono(usuarioGuardado.getTelefono() != null ? Integer.valueOf(usuarioGuardado.getTelefono()) : null);
-		dto.setEmail(usuarioGuardado.getEmail());
-		return dto;
+
+		// Retornamos DTO completo con mapeos incluidos
+		return Utils.mapUsuarioEntityToDTOxTurnos(usuarioGuardado);
 	}
+
+
 
 	public List<UsuarioDTO> getAllUsers() {
 		List<Usuario> usuarios = usuarioRepository.findAll();
-		List<UsuarioDTO> dtos = new ArrayList<>();
-		for (Usuario usuario : usuarios) {
-			UsuarioDTO dto = new UsuarioDTO();
-			dto.setIdUsuario(usuario.getIdUsuario());
-			dto.setNombre(usuario.getNombre());
-			dto.setApellido(usuario.getApellido());
-			dto.setDni(usuario.getDni() != null ? Integer.valueOf(usuario.getDni()) : null);
-			dto.setTelefono(usuario.getTelefono() != null ? Integer.valueOf(usuario.getTelefono()) : null);
-			dto.setEmail(usuario.getEmail());
-			dtos.add(dto);
-		}
-		return dtos;
+		return usuarios.stream()
+				.map(Utils::mapUserEntityToUserDTO)
+				.collect(Collectors.toList());
 	}
 
 	public UsuarioDTO getUserById(Long id) {
-		return usuarioRepository.findById(id).map(usuario -> {
-			UsuarioDTO dto = new UsuarioDTO();
-			dto.setIdUsuario(usuario.getIdUsuario());
-			dto.setNombre(usuario.getNombre());
-			dto.setApellido(usuario.getApellido());
-			dto.setDni(usuario.getDni() != null ? Integer.valueOf(usuario.getDni()) : null);
-			dto.setTelefono(usuario.getTelefono() != null ? Integer.valueOf(usuario.getTelefono()) : null);
-			dto.setEmail(usuario.getEmail());
-			return dto;
-		}).orElse(null);
+		return usuarioRepository.findById(id)
+				.map(Utils::mapUserEntityToUserDTO)
+				.orElse(null);
 	}
 
 	public boolean deleteUser(Long id) {
@@ -77,18 +87,11 @@ public class UsuarioService {
 			usuario.setNombre(usuarioDTO.getNombre());
 			usuario.setApellido(usuarioDTO.getApellido());
 			usuario.setDni(usuarioDTO.getDni() != null ? usuarioDTO.getDni().toString() : null);
-			usuario.setTelefono(usuarioDTO.getTelefono() != null ? usuarioDTO.getTelefono().toString() : null);
+			usuario.setTelefono(usuarioDTO.getTelefono() != null ? usuarioDTO.getTelefono() : null);
 			usuario.setEmail(usuarioDTO.getEmail());
 			Usuario actualizado = usuarioRepository.save(usuario);
-			UsuarioDTO dto = new UsuarioDTO();
-			dto.setIdUsuario(actualizado.getIdUsuario());
-			dto.setNombre(actualizado.getNombre());
-			dto.setApellido(actualizado.getApellido());
-			dto.setDni(actualizado.getDni() != null ? Integer.valueOf(actualizado.getDni()) : null);
-			dto.setTelefono(actualizado.getTelefono() != null ? Integer.valueOf(actualizado.getTelefono()) : null);
-			dto.setEmail(actualizado.getEmail());
-			return dto;
+			return Utils.mapUserEntityToUserDTO(actualizado);
 		}).orElse(null);
 	}
-
 }
+

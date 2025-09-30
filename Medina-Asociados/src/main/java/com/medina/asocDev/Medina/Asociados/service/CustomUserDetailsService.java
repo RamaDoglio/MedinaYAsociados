@@ -2,6 +2,7 @@ package com.medina.asocDev.Medina.Asociados.service;
 
 import com.medina.asocDev.Medina.Asociados.repo.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +14,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UsuarioRepository userRepository;
     @Override
+    @Cacheable(value = "users", key = "#username")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return (UserDetails) userRepository.findByEmail(username).orElseThrow(()-> new UsernameNotFoundException("User Name Not Found"));
     }

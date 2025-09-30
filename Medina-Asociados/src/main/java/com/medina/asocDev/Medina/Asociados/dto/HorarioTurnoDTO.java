@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 public class HorarioTurnoDTO {
 
     private Long idHorarioTurno;
-    private TurnoDTO turno;
+    private Long idTurno;
     private LocalDateTime fechaHoraInicio;
-    private EstadoDTO estadoHorario;
+    private Long idEstado;
 
 }

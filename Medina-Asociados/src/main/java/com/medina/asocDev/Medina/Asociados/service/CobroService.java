@@ -75,7 +75,7 @@ public class CobroService {
 		if (cobro.getEstadoCobro() != null) {
 			EstadoDTO estadoDTO = new EstadoDTO();
 			estadoDTO.setIdEstado(cobro.getEstadoCobro().getIdEstado());
-			estadoDTO.setEstadoCobro(cobro.getEstadoCobro().getNombreEstado());
+			//estadoDTO.setEstadoCobro(cobro.getEstadoCobro().getNombreEstado());
 			estadoDTO.setAmbito(cobro.getEstadoCobro().getAmbito());
 			dto.setEstadoCobro(estadoDTO);
 		}

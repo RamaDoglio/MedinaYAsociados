@@ -22,7 +22,7 @@ public class DetalleCobroService {
     private TipoCobroRepository tipoCobroRepository;
     @Autowired
     private CobroRepository cobroRepository;
-
+///
     public DetalleCobroDTO createDetalleCobro(DetalleCobroDTO dto) {
         DetalleCobro detalle = new DetalleCobro();
         detalle.setFecha(dto.getFecha());
@@ -32,10 +32,10 @@ public class DetalleCobroService {
             TipoCobro tipo = tipoCobroRepository.findByNombreTipoCobro(dto.getTipoCobro().getNombreTipoCobro());
             detalle.setTipoCobro(tipo);
         }
-        if (dto.getIdCobro() != null) {
-            Cobro cobro = cobroRepository.findById(dto.getIdCobro()).orElse(null);
-            detalle.setCobro(cobro);
-        }
+        //if (dto.getIdCobro() != null) {
+        //    Cobro cobro = cobroRepository.findById(dto.getIdCobro()).orElse(null);
+        //    detalle.setCobro(cobro);
+        //}
         DetalleCobro guardado = detalleCobroRepository.save(detalle);
         return mapToDTO(guardado);
     }

@@ -12,7 +12,7 @@ public class HistorialTurnoDTO {
     private Long idHistorial;
     private LocalDateTime fechaHoraInicio;
     private LocalDateTime fechaHoraFin;
-    private EstadoDTO estadoHistorial;
-    private TurnoDTO turno;
+    private Long idEstado;
+    private Long idTurno;
 
 }

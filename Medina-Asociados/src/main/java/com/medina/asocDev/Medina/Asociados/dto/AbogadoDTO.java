@@ -12,8 +12,8 @@ import java.util.List;
 public class AbogadoDTO {
 
     private Long idAbogado;
-    private UsuarioDTO usuario;
+    private Long idUsuario;
     private String matricula;
-    private List<EspecialidadDTO> especialidadesAbogado= new ArrayList<>();
+    private List<Long> especialidadesAbogado= new ArrayList<>();
 
 }

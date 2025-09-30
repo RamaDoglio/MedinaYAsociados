@@ -1,14 +1,18 @@
 package com.medina.asocDev.Medina.Asociados.repo;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.medina.asocDev.Medina.Asociados.entity.Abogado;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 
 public interface AbogadoRepository extends JpaRepository<Abogado, Long> {
     Optional<Abogado> findByUsuario_IdUsuario(Long idUsuario);
     Optional<Abogado> findByMatricula(String matricula);
-    Optional<Abogado> findByEspecialidad(String especialidad);
+    @Query("SELECT a FROM Abogado a JOIN a.especialidadesAbogado e WHERE e.nombreEspecialidad = :nombreEspecialidad")
+    List<Abogado> findByEspecialidadNombre(@Param("nombreEspecialidad") String nombreEspecialidad);
 }

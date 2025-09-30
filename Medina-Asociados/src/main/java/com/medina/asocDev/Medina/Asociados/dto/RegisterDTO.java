@@ -12,5 +12,5 @@ public class RegisterDTO {
     private String telefono;
     private String email;
     private String password;
-    private RolDTO rol;;
+    private Long idRol;
 }

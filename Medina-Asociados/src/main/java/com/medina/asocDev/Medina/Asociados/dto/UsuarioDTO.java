@@ -11,10 +11,10 @@ public class UsuarioDTO{
     private String nombre;
     private String apellido;
     private String dni;
-    private DireccionDTO direccion;
+    private Long idDireccion; // en vez de DireccionDTO
     private String telefono;
     private String email;
     private String password;
-    private RolDTO rol;
-    private List<TurnoDTO> turnos; // Agregado para reflejar la relación con Turno
+    private Long idRol;       // en vez de RolDTO
+    private List<Long> idTurnos; // en vez de List<TurnoDTO>
 }
