@@ -8,10 +8,13 @@ import com.medina.asocDev.Medina.Asociados.entity.Cobro;
 import com.medina.asocDev.Medina.Asociados.repo.DetalleCobroRepository;
 import com.medina.asocDev.Medina.Asociados.repo.TipoCobroRepository;
 import com.medina.asocDev.Medina.Asociados.repo.CobroRepository;
+import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.ArrayList;
+
+import static com.medina.asocDev.Medina.Asociados.utils.Utils.mapDetalleCobroEntityToDTO;
 
 @Service
 public class DetalleCobroService {
@@ -28,29 +31,26 @@ public class DetalleCobroService {
         detalle.setFecha(dto.getFecha());
         detalle.setDescripcionCobro(dto.getDescripcionCobro());
         detalle.setSubTotal(dto.getSubTotal());
-        if (dto.getTipoCobro() != null) {
-            TipoCobro tipo = tipoCobroRepository.findByNombreTipoCobro(dto.getTipoCobro().getNombreTipoCobro());
+        if (dto.getIdDetalleCobro() != null && dto.getIdTipoCobro() != null) {
+            TipoCobro tipo = tipoCobroRepository.findById(dto.getIdTipoCobro())
+                    .orElse(null);
             detalle.setTipoCobro(tipo);
         }
-        //if (dto.getIdCobro() != null) {
-        //    Cobro cobro = cobroRepository.findById(dto.getIdCobro()).orElse(null);
-        //    detalle.setCobro(cobro);
-        //}
         DetalleCobro guardado = detalleCobroRepository.save(detalle);
-        return mapToDTO(guardado);
+        return mapDetalleCobroEntityToDTO(guardado);
     }
 
     public List<DetalleCobroDTO> getDetallesPorCobro(Long cobroId) {
         List<DetalleCobro> detalles = detalleCobroRepository.findByCobro_Turno_IdTurno(cobroId);
         List<DetalleCobroDTO> dtos = new ArrayList<>();
         for (DetalleCobro d : detalles) {
-            dtos.add(mapToDTO(d));
+            dtos.add(mapDetalleCobroEntityToDTO(d));
         }
         return dtos;
     }
 
     public DetalleCobroDTO getDetalleCobroById(Long id) {
-        return detalleCobroRepository.findById(id).map(this::mapToDTO).orElse(null);
+        return detalleCobroRepository.findById(id).map(Utils::mapDetalleCobroEntityToDTO).orElse(null);
     }
 
     public DetalleCobroDTO updateDetalleCobro(Long id, DetalleCobroDTO dto) {
@@ -58,12 +58,13 @@ public class DetalleCobroService {
             detalle.setFecha(dto.getFecha());
             detalle.setDescripcionCobro(dto.getDescripcionCobro());
             detalle.setSubTotal(dto.getSubTotal());
-            if (dto.getTipoCobro() != null) {
-                TipoCobro tipo = tipoCobroRepository.findByNombreTipoCobro(dto.getTipoCobro().getNombreTipoCobro());
+            if (dto.getIdDetalleCobro() != null && dto.getIdTipoCobro() != null) {
+                TipoCobro tipo = tipoCobroRepository.findById(dto.getIdTipoCobro())
+                        .orElse(null);
                 detalle.setTipoCobro(tipo);
             }
             DetalleCobro actualizado = detalleCobroRepository.save(detalle);
-            return mapToDTO(actualizado);
+            return mapDetalleCobroEntityToDTO(actualizado);
         }).orElse(null);
     }
 
@@ -73,20 +74,5 @@ public class DetalleCobroService {
             return true;
         }
         return false;
-    }
-
-    private DetalleCobroDTO mapToDTO(DetalleCobro detalle) {
-        DetalleCobroDTO dto = new DetalleCobroDTO();
-        dto.setIdDetalleCobro(detalle.getIdDetalleCobro());
-        dto.setFecha(detalle.getFecha());
-        dto.setDescripcionCobro(detalle.getDescripcionCobro());
-        dto.setSubTotal(detalle.getSubTotal());
-        if (detalle.getTipoCobro() != null) {
-            TipoCobroDTO tipoDTO = new TipoCobroDTO();
-            tipoDTO.setNombreTipoCobro(detalle.getTipoCobro().getNombreTipoCobro());
-            tipoDTO.setDescripcionTipoCobro(detalle.getTipoCobro().getDescTipoCobro());
-            dto.setTipoCobro(tipoDTO);
-        }
-        return dto;
     }
 }

@@ -13,6 +13,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,36 +81,30 @@ public class HorarioTurnoService {
                 .collect(Collectors.toList());
     }
 
-    // Generar horarios disponibles para un día específico (plantilla)
-    public List<HorarioTurnoDTO> generateHorariosDisponiblesParaFecha(LocalDate fecha, Long idAbogado) {
-        List<HorarioTurnoDTO> horariosDisponibles = new ArrayList<>();
-        
-        // Obtener horarios ya ocupados
-        List<HorarioTurnoDTO> horariosOcupados = getHorariosOcupadosPorAbogadoEnFecha(idAbogado, fecha);
-        List<LocalTime> horasOcupadas = horariosOcupados.stream()
-                .map(h -> h.getFechaHoraInicio().toLocalTime())
-                .collect(Collectors.toList());
-        
-        // Generar horarios desde las 9:00 hasta las 18:00 cada 30 minutos
-        LocalTime horaInicio = LocalTime.of(9, 0);
-        LocalTime horaFin = LocalTime.of(18, 0);
-        
+    public List<LocalTime> obtenerHorariosDisponibles(Long idAbogado, LocalDateTime fecha) {
+        // Generar todos los horarios posibles dinámicamente (12:00 → 16:30, cada 45 min)
+        List<LocalTime> todosLosHorarios = new ArrayList<>();
+        LocalTime horaInicio = LocalTime.of(12, 0);
+        LocalTime horaFin = LocalTime.of(16, 30);
+
         LocalTime horaActual = horaInicio;
-        while (horaActual.isBefore(horaFin)) {
-            if (!horasOcupadas.contains(horaActual)) {
-                HorarioTurnoDTO horarioDisponible = new HorarioTurnoDTO();
-                horarioDisponible.setFechaHoraInicio(LocalDateTime.of(fecha, horaActual));
-                // Estado disponible por defecto
-                EstadoDTO estadoDisponible = new EstadoDTO();
-                estadoDisponible.setNombreEstado("DISPONIBLE");
-                horarioDisponible.setEstadoHorario(estadoDisponible);
-                
-                horariosDisponibles.add(horarioDisponible);
-            }
-            horaActual = horaActual.plusMinutes(30);
+        while (!horaActual.isAfter(horaFin)) {
+            todosLosHorarios.add(horaActual);
+            horaActual = horaActual.plusMinutes(45);
         }
-        
-        return horariosDisponibles;
+
+        // Horarios ocupados desde la BD
+        List<HorarioTurno> ocupados = horarioTurnoRepository
+                .findHorariosOcupadosPorAbogadoEnFecha(idAbogado, fecha);
+
+        Set<LocalTime> horasOcupadas = ocupados.stream()
+                .map(h -> h.getFechaHoraInicio().toLocalTime())
+                .collect(Collectors.toSet());
+
+        // Filtrar solo los horarios libres
+        return todosLosHorarios.stream()
+                .filter(hora -> !horasOcupadas.contains(hora))
+                .toList();
     }
 
     // Verificar si un horario está disponible

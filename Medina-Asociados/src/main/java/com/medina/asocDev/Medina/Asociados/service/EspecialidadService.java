@@ -3,6 +3,8 @@ package com.medina.asocDev.Medina.Asociados.service;
 import com.medina.asocDev.Medina.Asociados.dto.EspecialidadDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Especialidad;
 import com.medina.asocDev.Medina.Asociados.repo.EspecialidadRepository;
+import com.medina.asocDev.Medina.Asociados.utils.Utils;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,16 +64,13 @@ public class EspecialidadService {
 
     // Obtener especialidad por nombre
     public EspecialidadDTO getEspecialidadByName(String nombreEspecialidad) {
-        Especialidad especialidad = especialidadRepository.findByNombreEspecialidad(nombreEspecialidad);
-        if (especialidad != null) {
-            EspecialidadDTO dto = new EspecialidadDTO();
-            dto.setIdEspecialidad(especialidad.getIdEspecialidad());
-            dto.setNombreEspecialidad(especialidad.getNombreEspecialidad());
-            dto.setDescripcionEspecialidad(especialidad.getDescripcionEspecialidad());
-            return dto;
-        }
-        return null;
+        return especialidadRepository.findByNombreEspecialidad(nombreEspecialidad)
+                .map(Utils::mapEspecialidadEntityToDTO)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No se encontró la especialidad con nombre: " + nombreEspecialidad
+                ));
     }
+
 
     // Actualizar especialidad
     public EspecialidadDTO updateEspecialidad(Long id, EspecialidadDTO especialidadDTO) {

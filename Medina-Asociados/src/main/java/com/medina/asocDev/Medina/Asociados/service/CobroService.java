@@ -6,9 +6,12 @@ import com.medina.asocDev.Medina.Asociados.entity.Cobro;
 import com.medina.asocDev.Medina.Asociados.entity.Estado;
 import com.medina.asocDev.Medina.Asociados.repo.CobroRepository;
 import com.medina.asocDev.Medina.Asociados.repo.EstadoRepository;
+import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+
+import static com.medina.asocDev.Medina.Asociados.utils.Utils.mapCobroEntityToDTO;
 
 @Service
 public class CobroService {
@@ -23,12 +26,12 @@ public class CobroService {
 	public CobroDTO createCobro(CobroDTO cobroDTO) {
 		Cobro cobro = new Cobro();
 		cobro.setImporteTotal(cobroDTO.getImporteTotal());
-		if (cobroDTO.getEstadoCobro() != null && cobroDTO.getEstadoCobro().getIdEstado() != null) {
-			Estado estado = estadoRepository.findById(cobroDTO.getEstadoCobro().getIdEstado()).orElse(null);
+		if (cobroDTO.getIdEstado() != null) {
+			Estado estado = estadoRepository.findById(cobroDTO.getIdEstado()).orElse(null);
 			cobro.setEstadoCobro(estado);
 		}
 		Cobro guardado = cobroRepository.save(cobro);
-		return mapToDTO(guardado);
+		return mapCobroEntityToDTO(guardado);
 	}
 
 
@@ -36,26 +39,28 @@ public class CobroService {
 		List<Cobro> cobros = cobroRepository.findByTurno_IdTurno(turnoId);
 		List<CobroDTO> dtos = new java.util.ArrayList<>();
 		for (Cobro c : cobros) {
-			dtos.add(mapToDTO(c));
+			dtos.add(mapCobroEntityToDTO(c));
 		}
 		return dtos;
 	}
 
 
 	public CobroDTO getCobroPorId(Long id) {
-		return cobroRepository.findById(id).map(this::mapToDTO).orElse(null);
+		return cobroRepository.findById(id)
+				.map(Utils::mapCobroEntityToDTO) // ahora sí compila y es claro
+				.orElse(null);
 	}
 
 
 	public CobroDTO updateCobro(Long id, CobroDTO cobroDTO) {
 		return cobroRepository.findById(id).map(cobro -> {
 			cobro.setImporteTotal(cobroDTO.getImporteTotal());
-			if (cobroDTO.getEstadoCobro() != null && cobroDTO.getEstadoCobro().getIdEstado() != null) {
-				Estado estado = estadoRepository.findById(cobroDTO.getEstadoCobro().getIdEstado()).orElse(null);
+			if (cobroDTO.getIdCobro() != null) {
+				Estado estado = estadoRepository.findById(cobroDTO.getIdEstado()).orElse(null);
 				cobro.setEstadoCobro(estado);
 			}
 			Cobro actualizado = cobroRepository.save(cobro);
-			return mapToDTO(actualizado);
+			return mapCobroEntityToDTO(actualizado);
 		}).orElse(null);
 	}
 
@@ -66,19 +71,5 @@ public class CobroService {
 			return true;
 		}
 		return false;
-	}
-
-	private CobroDTO mapToDTO(Cobro cobro) {
-		CobroDTO dto = new CobroDTO();
-		dto.setIdCobro(cobro.getIdCobro());
-		dto.setImporteTotal(cobro.getImporteTotal());
-		if (cobro.getEstadoCobro() != null) {
-			EstadoDTO estadoDTO = new EstadoDTO();
-			estadoDTO.setIdEstado(cobro.getEstadoCobro().getIdEstado());
-			//estadoDTO.setEstadoCobro(cobro.getEstadoCobro().getNombreEstado());
-			estadoDTO.setAmbito(cobro.getEstadoCobro().getAmbito());
-			dto.setEstadoCobro(estadoDTO);
-		}
-		return dto;
 	}
 }

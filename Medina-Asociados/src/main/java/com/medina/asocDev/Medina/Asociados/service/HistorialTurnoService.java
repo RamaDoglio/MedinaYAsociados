@@ -4,7 +4,10 @@ import com.medina.asocDev.Medina.Asociados.dto.EstadoDTO;
 import com.medina.asocDev.Medina.Asociados.dto.HistorialTurnoDTO;
 import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.HistorialTurno;
+import com.medina.asocDev.Medina.Asociados.entity.Turno;
 import com.medina.asocDev.Medina.Asociados.repo.HistorialTurnoRepository;
+import com.medina.asocDev.Medina.Asociados.repo.TurnoRepository;
+import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,58 +21,28 @@ public class HistorialTurnoService {
     @Autowired
     private HistorialTurnoRepository historialTurnoRepository;
 
+    @Autowired
+    private TurnoRepository turnoRepository;
+
     // Obtener todo el historial de un turno específico
     public List<HistorialTurnoDTO> getHistorialByTurnoId(Long idTurno) {
         List<HistorialTurno> historial = historialTurnoRepository.findByTurno_IdTurno(idTurno);
         return historial.stream()
-                .map(this::convertirEntityADTO)
+                .map(Utils::mapHistorialTurnoEntityToDTO)
                 .collect(Collectors.toList());
     }
 
-    // Obtener el estado actual de un turno (historial sin fecha fin)
-    public HistorialTurnoDTO getEstadoActualByTurnoId(Long idTurno) {
-        Optional<HistorialTurno> historialActual = historialTurnoRepository.findByTurno_IdTurnoAndFechaHoraFinIsNull(idTurno);
-        return historialActual.map(this::convertirEntityADTO).orElse(null);
+    public EstadoDTO getEstadoActualByTurnoId(Long idTurno) {
+        return turnoRepository.findById(idTurno)
+                .map(Turno::getEstadoActual)              // obtengo el Estado directamente
+                .map(Utils::mapEstadoEntityToDTO)  // lo paso a DTO con tu mapper
+                .orElse(null);
     }
+
 
     // Obtener historial específico por ID
     public HistorialTurnoDTO getHistorialById(Long idHistorial) {
         Optional<HistorialTurno> historial = historialTurnoRepository.findById(idHistorial);
-        return historial.map(this::convertirEntityADTO).orElse(null);
-    }
-
-    // Obtener todo el historial
-    public List<HistorialTurnoDTO> getAllHistorial() {
-        List<HistorialTurno> historial = historialTurnoRepository.findAll();
-        return historial.stream()
-                .map(this::convertirEntityADTO)
-                .collect(Collectors.toList());
-    }
-
-    // Método auxiliar para convertir Entity a DTO
-    private HistorialTurnoDTO convertirEntityADTO(HistorialTurno historial) {
-        HistorialTurnoDTO dto = new HistorialTurnoDTO();
-        dto.setIdHistorial(historial.getIdHistorial());
-        dto.setFechaHoraInicio(historial.getFechaHoraInicio());
-        dto.setFechaHoraFin(historial.getFechaHoraFin());
-        
-        // Convertir Estado a EstadoDTO
-        if (historial.getEstadoHistorial() != null) {
-            EstadoDTO estadoDTO = new EstadoDTO();
-            estadoDTO.setIdEstado(historial.getEstadoHistorial().getIdEstado());
-            estadoDTO.setAmbito(historial.getEstadoHistorial().getAmbito());
-            estadoDTO.setNombreEstado(historial.getEstadoHistorial().getNombreEstado());
-            dto.setEstadoHistorial(estadoDTO);
-        }
-        
-        // Convertir Turno a TurnoDTO (solo campos básicos para evitar recursión)
-        if (historial.getTurno() != null) {
-            TurnoDTO turnoDTO = new TurnoDTO();
-            turnoDTO.setIdTurno(historial.getTurno().getIdTurno());
-            // Agregar otros campos básicos del turno si es necesario
-            dto.setTurno(turnoDTO);
-        }
-        
-        return dto;
+        return historial.map(Utils::mapHistorialTurnoEntityToDTO).orElse(null);
     }
 }

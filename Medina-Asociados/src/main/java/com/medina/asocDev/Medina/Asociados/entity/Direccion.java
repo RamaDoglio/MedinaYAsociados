@@ -24,7 +24,6 @@ public class Direccion {
 
     private String piso;
 
-    @NotBlank(message = "La localidad no debe estar en blanco")
     @ManyToOne
     @JoinColumn(name = "idLocalidad")
     private Localidad localidad;

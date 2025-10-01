@@ -16,7 +16,7 @@ public class AbogadoController {
 	private AbogadoService abogadoService;
 
 	// Crear un abogado para un usuario existente
-	@PostMapping("/usuario/{idUsuario}")
+	@PostMapping("/{idUsuario}")
 	public ResponseEntity<AbogadoDTO> createAbogado(@PathVariable Long idUsuario,
 													@RequestBody AbogadoDTO abogadoDTO) {
 		AbogadoDTO creado = abogadoService.createAbogado(idUsuario, abogadoDTO);

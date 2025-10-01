@@ -75,7 +75,7 @@ public class Utils {
         direccionDTO.setIdDireccion(direccion.getIdDireccion());
         direccionDTO.setCalle(direccion.getCalle());
         direccionDTO.setNumeroCalle(direccion.getNumeroCalle());
-        direccionDTO.setLocalidad(mapLocalidadEntityToDTO(direccion.getLocalidad()));
+        direccionDTO.setLocalidad(direccion.getLocalidad().getIdLocalidad());
         return direccionDTO;
     }
 
@@ -311,7 +311,12 @@ public class Utils {
         direccion.setIdDireccion(direccionDTO.getIdDireccion());
         direccion.setCalle(direccionDTO.getCalle());
         direccion.setNumeroCalle(direccionDTO.getNumeroCalle());
-        direccion.setLocalidad(mapLocalidadDTOToEntity(direccionDTO.getLocalidad()));
+
+        if (direccionDTO.getLocalidad() != null) {
+            Localidad localidad = new Localidad();
+            localidad.setIdLocalidad(direccionDTO.getLocalidad()); // ✅ solo id
+            direccion.setLocalidad(localidad);
+        }
 
         return direccion;
     }
@@ -340,30 +345,29 @@ public class Utils {
         return usuario;
     }
 
-    public static Abogado mapAbogadoDTOToEntity(AbogadoDTO abogadoDTO, Usuario usuario, EspecialidadRepository especialidadRepository) {
+    public static Abogado mapAbogadoDTOToEntity(AbogadoDTO abogadoDTO, Usuario usuario, List<Especialidad> especialidades) {
         if (abogadoDTO == null) return null;
 
         Abogado abogado = new Abogado();
         abogado.setIdAbogado(abogadoDTO.getIdAbogado());
         abogado.setMatricula(abogadoDTO.getMatricula());
-        abogado.setUsuario(usuario); // La entidad Usuario ya debe estar mapeada
-
-        // Mapear especialidades solo por ID
-        List<Especialidad> especialidades = new ArrayList<>();
-        if (abogadoDTO.getEspecialidadesAbogado() != null) {
-            for (Long espDTO : abogadoDTO.getEspecialidadesAbogado()) {
-                // Solo usar el ID
-                if (espDTO != null) {
-                    Especialidad esp = especialidadRepository.findById(espDTO).orElse(null);
-                    if (esp != null) {
-                        especialidades.add(esp);
-                    }
-                }
-            }
-        }
+        abogado.setUsuario(usuario);
         abogado.setEspecialidadesAbogado(especialidades);
 
         return abogado;
     }
 
+    public static Cobro mapDTOToCobro(CobroDTO dto) {
+        Cobro cobro = new Cobro();
+        cobro.setIdCobro(dto.getIdCobro());
+        cobro.setImporteTotal(dto.getImporteTotal());
+
+        if (dto.getIdEstado() != null) {
+            Estado estado = new Estado();
+            estado.setIdEstado(dto.getIdEstado());
+            cobro.setEstadoCobro(estado);
+        }
+
+        return cobro;
+    }
 }

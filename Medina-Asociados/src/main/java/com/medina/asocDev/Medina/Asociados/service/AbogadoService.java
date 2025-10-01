@@ -4,9 +4,11 @@ import com.medina.asocDev.Medina.Asociados.dto.AbogadoDTO;
 import com.medina.asocDev.Medina.Asociados.dto.EspecialidadDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Abogado;
 import com.medina.asocDev.Medina.Asociados.entity.Especialidad;
+import com.medina.asocDev.Medina.Asociados.entity.Rol;
 import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 import com.medina.asocDev.Medina.Asociados.repo.AbogadoRepository;
 import com.medina.asocDev.Medina.Asociados.repo.EspecialidadRepository;
+import com.medina.asocDev.Medina.Asociados.repo.RolRepository;
 import com.medina.asocDev.Medina.Asociados.repo.UsuarioRepository;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,26 +26,34 @@ public class AbogadoService {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 	@Autowired
+	private RolRepository rolRepository;
+	@Autowired
 	private EspecialidadRepository especialidadRepository;
 
 	public AbogadoDTO createAbogado(Long idUsuario, AbogadoDTO abogadoDTO) {
-		Optional<Usuario> usuarioOpt = usuarioRepository.findById(idUsuario);
-		if (usuarioOpt.isEmpty()) return null;
+		// 1. Buscar usuario
+		Usuario usuario = usuarioRepository.findById(idUsuario)
+				.orElseThrow(() -> new RuntimeException("Usuario no encontrado con id " + idUsuario));
 
-		Abogado abogado = new Abogado();
-		abogado.setUsuario(usuarioOpt.get());
-		abogado.setMatricula(abogadoDTO.getMatricula());
+		// 2. Cambiar rol a ABOGADO
+		Rol rolAbogado = rolRepository.findByNombre("ABOGADO")
+				.orElseThrow(() -> new RuntimeException("Rol 'ABOGADO' no encontrado"));
+		usuario.setRol(rolAbogado);
+		usuarioRepository.save(usuario);
 
-		// Mapear solo IDs de especialidades
+		// 3. Resolver especialidades (puede ser lista vacía)
 		List<Especialidad> especialidades = new ArrayList<>();
-		if (abogadoDTO.getEspecialidadesAbogado() != null) {
+		if (abogadoDTO.getEspecialidadesAbogado() != null && !abogadoDTO.getEspecialidadesAbogado().isEmpty()) {
 			for (Long espId : abogadoDTO.getEspecialidadesAbogado()) {
 				especialidadRepository.findById(espId).ifPresent(especialidades::add);
 			}
 		}
-		abogado.setEspecialidadesAbogado(especialidades);
 
+		// 4. Mapear y guardar abogado
+		Abogado abogado = Utils.mapAbogadoDTOToEntity(abogadoDTO, usuario, especialidades);
 		Abogado guardado = abogadoRepository.save(abogado);
+
+		// 5. Retornar DTO
 		return Utils.mapAbogadoEntityToDTOxUsuarioSinTurno(guardado);
 	}
 

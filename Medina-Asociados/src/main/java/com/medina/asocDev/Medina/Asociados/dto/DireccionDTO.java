@@ -1,6 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -12,6 +13,7 @@ public class DireccionDTO {
     private Integer numeroCalle;
     private String dpto;
     private String piso;
-    private LocalidadDTO localidad;
+    @NotNull(message = "Debe seleccionar una localidad")
+    private Long localidad;
     private String provincia="Córdoba";
 }

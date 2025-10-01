@@ -1,5 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
+import com.medina.asocDev.Medina.Asociados.dto.MensajeResponse;
+import com.medina.asocDev.Medina.Asociados.dto.RegisterDTO;
 import com.medina.asocDev.Medina.Asociados.dto.UsuarioDTO;
 import com.medina.asocDev.Medina.Asociados.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +17,9 @@ public class UsuarioController {
 	private UsuarioService usuarioService;
 
 	@PostMapping
-	public ResponseEntity<UsuarioDTO> createUsuario(@RequestBody UsuarioDTO usuarioDTO) {
-		UsuarioDTO usuarioCreado = usuarioService.createUsuario(usuarioDTO);
-		return ResponseEntity.ok(usuarioCreado);
+	public ResponseEntity<MensajeResponse> createUsuario(@RequestBody RegisterDTO registerDTO) {
+		MensajeResponse response = usuarioService.createUsuario(registerDTO);
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping
