@@ -20,7 +20,6 @@ public class Abogado {
     private String matricula;
 
     @OneToOne
-    @MapsId
     @JoinColumn(name = "idUsuario")
     private Usuario usuario;
 

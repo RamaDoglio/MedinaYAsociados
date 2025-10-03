@@ -1,5 +1,9 @@
 # Tareas
 
+- [x] Revisar porque los id de los abogados es el mismo que el de usuario. Ej: idUsuario:8, idAbogado:8
+- [x] Revisar porque los id no se asignan en orden ascendente ej: Ante una peticion correcta se asigna el idUsuario=1 y luego de hacer una peticion incorrecta y luego de una correcta se asigna el idUsuario=3
+- [x] Al actualizar un abogado, Enviar solo el id del abogado y las especialidades que se quieran agregar o eliminar, actualmente se envia toda la entidad
+
 ## Service y Controller Faltantes
 
 - [x] especialidad

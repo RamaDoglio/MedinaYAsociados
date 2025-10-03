@@ -15,4 +15,6 @@ public interface AbogadoRepository extends JpaRepository<Abogado, Long> {
     Optional<Abogado> findByMatricula(String matricula);
     @Query("SELECT a FROM Abogado a JOIN a.especialidadesAbogado e WHERE e.nombreEspecialidad = :nombreEspecialidad")
     List<Abogado> findByEspecialidadNombre(@Param("nombreEspecialidad") String nombreEspecialidad);
+
+    List<Abogado> findByEspecialidadesAbogado_IdEspecialidad(Long idEspecialidad);
 }

@@ -1,6 +1,8 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
 import com.medina.asocDev.Medina.Asociados.dto.AbogadoDTO;
+import com.medina.asocDev.Medina.Asociados.dto.AbogadoEspecialidadesDTO;
+import com.medina.asocDev.Medina.Asociados.dto.AbogadoMatriculaDTO;
 import com.medina.asocDev.Medina.Asociados.service.AbogadoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,10 +41,20 @@ public class AbogadoController {
 	}
 
 	// Actualizar un abogado
-	@PutMapping("/{id}")
-	public ResponseEntity<AbogadoDTO> updateAbogado(@PathVariable Long id,
-													@RequestBody AbogadoDTO abogadoDTO) {
-		AbogadoDTO actualizado = abogadoService.updateAbogado(id, abogadoDTO);
+	@PatchMapping("/{id}/matricula")
+	public ResponseEntity<AbogadoDTO> updateMatricula(
+			@PathVariable Long id,
+			@RequestBody AbogadoMatriculaDTO dto) {
+		AbogadoDTO actualizado = abogadoService.updateMatricula(id, dto.getMatricula());
+		if (actualizado == null) return ResponseEntity.notFound().build();
+		return ResponseEntity.ok(actualizado);
+	}
+
+	@PutMapping("/{idAbogado}/especialidades")
+	public ResponseEntity<AbogadoDTO> updateEspecialidades(
+			@PathVariable Long idAbogado,
+			@RequestBody AbogadoEspecialidadesDTO dto) {
+		AbogadoDTO actualizado = abogadoService.updateEspecialidades(idAbogado, dto.getEspecialidadesAbogado());
 		if (actualizado == null) return ResponseEntity.notFound().build();
 		return ResponseEntity.ok(actualizado);
 	}
@@ -55,10 +67,11 @@ public class AbogadoController {
 		else return ResponseEntity.notFound().build();
 	}
 
-	// Obtener abogados por especialidad
-	@GetMapping("/especialidad/{nombreEspecialidad}")
-	public ResponseEntity<List<AbogadoDTO>> getAbogadosByEspecialidad(@PathVariable String nombreEspecialidad) {
-		List<AbogadoDTO> abogados = abogadoService.getAbogadosByEspecialidad(nombreEspecialidad);
+	// Obtener abogados por id de especialidad
+	@GetMapping("/especialidad/{idEspecialidad}")
+	public ResponseEntity<List<AbogadoDTO>> getAbogadosByEspecialidad(@PathVariable Long idEspecialidad) {
+		List<AbogadoDTO> abogados = abogadoService.getAbogadosByEspecialidad(idEspecialidad);
 		return ResponseEntity.ok(abogados);
 	}
+
 }
