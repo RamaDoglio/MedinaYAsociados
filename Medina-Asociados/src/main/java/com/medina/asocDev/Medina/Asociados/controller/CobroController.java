@@ -12,38 +12,34 @@ import java.util.List;
 public class CobroController {
 
 	@Autowired
-	private CobroService cobroServices;
+	private CobroService cobroService;
 
 	@PostMapping
 	public ResponseEntity<CobroDTO> createCobro(@RequestBody CobroDTO cobroDTO) {
-		CobroDTO creado = cobroServices.createCobro(cobroDTO);
-		if (creado == null) return ResponseEntity.badRequest().build();
-		return ResponseEntity.ok(creado);
+		CobroDTO creado = cobroService.createCobro(cobroDTO);
+		return creado == null ? ResponseEntity.badRequest().build() : ResponseEntity.ok(creado);
 	}
 
 	@GetMapping("/turno/{turnoId}")
-	public ResponseEntity<List<CobroDTO>> getCobrosPorTurno(@PathVariable Long turnoId) {
-		return ResponseEntity.ok(cobroServices.getCobrosPorTurno(turnoId));
+	public ResponseEntity<CobroDTO> getCobroPorTurno(@PathVariable Long turnoId) {
+		return ResponseEntity.ok(cobroService.getCobroPorTurno(turnoId));
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<CobroDTO> getCobroPorId(@PathVariable Long id) {
-		CobroDTO cobro = cobroServices.getCobroPorId(id);
-		if (cobro == null) return ResponseEntity.notFound().build();
-		return ResponseEntity.ok(cobro);
+		CobroDTO cobro = cobroService.getCobroPorId(id);
+		return cobro == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(cobro);
 	}
 
 	@PutMapping("/{id}")
 	public ResponseEntity<CobroDTO> updateCobro(@PathVariable Long id, @RequestBody CobroDTO cobroDTO) {
-		CobroDTO actualizado = cobroServices.updateCobro(id, cobroDTO);
-		if (actualizado == null) return ResponseEntity.notFound().build();
-		return ResponseEntity.ok(actualizado);
+		CobroDTO actualizado = cobroService.updateCobro(id, cobroDTO);
+		return actualizado == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(actualizado);
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteCobro(@PathVariable Long id) {
-		boolean borrado = cobroServices.deleteCobro(id);
-		if (borrado) return ResponseEntity.noContent().build();
-		else return ResponseEntity.notFound().build();
+		return cobroService.deleteCobro(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
 	}
 }
+

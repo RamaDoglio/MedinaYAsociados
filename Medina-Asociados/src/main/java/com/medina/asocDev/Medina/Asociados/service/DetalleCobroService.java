@@ -25,32 +25,40 @@ public class DetalleCobroService {
     private TipoCobroRepository tipoCobroRepository;
     @Autowired
     private CobroRepository cobroRepository;
-///
+
     public DetalleCobroDTO createDetalleCobro(DetalleCobroDTO dto) {
         DetalleCobro detalle = new DetalleCobro();
         detalle.setFecha(dto.getFecha());
         detalle.setDescripcionCobro(dto.getDescripcionCobro());
         detalle.setSubTotal(dto.getSubTotal());
-        if (dto.getIdDetalleCobro() != null && dto.getIdTipoCobro() != null) {
-            TipoCobro tipo = tipoCobroRepository.findById(dto.getIdTipoCobro())
-                    .orElse(null);
+
+        if (dto.getIdCobro() != null) {
+            Cobro cobro = cobroRepository.findById(dto.getIdCobro()).orElse(null);
+            detalle.setCobro(cobro);
+        }
+
+        if (dto.getIdTipoCobro() != null) {
+            TipoCobro tipo = tipoCobroRepository.findById(dto.getIdTipoCobro()).orElse(null);
             detalle.setTipoCobro(tipo);
         }
+
         DetalleCobro guardado = detalleCobroRepository.save(detalle);
-        return mapDetalleCobroEntityToDTO(guardado);
+        return Utils.mapDetalleCobroEntityToDTO(guardado);
     }
 
     public List<DetalleCobroDTO> getDetallesPorCobro(Long cobroId) {
-        List<DetalleCobro> detalles = detalleCobroRepository.findByCobro_Turno_IdTurno(cobroId);
+        List<DetalleCobro> detalles = detalleCobroRepository.findByCobro_IdCobro(cobroId);
         List<DetalleCobroDTO> dtos = new ArrayList<>();
         for (DetalleCobro d : detalles) {
-            dtos.add(mapDetalleCobroEntityToDTO(d));
+            dtos.add(Utils.mapDetalleCobroEntityToDTO(d));
         }
         return dtos;
     }
 
     public DetalleCobroDTO getDetalleCobroById(Long id) {
-        return detalleCobroRepository.findById(id).map(Utils::mapDetalleCobroEntityToDTO).orElse(null);
+        return detalleCobroRepository.findById(id)
+                .map(Utils::mapDetalleCobroEntityToDTO)
+                .orElse(null);
     }
 
     public DetalleCobroDTO updateDetalleCobro(Long id, DetalleCobroDTO dto) {
@@ -58,13 +66,19 @@ public class DetalleCobroService {
             detalle.setFecha(dto.getFecha());
             detalle.setDescripcionCobro(dto.getDescripcionCobro());
             detalle.setSubTotal(dto.getSubTotal());
-            if (dto.getIdDetalleCobro() != null && dto.getIdTipoCobro() != null) {
-                TipoCobro tipo = tipoCobroRepository.findById(dto.getIdTipoCobro())
-                        .orElse(null);
+
+            if (dto.getIdCobro() != null) {
+                Cobro cobro = cobroRepository.findById(dto.getIdCobro()).orElse(null);
+                detalle.setCobro(cobro);
+            }
+
+            if (dto.getIdTipoCobro() != null) {
+                TipoCobro tipo = tipoCobroRepository.findById(dto.getIdTipoCobro()).orElse(null);
                 detalle.setTipoCobro(tipo);
             }
+
             DetalleCobro actualizado = detalleCobroRepository.save(detalle);
-            return mapDetalleCobroEntityToDTO(actualizado);
+            return Utils.mapDetalleCobroEntityToDTO(actualizado);
         }).orElse(null);
     }
 

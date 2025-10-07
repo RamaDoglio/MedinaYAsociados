@@ -9,6 +9,8 @@ import com.medina.asocDev.Medina.Asociados.repo.EstadoRepository;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.medina.asocDev.Medina.Asociados.utils.Utils.mapCobroEntityToDTO;
@@ -16,54 +18,48 @@ import static com.medina.asocDev.Medina.Asociados.utils.Utils.mapCobroEntityToDT
 @Service
 public class CobroService {
 
-
 	@Autowired
 	private CobroRepository cobroRepository;
 	@Autowired
 	private EstadoRepository estadoRepository;
 
-
 	public CobroDTO createCobro(CobroDTO cobroDTO) {
 		Cobro cobro = new Cobro();
 		cobro.setImporteTotal(cobroDTO.getImporteTotal());
+
 		if (cobroDTO.getIdEstado() != null) {
 			Estado estado = estadoRepository.findById(cobroDTO.getIdEstado()).orElse(null);
 			cobro.setEstadoCobro(estado);
 		}
+
 		Cobro guardado = cobroRepository.save(cobro);
-		return mapCobroEntityToDTO(guardado);
+		return Utils.mapCobroEntityToDTO(guardado);
 	}
 
-
-	public List<CobroDTO> getCobrosPorTurno(Long turnoId) {
-		List<Cobro> cobros = cobroRepository.findByTurno_IdTurno(turnoId);
-		List<CobroDTO> dtos = new java.util.ArrayList<>();
-		for (Cobro c : cobros) {
-			dtos.add(mapCobroEntityToDTO(c));
-		}
-		return dtos;
+	public CobroDTO getCobroPorTurno(Long turnoId) {
+		Cobro cobro = cobroRepository.findByTurno_IdTurno(turnoId)
+				.orElseThrow(() -> new RuntimeException("Cobro no encontrado para el turno " + turnoId));
+		return Utils.mapCobroEntityToDTO(cobro);
 	}
 
 
 	public CobroDTO getCobroPorId(Long id) {
 		return cobroRepository.findById(id)
-				.map(Utils::mapCobroEntityToDTO) // ahora sí compila y es claro
+				.map(Utils::mapCobroEntityToDTO)
 				.orElse(null);
 	}
-
 
 	public CobroDTO updateCobro(Long id, CobroDTO cobroDTO) {
 		return cobroRepository.findById(id).map(cobro -> {
 			cobro.setImporteTotal(cobroDTO.getImporteTotal());
-			if (cobroDTO.getIdCobro() != null) {
+			if (cobroDTO.getIdEstado() != null) {
 				Estado estado = estadoRepository.findById(cobroDTO.getIdEstado()).orElse(null);
 				cobro.setEstadoCobro(estado);
 			}
 			Cobro actualizado = cobroRepository.save(cobro);
-			return mapCobroEntityToDTO(actualizado);
+			return Utils.mapCobroEntityToDTO(actualizado);
 		}).orElse(null);
 	}
-
 
 	public boolean deleteCobro(Long id) {
 		if (cobroRepository.existsById(id)) {
@@ -73,3 +69,4 @@ public class CobroService {
 		return false;
 	}
 }
+

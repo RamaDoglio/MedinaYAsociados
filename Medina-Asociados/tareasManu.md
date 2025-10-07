@@ -11,7 +11,7 @@
 - [x] Historial Turno
 - [x] Horario Turno
 - [ ] Localidad
-- [ ] TipoCobro
+- [x] TipoCobro
 - [ ] Turno
 - [x] Permiso
 - [x] Rol
