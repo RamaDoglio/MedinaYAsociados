@@ -8,5 +8,5 @@ import java.util.List;
 public interface DetalleCobroRepository extends JpaRepository<DetalleCobro, Long> {
 
     // Obtener todos los detalles de cobro de un turno
-    List<DetalleCobro> findByCobro_Turno_IdTurno(Long idTurno);
+    List<DetalleCobro> findByIdCobro(Long idCobro);
 }

@@ -26,8 +26,7 @@ public class TipoCobroService {
 
     // Buscar por nombre
     public TipoCobro buscarPorNombre(String nombre) {
-        return tipoCobroRepository.findByNombre(nombre)
-                .orElseThrow(() -> new RuntimeException("TipoCobro no encontrado con nombre " + nombre));
+        return tipoCobroRepository.findByNombreTipoCobro(nombre);
     }
 
     // Crear
@@ -38,8 +37,8 @@ public class TipoCobroService {
     // Actualizar
     public TipoCobro actualizar(Long id, TipoCobro datos) {
         TipoCobro existente = buscarPorId(id);
-        existente.setNombre(datos.getNombre());
-        existente.setDescripcion(datos.getDescripcion());
+        existente.setNombreTipoCobro(datos.getNombreTipoCobro());
+        existente.setDescTipoCobro(datos.getDescTipoCobro());
         return tipoCobroRepository.save(existente);
     }
 

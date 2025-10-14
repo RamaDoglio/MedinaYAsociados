@@ -11,6 +11,8 @@ import com.medina.asocDev.Medina.Asociados.repo.CobroRepository;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -46,8 +48,8 @@ public class DetalleCobroService {
         return Utils.mapDetalleCobroEntityToDTO(guardado);
     }
 
-    public List<DetalleCobroDTO> getDetallesPorCobro(Long cobroId) {
-        List<DetalleCobro> detalles = detalleCobroRepository.findByCobro_IdCobro(cobroId);
+    public List<DetalleCobroDTO> getDetallesPorCobro(Long idCobro) {
+        List<DetalleCobro> detalles = detalleCobroRepository.findByIdCobro(idCobro);
         List<DetalleCobroDTO> dtos = new ArrayList<>();
         for (DetalleCobro d : detalles) {
             dtos.add(Utils.mapDetalleCobroEntityToDTO(d));
@@ -88,5 +90,19 @@ public class DetalleCobroService {
             return true;
         }
         return false;
+    }
+
+    public DetalleCobroDTO crearDetalleReembolso(Cobro cobro) {
+        TipoCobro tipoReembolso = tipoCobroRepository.findByNombreTipoCobro("REEMBOLSO");
+
+        DetalleCobro detalle = new DetalleCobro();
+        detalle.setCobro(cobro);
+        detalle.setFecha(LocalDateTime.now());
+        detalle.setDescripcionCobro("Reembolso por cancelación de turno");
+        detalle.setSubTotal(cobro.getImporteTotal());
+        detalle.setTipoCobro(tipoReembolso);
+
+        DetalleCobro guardado = detalleCobroRepository.save(detalle);
+        return Utils.mapDetalleCobroEntityToDTO(guardado);
     }
 }

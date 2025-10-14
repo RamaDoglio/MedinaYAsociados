@@ -22,6 +22,8 @@ public class CobroService {
 	private CobroRepository cobroRepository;
 	@Autowired
 	private EstadoRepository estadoRepository;
+	@Autowired
+	private DetalleCobroService detalleCobroService;
 
 	public CobroDTO createCobro(CobroDTO cobroDTO) {
 		Cobro cobro = new Cobro();
@@ -37,8 +39,7 @@ public class CobroService {
 	}
 
 	public CobroDTO getCobroPorTurno(Long turnoId) {
-		Cobro cobro = cobroRepository.findByTurno_IdTurno(turnoId)
-				.orElseThrow(() -> new RuntimeException("Cobro no encontrado para el turno " + turnoId));
+		Cobro cobro = (Cobro) cobroRepository.findByTurno_IdTurno(turnoId);
 		return Utils.mapCobroEntityToDTO(cobro);
 	}
 
@@ -67,6 +68,21 @@ public class CobroService {
 			return true;
 		}
 		return false;
+	}
+
+	public CobroDTO reembolsar(Long id) {
+		Cobro cobro = cobroRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Cobro no encontrado"));
+
+		Estado estadoReembolsado = estadoRepository.findByNombreAndAmbito("REEMBOLSADO", "COBRO");
+		cobro.setEstadoCobro(estadoReembolsado);
+
+		Cobro cobroActualizado = cobroRepository.save(cobro);
+
+		// 👉 delega la creación del detalle
+		detalleCobroService.crearDetalleReembolso(cobroActualizado);
+
+		return Utils.mapCobroEntityToDTO(cobroActualizado);
 	}
 }
 

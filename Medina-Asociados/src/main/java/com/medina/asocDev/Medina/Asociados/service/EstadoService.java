@@ -61,9 +61,9 @@ public class EstadoService {
     }
 
     // Obtener ID por nombre y ámbito (método específico del repositorio)
-    public Long getIdEstadoByNameAndAmbito(String nombreEstado, String ambito) {
-        return estadoRepository.findIdByNombreAndAmbito(nombreEstado, ambito);
-    }
+    //public Optional<Long> getIdEstadoByNameAndAmbito(String nombreEstado, String ambito) {
+    //    return estadoRepository.findIdByNombreAndAmbito(nombreEstado, ambito);
+    //}
 
     // Actualizar estado
     public EstadoDTO updateEstado(Long id, EstadoDTO estadoDTO) {

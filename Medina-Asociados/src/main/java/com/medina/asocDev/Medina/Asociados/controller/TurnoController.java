@@ -1,6 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
 
+import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Turno;
 import com.medina.asocDev.Medina.Asociados.service.TurnoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,8 @@ public class TurnoController {
 
     // Crear turno
     @PostMapping
-    public ResponseEntity<Turno> crearTurno(@RequestBody Turno turno) {
-        return ResponseEntity.ok(turnoService.crearTurno(turno));
+    public ResponseEntity<TurnoDTO> crearTurno(@RequestBody Turno turnoDTO) {
+        return ResponseEntity.ok(turnoService.crearTurno(turnoDTO));
     }
 
     // Listar todos

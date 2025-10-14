@@ -1,6 +1,5 @@
 package com.medina.asocDev.Medina.Asociados.service;
 
-import com.medina.asocDev.Medina.Asociados.dto.EstadoDTO;
 import com.medina.asocDev.Medina.Asociados.dto.HorarioTurnoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.HorarioTurno;
 import com.medina.asocDev.Medina.Asociados.repo.HorarioTurnoRepository;
@@ -20,10 +19,10 @@ import java.util.stream.Collectors;
 public class HorarioTurnoService {
 
     @Autowired
-    private HorarioTurnoRepository horarioTurnoRepository;
+    private static HorarioTurnoRepository horarioTurnoRepository;
 
     // Crear nuevo horario de turno
-    public HorarioTurnoDTO createHorarioTurno(HorarioTurnoDTO horarioTurnoDTO) {
+    public static HorarioTurnoDTO createHorarioTurno(HorarioTurno horarioTurnoDTO) {
         HorarioTurno horarioTurno = new HorarioTurno();
         horarioTurno.setFechaHoraInicio(horarioTurnoDTO.getFechaHoraInicio());
         // El turno y estado se asignarán cuando se reserve el horario

@@ -6,8 +6,10 @@ class Turno {
     - especialidad: Especialidad
     - cobro:Cobro
     - horario: HorarioTurno
-    - usuario: Usuario
-    - observaciones
+    - abogadoTurno: Usuario
+    - clienteTurno: Usuario
+    - observacionesCliente
+    - observacionesAbogado
     + crear()
     + modificar()
 }
@@ -62,7 +64,8 @@ class Permisos {
 
 class Abogado {
     - matricula
-    - especialidad: Especialidad
+    - especialidadesAbogado: Especialidad
+    - usuario: Usuario
     + crear()
     + mostrar()
 }
@@ -72,6 +75,7 @@ Abogado -->"1..*" Especialidad
 class HistorialTurno{
     - fechaHoraInicio
     - fechaHoraFin
+    - turno: Turno
     - estado: Estado
     + crear()
     + mostrar()
@@ -80,15 +84,11 @@ class HistorialTurno{
 HistorialTurno -->"1" Estado
 
 class Cobro {
-    - fechaHoraCobro
     - importeTotal
     - estado:Estado
-    - detalleCobro:DetalleCobro
-    + calcularSaldoPendiente()
-    + calcularImporteTotal()
+    - turno: Turno
     + crear()
     + mostrar()
-
 }
 
 Cobro o--"1..*" DetalleCobro
@@ -97,8 +97,9 @@ Cobro -->"1" Estado
 class DetalleCobro {
     - fecha
     - descripcion
-    - monto
+    - subTotal
     - tipoCobro: TipoCobro
+    - cobro: Cobro
     + crear()
     + mostrar()
 }
@@ -114,12 +115,12 @@ class TipoCobro {
 
 class Estado{
     - ambito
-    - valor
+    - nombre
     + crear()
     + mostrar()
-    + setValor(valor)
+    + setnombre(nombre)
     + setAmbito(ambito)
-    + getValor()
+    + getnombre()
     + getAmbito()
 }
 
@@ -129,7 +130,7 @@ class Direccion{
     - calle
     - numero
     - piso
-    - departamento
+    - dpto
     - localidad:Localidad
     - provincia
     + crear()
@@ -146,9 +147,7 @@ class Localidad{
 }
 
 class HorarioTurno {
-    - hora
-    - fecha
-    - estado
+    - turno:Turno
     - fechaHoraInicio
     + crear()
     + mostrar()

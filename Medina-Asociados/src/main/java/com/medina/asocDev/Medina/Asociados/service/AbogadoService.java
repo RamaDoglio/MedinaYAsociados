@@ -1,7 +1,6 @@
 package com.medina.asocDev.Medina.Asociados.service;
 
 import com.medina.asocDev.Medina.Asociados.dto.AbogadoDTO;
-import com.medina.asocDev.Medina.Asociados.dto.EspecialidadDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Abogado;
 import com.medina.asocDev.Medina.Asociados.entity.Especialidad;
 import com.medina.asocDev.Medina.Asociados.entity.Rol;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AbogadoService {

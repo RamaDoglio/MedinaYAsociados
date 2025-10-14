@@ -9,4 +9,6 @@ public interface EstadoRepository extends JpaRepository<Estado, Long>{
 
     @Query("SELECT e.id FROM Estado e WHERE e.nombreEstado = :nombreEstado AND e.ambito = :ambito")
     Long findIdByNombreAndAmbito(@Param("nombreEstado") String nombreEstado, @Param("ambito") String ambito);
+
+    Estado findByNombreAndAmbito(String reembolsado, String cobro);
 }
