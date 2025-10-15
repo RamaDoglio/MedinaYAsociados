@@ -3,6 +3,8 @@ package com.medina.asocDev.Medina.Asociados.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +32,7 @@ public class Turno {
 
     private String observacionesAbogado;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "idHorarioTurno", referencedColumnName = "idHorarioTurno")
-    private HorarioTurno horarioTurno;
+    private LocalDateTime horarioTurno;
 
     @ManyToOne
     @JoinColumn(name = "idCliente")

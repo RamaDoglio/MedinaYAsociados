@@ -7,6 +7,7 @@ entity Turno {
     -observacionesCliente: VARCHAR
     -observacionesAbogado: VARCHAR
     -importeTotal: INTEGER
+    -horarioTurno: DATETIME
     -HistorialTurno <<FK>>: INTEGER
     -especialidad <<FK>>: INTEGER
     -cobro <<FK>>: INTEGER
@@ -72,12 +73,6 @@ entity Localidad {
     -codigoPostal: INTEGER
 }
 
-entity HorarioTurno {
-    -idHorarioTurno <<PK>>: SERIAL
-    -idTurno <<FK>>: INTEGER
-    -fechHoraInicio: DATE
-}
-
 entity HistorialTurno {
     -idHistorialTurno <<PK>>: SERIAL
     -idTurno <<FK>>: INTEGER
@@ -125,7 +120,6 @@ Turno ||--|| Cobro
 Turno }o--|| Estado : "estadoActual"
 Turno ||--|{ HistorialTurno
 Turno ||--|| Especialidad
-Turno ||--|| HorarioTurno
 
 Cobro ||--o{ DetalleCobro
 Cobro }o--|| Estado
@@ -134,7 +128,6 @@ DetalleCobro }o--|| TipoCobro
 
 HistorialTurno }o--||Estado
 
-HorarioTurno }o--||Estado
 
 AbogadoXEspecialidad }o-up-|| Especialidad
 AbogadoXEspecialidad }o-up-|| Abogado

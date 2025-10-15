@@ -1,7 +1,6 @@
 package com.medina.asocDev.Medina.Asociados.service;
 
 import com.medina.asocDev.Medina.Asociados.dto.DetalleCobroDTO;
-import com.medina.asocDev.Medina.Asociados.dto.TipoCobroDTO;
 import com.medina.asocDev.Medina.Asociados.entity.DetalleCobro;
 import com.medina.asocDev.Medina.Asociados.entity.TipoCobro;
 import com.medina.asocDev.Medina.Asociados.entity.Cobro;
@@ -16,7 +15,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
-import static com.medina.asocDev.Medina.Asociados.utils.Utils.mapDetalleCobroEntityToDTO;
 
 @Service
 public class DetalleCobroService {
@@ -49,7 +47,7 @@ public class DetalleCobroService {
     }
 
     public List<DetalleCobroDTO> getDetallesPorCobro(Long idCobro) {
-        List<DetalleCobro> detalles = detalleCobroRepository.findByIdCobro(idCobro);
+        List<DetalleCobro> detalles = detalleCobroRepository.findByCobro_IdCobro(idCobro);
         List<DetalleCobroDTO> dtos = new ArrayList<>();
         for (DetalleCobro d : detalles) {
             dtos.add(Utils.mapDetalleCobroEntityToDTO(d));

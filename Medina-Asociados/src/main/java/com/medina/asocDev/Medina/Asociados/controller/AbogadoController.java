@@ -5,9 +5,13 @@ import com.medina.asocDev.Medina.Asociados.dto.AbogadoEspecialidadesDTO;
 import com.medina.asocDev.Medina.Asociados.dto.AbogadoMatriculaDTO;
 import com.medina.asocDev.Medina.Asociados.service.AbogadoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -72,6 +76,26 @@ public class AbogadoController {
 	public ResponseEntity<List<AbogadoDTO>> getAbogadosByEspecialidad(@PathVariable Long idEspecialidad) {
 		List<AbogadoDTO> abogados = abogadoService.getAbogadosByEspecialidad(idEspecialidad);
 		return ResponseEntity.ok(abogados);
+	}
+
+	@GetMapping("/{idAbogado}/horarios-disponibles")
+	public ResponseEntity<List<LocalTime>> obtenerHorariosDisponibles(
+			@PathVariable Long idAbogado,
+			@RequestParam("fecha")
+			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+			LocalDate fecha) {
+
+		return ResponseEntity.ok(abogadoService.obtenerHorariosDisponibles(idAbogado, fecha));
+	}
+
+	@GetMapping("/{idAbogado}/disponibilidad")
+	public ResponseEntity<Boolean> verificarDisponibilidad(
+			@PathVariable Long idAbogado,
+			@RequestParam("fechaHora")
+			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+			LocalDateTime fechaHora) {
+
+		return ResponseEntity.ok(abogadoService.verificarDisponibilidad(idAbogado, fechaHora));
 	}
 
 }

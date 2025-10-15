@@ -3,12 +3,13 @@ package com.medina.asocDev.Medina.Asociados.utils;
 import com.medina.asocDev.Medina.Asociados.dto.*;
 import com.medina.asocDev.Medina.Asociados.entity.*;
 import com.medina.asocDev.Medina.Asociados.repo.EspecialidadRepository;
+import com.medina.asocDev.Medina.Asociados.repo.EstadoRepository;
+import com.medina.asocDev.Medina.Asociados.repo.TurnoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -25,8 +26,6 @@ public class Utils {
         }
         return stringBuilder.toString();
     }
-    @Autowired
-    private EspecialidadRepository especialidadRepository;
 
 
     //Usuario(Sin turnos) -> UsuarioDTO
@@ -110,7 +109,7 @@ public class Utils {
         turnoDTO.setIdEspecialidad(turno.getEspecialidad().getIdEspecialidad());
         turnoDTO.setObservacionesCliente(turno.getObservacionesCliente());
         turnoDTO.setObservacionesAbogado(turno.getObservacionesAbogado());
-        turnoDTO.setIdHorarioTurno(turno.getHorarioTurno().getIdHorarioTurno());
+        turnoDTO.setHorarioTurno(turno.getHorarioTurno());
         turnoDTO.setIdEstado(turno.getEstadoActual().getIdEstado());
 
         return turnoDTO;
@@ -234,26 +233,6 @@ public class Utils {
         }
 
         return dto;
-    }
-
-
-    //HorarioTurno -> HorarioTurnoDTO
-    public static HorarioTurnoDTO mapHorarioTurnoEntityToDTO(HorarioTurno horarioTurno) {
-        if (horarioTurno == null) {
-            return null;
-        }
-
-        HorarioTurnoDTO horarioTurnoDTO = new HorarioTurnoDTO();
-        horarioTurnoDTO.setIdHorarioTurno(horarioTurno.getIdHorarioTurno());
-        horarioTurnoDTO.setFechaHoraInicio(horarioTurno.getFechaHoraInicio());
-        horarioTurnoDTO.setIdEstado(horarioTurno.getEstadoHorario().getIdEstado());
-
-        // Evitar recursión: solo setear idTurno
-        if (horarioTurno.getTurno() != null) {
-            horarioTurnoDTO.setIdTurno(horarioTurno.getTurno().getIdTurno()); // ✅ solo el id
-        }
-
-        return horarioTurnoDTO;
     }
 
 

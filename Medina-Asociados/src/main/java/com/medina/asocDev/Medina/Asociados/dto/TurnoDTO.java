@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Data;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -17,9 +17,8 @@ public class TurnoDTO {
     private Long idCobro;
     private String observacionesCliente;
     private String observacionesAbogado;
-    private Long idHorarioTurno;
+    private LocalDateTime horarioTurno;
     private Long abogadoTurno;
     private Long usuarioTurno;
     private List<Long> historialTurno;
-
 }

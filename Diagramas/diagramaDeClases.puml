@@ -5,7 +5,7 @@ class Turno {
     - ultimoHistorialTurno:HistorialTurno
     - especialidad: Especialidad
     - cobro:Cobro
-    - horario: HorarioTurno
+    - horarioTurno
     - abogadoTurno: Usuario
     - clienteTurno: Usuario
     - observacionesCliente
@@ -13,11 +13,10 @@ class Turno {
     + crear()
     + modificar()
 }
-Turno --> "1..* "Cobro
+Turno --> "1"Cobro
 Turno -> "1" Estado
 Turno -->"1..*" HistorialTurno
 Turno --> "1" Especialidad
-Turno -left-> "1"HorarioTurno
 Turno ..> "1..*"Usuario
 
 class Especialidad {
@@ -146,15 +145,4 @@ class Localidad{
     + mostrar()
 }
 
-class HorarioTurno {
-    - turno:Turno
-    - fechaHoraInicio
-    + crear()
-    + mostrar()
-}
-note top of HorarioTurno : La fecha podria ir en \nesta clase o en la clase Turno
-note bottom of HorarioTurno: La duracion del turno \nes de 45 minutos
-
-HorarioTurno --> "1"Estado
-HorarioTurno ..> "1"Turno
 @enduml
