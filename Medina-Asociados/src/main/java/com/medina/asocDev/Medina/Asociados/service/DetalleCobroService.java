@@ -26,24 +26,31 @@ public class DetalleCobroService {
     @Autowired
     private CobroRepository cobroRepository;
 
-    public DetalleCobroDTO createDetalleCobro(DetalleCobroDTO dto) {
+    public DetalleCobroDTO crearDetalleCobro(Long idCobro,Long tipoDetalle) {
+        Cobro cobro = cobroRepository.findById(idCobro)
+                .orElseThrow(() -> new RuntimeException("Cobro no encontrado"));
+
         DetalleCobro detalle = new DetalleCobro();
-        detalle.setFecha(dto.getFecha());
-        detalle.setDescripcionCobro(dto.getDescripcionCobro());
-        detalle.setSubTotal(dto.getSubTotal());
+        detalle.setCobro(cobro);
+        detalle.setFecha(LocalDateTime.now());
+        detalle.setSubTotal(cobro.getImporteTotal());
 
-        if (dto.getIdCobro() != null) {
-            Cobro cobro = cobroRepository.findById(dto.getIdCobro()).orElse(null);
-            detalle.setCobro(cobro);
+        if (tipoDetalle==1L){
+            TipoCobro tipoPago = tipoCobroRepository.findByNombreTipoCobro("PAGO");
+
+            detalle.setTipoCobro(tipoPago);
+
+            detalleCobroRepository.save(detalle);
+        } else if (tipoDetalle==2L) {
+            TipoCobro tipoPago = tipoCobroRepository.findByNombreTipoCobro("REEMBOLSO");
+
+
+            detalle.setTipoCobro(tipoPago);
+
+            detalleCobroRepository.save(detalle);
         }
 
-        if (dto.getIdTipoCobro() != null) {
-            TipoCobro tipo = tipoCobroRepository.findById(dto.getIdTipoCobro()).orElse(null);
-            detalle.setTipoCobro(tipo);
-        }
-
-        DetalleCobro guardado = detalleCobroRepository.save(detalle);
-        return Utils.mapDetalleCobroEntityToDTO(guardado);
+        return Utils.mapDetalleCobroEntityToDTO(detalle);
     }
 
     public List<DetalleCobroDTO> getDetallesPorCobro(Long idCobro) {
@@ -88,19 +95,5 @@ public class DetalleCobroService {
             return true;
         }
         return false;
-    }
-
-    public DetalleCobroDTO crearDetalleReembolso(Cobro cobro) {
-        TipoCobro tipoReembolso = tipoCobroRepository.findByNombreTipoCobro("REEMBOLSO");
-
-        DetalleCobro detalle = new DetalleCobro();
-        detalle.setCobro(cobro);
-        detalle.setFecha(LocalDateTime.now());
-        detalle.setDescripcionCobro("Reembolso por cancelación de turno");
-        detalle.setSubTotal(cobro.getImporteTotal());
-        detalle.setTipoCobro(tipoReembolso);
-
-        DetalleCobro guardado = detalleCobroRepository.save(detalle);
-        return Utils.mapDetalleCobroEntityToDTO(guardado);
     }
 }

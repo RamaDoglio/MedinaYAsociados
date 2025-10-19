@@ -6,10 +6,7 @@ import com.medina.asocDev.Medina.Asociados.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,15 +19,21 @@ public class TurnoService {
     private EstadoRepository estadoRepository;
 
     @Autowired
-    private CobroRepository cobroRepository;
-
-    @Autowired
     private UsuarioRepository usuarioRepository;
 
     @Autowired
     private EspecialidadRepository especialidadRepository;
 
-    // ✅ Crear turno (reserva)
+    @Autowired
+    private AbogadoService abogadoService;
+
+    @Autowired
+    private CobroService cobroService;
+
+    @Autowired
+    private HistorialTurnoService historialTurnoService;
+
+    //Crear turno (reserva)
     public Turno crearTurno(TurnoCreateRequest turnoDTO) {
         // Buscar cliente y abogado por ID
         Usuario cliente = usuarioRepository.findById(turnoDTO.getIdCliente())
@@ -40,7 +43,7 @@ public class TurnoService {
 
         // Validar que el horario esté disponible
         LocalDateTime fechaHoraTurno = turnoDTO.getHorarioTurno();
-        if (!isHorarioDisponible(abogado.getIdUsuario(), fechaHoraTurno)) {
+        if (!(abogadoService.verificarDisponibilidad(turnoDTO.getIdAbogado(), turnoDTO.getHorarioTurno()))) {
             throw new RuntimeException("El horario seleccionado no está disponible");
         }
 
@@ -73,18 +76,18 @@ public class TurnoService {
         return turnoRepository.save(turno);
     }
 
-    // ✅ Listar todos los turnos
+    //Listar todos los turnos
     public List<Turno> listarTurnos() {
         return turnoRepository.findAll();
     }
 
-    // ✅ Obtener turno por ID
+    //Obtener turno por ID
     public Turno obtenerPorId(Long id) {
         return turnoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Turno no encontrado"));
     }
 
-    // ✅ Actualizar observaciones
+    //Actualizar observaciones
     public Turno actualizarTurno(Long id, Turno datos) {
         Turno turno = obtenerPorId(id);
         turno.setObservacionesCliente(datos.getObservacionesCliente());
@@ -92,12 +95,12 @@ public class TurnoService {
         return turnoRepository.save(turno);
     }
 
-    // ✅ Eliminar turno
+    //Eliminar turno
     public void eliminarTurno(Long id) {
         turnoRepository.deleteById(id);
     }
 
-    // ✅ Reprogramar turno
+    //Reprogramar turno
     public Turno reprogramarTurno(Long id, LocalDateTime nuevaFechaHora) {
         Turno turno = obtenerPorId(id);
 
@@ -109,7 +112,7 @@ public class TurnoService {
             throw new IllegalArgumentException("La nueva fecha debe tener al menos 24 horas de antelación");
         }
 
-        if (!isHorarioDisponible(turno.getAbogadoTurno().getIdUsuario(), nuevaFechaHora)) {
+        if (!(abogadoService.verificarDisponibilidad(turno.getAbogadoTurno().getIdUsuario(), nuevaFechaHora))) {
             throw new RuntimeException("El nuevo horario no está disponible");
         }
 
@@ -121,52 +124,56 @@ public class TurnoService {
         return turnoRepository.save(turno);
     }
 
-    // ✅ Cancelar turno
+    //Cancelar turno
     public Turno cancelarTurno(Long id) {
         Turno turno = obtenerPorId(id);
         LocalDateTime fechaTurno = turno.getHorarioTurno();
 
+        Estado estadoAnterior = turno.getEstadoActual();
+
         if (fechaTurno.isBefore(LocalDateTime.now().plusHours(24))) {
-            turno.setEstadoActual(estadoRepository.findByNombreAndAmbito("CANCELADO_SIN_REEMBOLSO", "TURNO")
-                    .orElseThrow(() -> new RuntimeException("Estado no encontrado")));
+            // 👉 Cancelación sin reembolso
+            Estado estadoCanceladoSinReembolso = estadoRepository
+                    .findByNombreAndAmbito("CANCELADO_SIN_REEMBOLSO", "TURNO")
+                    .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+            turno.setEstadoActual(estadoCanceladoSinReembolso);
+
         } else {
-            turno.setEstadoActual(estadoRepository.findByNombreAndAmbito("CANCELADO_CON_REEMBOLSO", "TURNO")
-                    .orElseThrow(() -> new RuntimeException("Estado no encontrado")));
+            // 👉 Cancelación con reembolso
+            Estado estadoCanceladoConReembolso = estadoRepository
+                    .findByNombreAndAmbito("CANCELADO_CON_REEMBOLSO", "TURNO")
+                    .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+            turno.setEstadoActual(estadoCanceladoConReembolso);
+
+            if (turno.getCobro() != null) {
+                // 👉 delegar al CobroService, que a su vez delega al DetalleCobroService
+                cobroService.reembolsar(turno.getCobro());
+            }
         }
+
+        // 👉 registrar historial de cambio de estado
+        historialTurnoService.registrarCambio(turno, estadoAnterior, turno.getEstadoActual());
 
         return turnoRepository.save(turno);
     }
 
-    // ✅ Obtener horarios ocupados de un abogado en una fecha
-    public List<LocalTime> obtenerHorariosOcupadosPorAbogado(Long idAbogado, LocalDate fecha) {
-        List<Turno> turnosOcupados = turnoRepository.findTurnosOcupadosPorAbogadoEnFecha(idAbogado, fecha);
-        return turnosOcupados.stream()
-                .map(t -> t.getHorarioTurno().toLocalTime())
-                .toList();
-    }
+    public Turno pagarTurno(Long idTurno) {
+        Turno turno = obtenerPorId(idTurno);
 
-    // ✅ Generar horarios disponibles (12:00 → 16:30, cada 45 min)
-    public List<LocalTime> obtenerHorariosDisponibles(Long idAbogado, LocalDate fecha) {
-        List<LocalTime> todos = new ArrayList<>();
-        LocalTime inicio = LocalTime.of(12, 0);
-        LocalTime fin = LocalTime.of(16, 30);
-        LocalTime actual = inicio;
+        Estado estadoAnterior = turno.getEstadoActual();
+        Estado estadoPagado = estadoRepository.findByNombreAndAmbito("PAGADO", "TURNO")
+                .orElseThrow(() -> new RuntimeException("Estado PAGADO no encontrado"));
 
-        while (!actual.isAfter(fin)) {
-            todos.add(actual);
-            actual = actual.plusMinutes(45);
+        turno.setEstadoActual(estadoPagado);
+
+        // Actualizar cobro
+        if (turno.getCobro() != null) {
+            cobroService.marcarComoPagado(turno.getCobro());
         }
 
-        List<LocalTime> ocupados = obtenerHorariosOcupadosPorAbogado(idAbogado, fecha);
-        return todos.stream()
-                .filter(h -> !ocupados.contains(h))
-                .toList();
-    }
+        // Registrar historial
+        historialTurnoService.registrarCambio(turno, estadoAnterior, estadoPagado);
 
-    // ✅ Verificar si un horario está disponible
-    public boolean isHorarioDisponible(Long idAbogado, LocalDateTime fechaHora) {
-        LocalDate fecha = fechaHora.toLocalDate();
-        List<LocalTime> ocupados = obtenerHorariosOcupadosPorAbogado(idAbogado, fecha);
-        return !ocupados.contains(fechaHora.toLocalTime());
+        return turnoRepository.save(turno);
     }
 }

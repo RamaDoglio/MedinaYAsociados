@@ -14,12 +14,6 @@ public class DetalleCobroController {
     @Autowired
     private DetalleCobroService detalleCobroService;
 
-    @PostMapping
-    public ResponseEntity<DetalleCobroDTO> createDetalleCobro(@RequestBody DetalleCobroDTO dto) {
-        DetalleCobroDTO creado = detalleCobroService.createDetalleCobro(dto);
-        return creado == null ? ResponseEntity.badRequest().build() : ResponseEntity.ok(creado);
-    }
-
     @GetMapping("/cobro/{cobroId}")
     public ResponseEntity<List<DetalleCobroDTO>> getDetallesPorCobro(@PathVariable Long cobroId) {
         return ResponseEntity.ok(detalleCobroService.getDetallesPorCobro(cobroId));

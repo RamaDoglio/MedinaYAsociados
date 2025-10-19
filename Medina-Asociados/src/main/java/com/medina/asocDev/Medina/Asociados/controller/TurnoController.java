@@ -5,14 +5,13 @@ import com.medina.asocDev.Medina.Asociados.dto.TurnoCreateRequest;
 import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Turno;
 import com.medina.asocDev.Medina.Asociados.service.TurnoService;
+import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -26,6 +25,12 @@ public class TurnoController {
     @PostMapping
     public ResponseEntity<Turno> crearTurno(@RequestBody TurnoCreateRequest turnoDTO) {
         return ResponseEntity.ok(turnoService.crearTurno(turnoDTO));
+    }
+
+    @PostMapping("/{id}/pagar")
+    public ResponseEntity<TurnoDTO> pagarTurno(@PathVariable Long id) {
+        Turno turno = turnoService.pagarTurno(id);
+        return ResponseEntity.ok(Utils.mapTurnoEntityToDTO(turno));
     }
 
     // ✅ Listar todos
@@ -65,30 +70,9 @@ public class TurnoController {
     }
 
     // ✅ Cancelar turno
-    @PutMapping("/{id}/cancelar")
-    public ResponseEntity<Turno> cancelarTurno(@PathVariable Long id) {
-        return ResponseEntity.ok(turnoService.cancelarTurno(id));
-    }
-
-    // ✅ Obtener horarios disponibles para un abogado en una fecha
-    @GetMapping("/abogado/{idAbogado}/disponibles")
-    public ResponseEntity<List<LocalTime>> obtenerHorariosDisponibles(
-            @PathVariable Long idAbogado,
-            @RequestParam("fecha")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate fecha) {
-
-        return ResponseEntity.ok(turnoService.obtenerHorariosDisponibles(idAbogado, fecha));
-    }
-
-    // ✅ Verificar si un horario específico está disponible
-    @GetMapping("/abogado/{idAbogado}/disponible")
-    public ResponseEntity<Boolean> verificarDisponibilidad(
-            @PathVariable Long idAbogado,
-            @RequestParam("fechaHora")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime fechaHora) {
-
-        return ResponseEntity.ok(turnoService.isHorarioDisponible(idAbogado, fechaHora));
+    @PostMapping("/{id}/cancelar")
+    public ResponseEntity<TurnoDTO> cancelarTurno(@PathVariable Long id) {
+        Turno turno = turnoService.cancelarTurno(id);
+        return ResponseEntity.ok(Utils.mapTurnoEntityToDTO(turno));
     }
 }

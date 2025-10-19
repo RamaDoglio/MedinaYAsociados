@@ -3,6 +3,7 @@ package com.medina.asocDev.Medina.Asociados.service;
 import com.medina.asocDev.Medina.Asociados.dto.EstadoDTO;
 import com.medina.asocDev.Medina.Asociados.dto.HistorialTurnoDTO;
 import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
+import com.medina.asocDev.Medina.Asociados.entity.Estado;
 import com.medina.asocDev.Medina.Asociados.entity.HistorialTurno;
 import com.medina.asocDev.Medina.Asociados.entity.Turno;
 import com.medina.asocDev.Medina.Asociados.repo.HistorialTurnoRepository;
@@ -11,6 +12,7 @@ import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,10 +41,25 @@ public class HistorialTurnoService {
                 .orElse(null);
     }
 
-
     // Obtener historial específico por ID
     public HistorialTurnoDTO getHistorialById(Long idHistorial) {
         Optional<HistorialTurno> historial = historialTurnoRepository.findById(idHistorial);
         return historial.map(Utils::mapHistorialTurnoEntityToDTO).orElse(null);
+    }
+
+
+
+    public void registrarCambio(Turno turno, Estado estadoAnterior, Estado estadoNuevo) {
+        HistorialTurno historial = new HistorialTurno();
+        historial.setTurno(turno);
+        historial.setFechaHoraInicio(LocalDateTime.now());
+        historial.setEstadoHistorial(estadoNuevo);
+
+        // opcional: si querés guardar el estado anterior como fin
+        if (estadoAnterior != null) {
+            historial.setFechaHoraFin(LocalDateTime.now());
+        }
+
+        historialTurnoRepository.save(historial);
     }
 }

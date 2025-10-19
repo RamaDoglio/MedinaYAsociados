@@ -19,13 +19,13 @@ import static com.medina.asocDev.Medina.Asociados.utils.Utils.mapCobroEntityToDT
 public class CobroService {
 
 	@Autowired
-	private static CobroRepository cobroRepository;
+	private CobroRepository cobroRepository;
 	@Autowired
-	private static EstadoRepository estadoRepository;
+	private EstadoRepository estadoRepository;
 	@Autowired
-	private static DetalleCobroService detalleCobroService;
+	private DetalleCobroService detalleCobroService;
 
-	public static CobroDTO createCobro(CobroDTO cobroDTO) {
+	public CobroDTO createCobro(CobroDTO cobroDTO) {
 		Cobro cobro = new Cobro();
 		cobro.setImporteTotal(cobroDTO.getImporteTotal());
 
@@ -38,19 +38,19 @@ public class CobroService {
 		return Utils.mapCobroEntityToDTO(guardado);
 	}
 
-	public static CobroDTO getCobroPorTurno(Long turnoId) {
+	public CobroDTO getCobroPorTurno(Long turnoId) {
 		Cobro cobro = (Cobro) cobroRepository.findByTurno_IdTurno(turnoId);
 		return Utils.mapCobroEntityToDTO(cobro);
 	}
 
 
-	public static CobroDTO getCobroPorId(Long id) {
+	public CobroDTO getCobroPorId(Long id) {
 		return cobroRepository.findById(id)
 				.map(Utils::mapCobroEntityToDTO)
 				.orElse(null);
 	}
 
-	public static CobroDTO updateCobro(Long id, CobroDTO cobroDTO) {
+	public CobroDTO updateCobro(Long id, CobroDTO cobroDTO) {
 		return cobroRepository.findById(id).map(cobro -> {
 			cobro.setImporteTotal(cobroDTO.getImporteTotal());
 			if (cobroDTO.getIdEstado() != null) {
@@ -62,7 +62,7 @@ public class CobroService {
 		}).orElse(null);
 	}
 
-	public static boolean deleteCobro(Long id) {
+	public boolean deleteCobro(Long id) {
 		if (cobroRepository.existsById(id)) {
 			cobroRepository.deleteById(id);
 			return true;
@@ -70,20 +70,30 @@ public class CobroService {
 		return false;
 	}
 
-	public static CobroDTO reembolsar(Long id) {
-		Cobro cobro = cobroRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Cobro no encontrado"));
+    public CobroDTO reembolsar(Cobro cobro) {
+        Estado estadoReembolsado = estadoRepository.findByNombreAndAmbito("REEMBOLSADO", "COBRO")
+                .orElseThrow(() -> new RuntimeException("Estado REEMBOLSADO no encontrado"));
+        cobro.setEstadoCobro(estadoReembolsado);
 
-		Estado estadoReembolsado = estadoRepository.findByNombreAndAmbito("REEMBOLSADO", "COBRO")
-				.orElseThrow(() -> new RuntimeException("Estado REEMBOLSADO no encontrado"));;
-		cobro.setEstadoCobro(estadoReembolsado);
+        Cobro cobroActualizado = cobroRepository.save(cobro);
 
-		Cobro cobroActualizado = cobroRepository.save(cobro);
+        // 👉 delegar con el id del cobro
+        detalleCobroService.crearDetalleCobro(cobroActualizado.getIdCobro(), 2L);
 
-		// 👉 delega la creación del detalle
-		detalleCobroService.crearDetalleReembolso(cobroActualizado);
+        return Utils.mapCobroEntityToDTO(cobroActualizado);
+    }
 
-		return Utils.mapCobroEntityToDTO(cobroActualizado);
-	}
+    public CobroDTO marcarComoPagado(Cobro cobro) {
+        Estado estadoPagado = estadoRepository.findByNombreAndAmbito("PAGADO", "COBRO")
+                .orElseThrow(() -> new RuntimeException("Estado PAGADO no encontrado"));
+        cobro.setEstadoCobro(estadoPagado);
+
+        Cobro cobroActualizado = cobroRepository.save(cobro);
+
+        // 👉 delegar con el id del cobro
+        detalleCobroService.crearDetalleCobro(cobroActualizado.getIdCobro(), 1L);
+
+        return Utils.mapCobroEntityToDTO(cobroActualizado);
+    }
 }
 

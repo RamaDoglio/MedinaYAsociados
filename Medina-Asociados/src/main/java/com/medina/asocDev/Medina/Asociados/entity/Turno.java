@@ -16,17 +16,17 @@ public class Turno {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTurno;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idEstado", nullable = false)
-    private Estado estadoActual;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "idEspecialidad", referencedColumnName = "idEspecialidad")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idEspecialidad", nullable = false)
     private Especialidad especialidad;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "idCobro", referencedColumnName = "idCobro")
     private Cobro cobro;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idEstado", nullable = false)
+    private Estado estadoActual;
 
     private String observacionesCliente;
 
