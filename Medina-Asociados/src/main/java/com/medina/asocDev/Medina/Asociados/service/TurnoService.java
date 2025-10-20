@@ -1,9 +1,13 @@
 package com.medina.asocDev.Medina.Asociados.service;
 
 import com.medina.asocDev.Medina.Asociados.dto.TurnoCreateRequest;
+import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.*;
 import com.medina.asocDev.Medina.Asociados.repo.*;
+import com.medina.asocDev.Medina.Asociados.utils.Utils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -101,79 +105,142 @@ public class TurnoService {
     }
 
     //Reprogramar turno
-    public Turno reprogramarTurno(Long id, LocalDateTime nuevaFechaHora) {
+    @Transactional
+    public TurnoDTO reprogramarTurno(Long id, LocalDateTime nuevaFechaHora) {
         Turno turno = obtenerPorId(id);
 
+        String estado = turno.getEstadoActual().getNombreEstado();
+        if (!List.of("PAGADO", "REPROGRAMADO").contains(estado)) {
+            throw new IllegalArgumentException("No se puede reprogramar un turno que no esté pagado o reprogramado");
+        }
         if (turno.getHorarioTurno().isBefore(LocalDateTime.now().plusHours(24))) {
             throw new IllegalArgumentException("No se puede reprogramar con menos de 24 horas de anticipación");
         }
-
         if (nuevaFechaHora.isBefore(LocalDateTime.now().plusHours(24))) {
             throw new IllegalArgumentException("La nueva fecha debe tener al menos 24 horas de antelación");
         }
-
-        if (!(abogadoService.verificarDisponibilidad(turno.getAbogadoTurno().getIdUsuario(), nuevaFechaHora))) {
+        if (!abogadoService.verificarDisponibilidad(turno.getAbogadoTurno().getIdUsuario(), nuevaFechaHora)) {
             throw new RuntimeException("El nuevo horario no está disponible");
         }
 
+        Estado anterior = turno.getEstadoActual();
         turno.setHorarioTurno(nuevaFechaHora);
-        Estado estadoReprogramado = estadoRepository.findByNombreAndAmbito("REPROGRAMADO", "TURNO")
-                .orElseThrow(() -> new RuntimeException("Estado REPROGRAMADO no encontrado"));
-        turno.setEstadoActual(estadoReprogramado);
 
-        return turnoRepository.save(turno);
+        Estado reprogramado = estadoRepository.findByNombreAndAmbito("REPROGRAMADO", "TURNO")
+                .orElseThrow(() -> new RuntimeException("Estado REPROGRAMADO no encontrado"));
+        turno.setEstadoActual(reprogramado);
+
+        historialTurnoService.registrarCambio(turno, anterior, reprogramado);
+
+        return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
     }
 
     //Cancelar turno
-    public Turno cancelarTurno(Long id) {
+    @Transactional
+    public TurnoDTO cancelarTurno(Long id) {
         Turno turno = obtenerPorId(id);
-        LocalDateTime fechaTurno = turno.getHorarioTurno();
+        String estado = turno.getEstadoActual().getNombreEstado();
 
-        Estado estadoAnterior = turno.getEstadoActual();
+        if (!List.of("PAGADO", "REPROGRAMADO").contains(estado)) {
+            throw new IllegalStateException("Solo un turno pagado o reprogramado puede cancelarse");
+        }
+
+        LocalDateTime fechaTurno = turno.getHorarioTurno();
+        Estado anterior = turno.getEstadoActual();
 
         if (fechaTurno.isBefore(LocalDateTime.now().plusHours(24))) {
-            // 👉 Cancelación sin reembolso
-            Estado estadoCanceladoSinReembolso = estadoRepository
-                    .findByNombreAndAmbito("CANCELADO_SIN_REEMBOLSO", "TURNO")
+            Estado sinReembolso = estadoRepository.findByNombreAndAmbito("CANCELADO_SIN_REEMBOLSO", "TURNO")
                     .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
-            turno.setEstadoActual(estadoCanceladoSinReembolso);
-
+            turno.setEstadoActual(sinReembolso);
         } else {
-            // 👉 Cancelación con reembolso
-            Estado estadoCanceladoConReembolso = estadoRepository
-                    .findByNombreAndAmbito("CANCELADO_CON_REEMBOLSO", "TURNO")
+            Estado conReembolso = estadoRepository.findByNombreAndAmbito("CANCELADO_CON_REEMBOLSO", "TURNO")
                     .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
-            turno.setEstadoActual(estadoCanceladoConReembolso);
-
+            turno.setEstadoActual(conReembolso);
             if (turno.getCobro() != null) {
-                // 👉 delegar al CobroService, que a su vez delega al DetalleCobroService
                 cobroService.reembolsar(turno.getCobro());
             }
         }
 
-        // 👉 registrar historial de cambio de estado
-        historialTurnoService.registrarCambio(turno, estadoAnterior, turno.getEstadoActual());
-
-        return turnoRepository.save(turno);
+        historialTurnoService.registrarCambio(turno, anterior, turno.getEstadoActual());
+        return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
     }
 
-    public Turno pagarTurno(Long idTurno) {
+    @Transactional
+    public TurnoDTO pagarTurno(Long idTurno) {
         Turno turno = obtenerPorId(idTurno);
 
-        Estado estadoAnterior = turno.getEstadoActual();
-        Estado estadoPagado = estadoRepository.findByNombreAndAmbito("PAGADO", "TURNO")
+        Estado anterior = turno.getEstadoActual();
+        Estado pagado = estadoRepository.findByNombreAndAmbito("PAGADO", "TURNO")
                 .orElseThrow(() -> new RuntimeException("Estado PAGADO no encontrado"));
 
-        turno.setEstadoActual(estadoPagado);
+        turno.setEstadoActual(pagado);
 
-        // Actualizar cobro
         if (turno.getCobro() != null) {
             cobroService.marcarComoPagado(turno.getCobro());
         }
 
-        // Registrar historial
-        historialTurnoService.registrarCambio(turno, estadoAnterior, estadoPagado);
+        historialTurnoService.registrarCambio(turno, anterior, pagado);
 
-        return turnoRepository.save(turno);
+        return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
+    }
+
+    @Transactional
+    public TurnoDTO marcarEnCurso(Long idTurno) {
+        Turno turno = obtenerPorId(idTurno);
+
+        String estado = turno.getEstadoActual().getNombreEstado();
+        if (!List.of("PAGADO", "REPROGRAMADO").contains(estado)) {
+            throw new IllegalStateException("Solo un turno pagado o reprogramado puede pasar a EN_CURSO");
+        }
+
+        Estado enCurso = estadoRepository.findByNombreAndAmbito("EN_CURSO", "TURNO")
+                .orElseThrow(() -> new RuntimeException("Estado EN_CURSO no encontrado"));
+
+        Estado anterior = turno.getEstadoActual();
+        turno.setEstadoActual(enCurso);
+
+        historialTurnoService.registrarCambio(turno, anterior, enCurso);
+
+        return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
+    }
+
+    // Marcar no asistió
+    @Transactional
+    public TurnoDTO marcarNoAsistio(Long idTurno) {
+        Turno turno = obtenerPorId(idTurno);
+
+        if (!turno.getEstadoActual().getNombreEstado().equals("EN_CURSO")) {
+            throw new IllegalStateException("Solo un turno en curso puede marcarse como NO_ASISTIO");
+        }
+
+        Estado noAsistio = estadoRepository.findByNombreAndAmbito("NO_ASISTIO", "TURNO")
+                .orElseThrow(() -> new RuntimeException("Estado NO_ASISTIO no encontrado"));
+
+        Estado anterior = turno.getEstadoActual();
+        turno.setEstadoActual(noAsistio);
+
+        historialTurnoService.registrarCambio(turno, anterior, noAsistio);
+
+        return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
+    }
+
+    // Finalizar turno
+    @Transactional
+    public TurnoDTO finalizarTurno(Long idTurno) {
+        Turno turno = obtenerPorId(idTurno);
+
+        if (!turno.getEstadoActual().getNombreEstado().equals("EN_CURSO")) {
+            throw new IllegalStateException("Solo un turno en curso puede finalizarse");
+        }
+
+        Estado finalizado = estadoRepository.findByNombreAndAmbito("FINALIZADO", "TURNO")
+                .orElseThrow(() -> new RuntimeException("Estado FINALIZADO no encontrado"));
+
+        Estado anterior = turno.getEstadoActual();
+        turno.setEstadoActual(finalizado);
+
+        historialTurnoService.registrarCambio(turno, anterior, finalizado);
+
+        return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
     }
 }

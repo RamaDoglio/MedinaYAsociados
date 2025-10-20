@@ -1,14 +1,27 @@
 @startuml CicloEstadosTurno
 hide empty description
+
 [*] --> Reservado : Crear turno
 
-Reservado --> Confirmado : Cliente confirma
-Reservado --> Cancelado : Cliente/abogado cancela
+Reservado --> [*]: El cliente no paga el turno
+Reservado --> Pagado
 
-Confirmado --> Cancelado : Cliente/abogado cancela
-Confirmado --> Finalizado : Turno atendido
+Pagado --> EnCurso : Llega la hora del turno
+Pagado --> CanceladoConReembolso : Cliente/abogado cancela con >24h
+Pagado --> CanceladoSinReembolso : Cliente/abogado cancela con <24h
+Pagado --> Reprogramado : Cliente/abogado reprograma
 
-Cancelado --> [*] : Cierre definitivo
+EnCurso --> Finalizado : Turno atendido
+EnCurso --> NoAsistio : Cliente no se presenta
+
+Reprogramado --> Reprogramado : Cliente confirma nueva fecha
+Reprogramado --> CanceladoConReembolso
+Reprogramado --> CanceladoSinReembolso
+Reprogramado --> Finalizado
+
+CanceladoConReembolso --> [*] : Cierre definitivo
+CanceladoSinReembolso --> [*] : Cierre definitivo
+NoAsistio --> [*] : Cierre definitivo
 Finalizado --> [*] : Cierre definitivo
 
 @enduml

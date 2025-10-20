@@ -23,14 +23,13 @@ public class TurnoController {
 
     // ✅ Crear turno (reserva)
     @PostMapping
-    public ResponseEntity<Turno> crearTurno(@RequestBody TurnoCreateRequest turnoDTO) {
-        return ResponseEntity.ok(turnoService.crearTurno(turnoDTO));
+    public ResponseEntity<TurnoDTO> crearTurno(@RequestBody TurnoCreateRequest turnoDTO) {
+        return ResponseEntity.ok(Utils.mapTurnoEntityToDTO(turnoService.crearTurno(turnoDTO)));
     }
 
     @PostMapping("/{id}/pagar")
     public ResponseEntity<TurnoDTO> pagarTurno(@PathVariable Long id) {
-        Turno turno = turnoService.pagarTurno(id);
-        return ResponseEntity.ok(Utils.mapTurnoEntityToDTO(turno));
+        return ResponseEntity.ok(turnoService.pagarTurno(id));
     }
 
     // ✅ Listar todos
@@ -47,8 +46,8 @@ public class TurnoController {
 
     // ✅ Actualizar observaciones
     @PutMapping("/{id}")
-    public ResponseEntity<Turno> actualizarTurno(@PathVariable Long id, @RequestBody Turno datos) {
-        return ResponseEntity.ok(turnoService.actualizarTurno(id, datos));
+    public ResponseEntity<TurnoDTO> actualizarTurno(@PathVariable Long id, @RequestBody Turno datos) {
+        return ResponseEntity.ok(Utils.mapTurnoEntityToDTO(turnoService.actualizarTurno(id, datos)));
     }
 
     // ✅ Eliminar
@@ -60,7 +59,7 @@ public class TurnoController {
 
     // ✅ Reprogramar turno
     @PutMapping("/{id}/reprogramar")
-    public ResponseEntity<Turno> reprogramarTurno(
+    public ResponseEntity<TurnoDTO> reprogramarTurno(
             @PathVariable Long id,
             @RequestParam("fecha")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -72,7 +71,23 @@ public class TurnoController {
     // ✅ Cancelar turno
     @PostMapping("/{id}/cancelar")
     public ResponseEntity<TurnoDTO> cancelarTurno(@PathVariable Long id) {
-        Turno turno = turnoService.cancelarTurno(id);
-        return ResponseEntity.ok(Utils.mapTurnoEntityToDTO(turno));
+        return ResponseEntity.ok(turnoService.cancelarTurno(id));
+    }
+
+    // 🔥 Marcar no asistió
+    @PostMapping("/{id}/noAsistio")
+    public ResponseEntity<TurnoDTO> marcarNoAsistio(@PathVariable Long id) {
+        return ResponseEntity.ok(turnoService.marcarNoAsistio(id));
+    }
+
+    @PostMapping("/{id}/enCurso")
+    public ResponseEntity<TurnoDTO> marcarEnCurso(@PathVariable Long id) {
+        return ResponseEntity.ok(turnoService.marcarEnCurso(id));
+    }
+
+    // 🔥 Finalizar turno
+    @PostMapping("/{id}/finalizar")
+    public ResponseEntity<TurnoDTO> finalizarTurno(@PathVariable Long id) {
+        return ResponseEntity.ok(turnoService.finalizarTurno(id));
     }
 }

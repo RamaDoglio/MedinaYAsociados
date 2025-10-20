@@ -51,4 +51,10 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
     List<Turno> findTurnosOcupadosPorAbogadoEnFecha(
             @Param("idAbogado") Long idAbogado,
             @Param("fecha") LocalDate fecha);
+
+    // Buscar turnos cuyo estado actual esté en una lista de nombres
+    List<Turno> findByEstadoActualNombreEstadoIn(List<String> nombres);
+
+    // Si preferís por un solo nombre
+    List<Turno> findByEstadoActualNombreEstado(String nombre);
 }
