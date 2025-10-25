@@ -57,4 +57,7 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
     // Si preferís por un solo nombre
     List<Turno> findByEstadoActualNombreEstado(String nombre);
+
+    // Busca turnos cuya fecha/hora esté entre dos valores
+    List<Turno> findByHorarioTurnoBetween(LocalDateTime desde, LocalDateTime hasta);
 }

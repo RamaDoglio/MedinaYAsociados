@@ -7,7 +7,6 @@ import com.medina.asocDev.Medina.Asociados.repo.*;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -37,37 +36,41 @@ public class TurnoService {
     @Autowired
     private HistorialTurnoService historialTurnoService;
 
+    @Autowired
+    private NotificacionTurnoService notificacionTurnoService;
+
     //Crear turno (reserva)
+    @Transactional
     public Turno crearTurno(TurnoCreateRequest turnoDTO) {
-        // Buscar cliente y abogado por ID
+        // 1. Buscar cliente y abogado
         Usuario cliente = usuarioRepository.findById(turnoDTO.getIdCliente())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
         Usuario abogado = usuarioRepository.findById(turnoDTO.getIdAbogado())
                 .orElseThrow(() -> new RuntimeException("Abogado no encontrado"));
 
-        // Validar que el horario esté disponible
+        // 2. Validar disponibilidad
         LocalDateTime fechaHoraTurno = turnoDTO.getHorarioTurno();
-        if (!(abogadoService.verificarDisponibilidad(turnoDTO.getIdAbogado(), turnoDTO.getHorarioTurno()))) {
+        if (!abogadoService.verificarDisponibilidad(turnoDTO.getIdAbogado(), turnoDTO.getHorarioTurno())) {
             throw new RuntimeException("El horario seleccionado no está disponible");
         }
 
-        // Buscar especialidad
+        // 3. Buscar especialidad
         Especialidad especialidad = especialidadRepository.findById(turnoDTO.getIdEspecialidad())
                 .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
 
-        // Crear cobro
+        // 4. Crear cobro
         Cobro cobro = new Cobro();
         cobro.setImporteTotal(turnoDTO.getCobro().getImporteTotal());
         Estado estadoCobro = estadoRepository.findById(turnoDTO.getCobro().getIdEstado())
                 .orElseThrow(() -> new RuntimeException("Estado de cobro no encontrado"));
         cobro.setEstadoCobro(estadoCobro);
 
-        // Estado inicial del turno
+        // 5. Estado inicial del turno
         Estado estadoTurno = estadoRepository
                 .findByNombreAndAmbito("RESERVADO", "TURNO")
                 .orElseThrow(() -> new RuntimeException("Estado RESERVADO no encontrado"));
 
-        // Crear turno
+        // 6. Crear turno
         Turno turno = new Turno();
         turno.setClienteTurno(cliente);
         turno.setAbogadoTurno(abogado);
@@ -77,7 +80,12 @@ public class TurnoService {
         turno.setHorarioTurno(fechaHoraTurno);
         turno.setObservacionesCliente(turnoDTO.getObservacionesCliente());
 
-        return turnoRepository.save(turno);
+        Turno guardado = turnoRepository.save(turno);
+
+        // 7. Registrar en historial (estado inicial RESERVADO)
+        historialTurnoService.registrarCambio(guardado, null, estadoTurno);
+
+        return guardado;
     }
 
     //Listar todos los turnos
@@ -132,7 +140,17 @@ public class TurnoService {
 
         historialTurnoService.registrarCambio(turno, anterior, reprogramado);
 
-        return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
+        Turno actualizado = turnoRepository.save(turno);
+
+        // 👇 Notificación
+        try {
+            notificacionTurnoService.enviarReprogramacion(actualizado);
+        } catch (Exception e) {
+            // loguear error, no romper la transacción
+            e.printStackTrace();
+        }
+
+        return Utils.mapTurnoEntityToDTO(actualizado);
     }
 
     //Cancelar turno
@@ -162,7 +180,16 @@ public class TurnoService {
         }
 
         historialTurnoService.registrarCambio(turno, anterior, turno.getEstadoActual());
-        return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
+        Turno actualizado = turnoRepository.save(turno);
+
+        // 👇 Notificación
+        try {
+            notificacionTurnoService.enviarCancelacion(actualizado);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Utils.mapTurnoEntityToDTO(actualizado);
     }
 
     @Transactional
@@ -181,7 +208,16 @@ public class TurnoService {
 
         historialTurnoService.registrarCambio(turno, anterior, pagado);
 
-        return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
+        Turno actualizado = turnoRepository.save(turno);
+
+        // 👇 Notificación
+        try {
+            notificacionTurnoService.enviarConfirmacionReserva(actualizado);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Utils.mapTurnoEntityToDTO(actualizado);
     }
 
     @Transactional

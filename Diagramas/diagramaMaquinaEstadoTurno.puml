@@ -17,7 +17,7 @@ EnCurso --> NoAsistio : Cliente no se presenta
 Reprogramado --> Reprogramado : Cliente confirma nueva fecha
 Reprogramado --> CanceladoConReembolso
 Reprogramado --> CanceladoSinReembolso
-Reprogramado --> Finalizado
+Reprogramado --> EnCurso
 
 CanceladoConReembolso --> [*] : Cierre definitivo
 CanceladoSinReembolso --> [*] : Cierre definitivo
