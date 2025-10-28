@@ -4,6 +4,7 @@ import com.medina.asocDev.Medina.Asociados.dto.TurnoCreateRequest;
 import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.*;
 import com.medina.asocDev.Medina.Asociados.repo.*;
+import com.medina.asocDev.Medina.Asociados.utils.TurnoProperties;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ public class TurnoService {
     @Autowired
     private NotificacionTurnoService notificacionTurnoService;
 
+    @Autowired
+    private TurnoProperties turnoProperties;
+
     //Crear turno (reserva)
     @Transactional
     public Turno crearTurno(TurnoCreateRequest turnoDTO) {
@@ -50,39 +54,45 @@ public class TurnoService {
 
         // 2. Validar disponibilidad
         LocalDateTime fechaHoraTurno = turnoDTO.getHorarioTurno();
-        if (!abogadoService.verificarDisponibilidad(turnoDTO.getIdAbogado(), turnoDTO.getHorarioTurno())) {
+        if (!abogadoService.verificarDisponibilidad(turnoDTO.getIdAbogado(), fechaHoraTurno)) {
             throw new RuntimeException("El horario seleccionado no está disponible");
         }
 
-        // 3. Buscar especialidad
+        // 3. Validar que no sea sábado o domingo
+        Utils.validarDiaHabil(fechaHoraTurno);
+
+        // 4. Buscar especialidad
         Especialidad especialidad = especialidadRepository.findById(turnoDTO.getIdEspecialidad())
                 .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
 
-        // 4. Crear cobro
+        // 5. Crear cobro (importe desde config, no desde el front)
         Cobro cobro = new Cobro();
-        cobro.setImporteTotal(turnoDTO.getCobro().getImporteTotal());
-        Estado estadoCobro = estadoRepository.findById(turnoDTO.getCobro().getIdEstado())
+        cobro.setImporteTotal(turnoProperties.getPrecioBase());
+
+        Estado estadoCobro = estadoRepository
+                .findByNombreAndAmbito("PENDIENTE", "COBRO")
                 .orElseThrow(() -> new RuntimeException("Estado de cobro no encontrado"));
         cobro.setEstadoCobro(estadoCobro);
 
-        // 5. Estado inicial del turno
+        // 6. Estado inicial del turno
         Estado estadoTurno = estadoRepository
                 .findByNombreAndAmbito("RESERVADO", "TURNO")
                 .orElseThrow(() -> new RuntimeException("Estado RESERVADO no encontrado"));
 
-        // 6. Crear turno
-        Turno turno = new Turno();
-        turno.setClienteTurno(cliente);
-        turno.setAbogadoTurno(abogado);
-        turno.setEspecialidad(especialidad);
-        turno.setCobro(cobro);
-        turno.setEstadoActual(estadoTurno);
-        turno.setHorarioTurno(fechaHoraTurno);
-        turno.setObservacionesCliente(turnoDTO.getObservacionesCliente());
+        // 7. Crear turno
+        Turno turno = Turno.builder()
+                .clienteTurno(cliente)
+                .abogadoTurno(abogado)
+                .especialidad(especialidad)
+                .cobro(cobro)
+                .estadoActual(estadoTurno)
+                .horarioTurno(fechaHoraTurno)
+                .observacionesCliente(turnoDTO.getObservacionesCliente())
+                .build();
 
         Turno guardado = turnoRepository.save(turno);
 
-        // 7. Registrar en historial (estado inicial RESERVADO)
+        // 8. Registrar en historial (estado inicial RESERVADO)
         historialTurnoService.registrarCambio(guardado, null, estadoTurno);
 
         return guardado;

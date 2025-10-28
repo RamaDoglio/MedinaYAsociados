@@ -8,8 +8,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +29,6 @@ public class NotificacionTurnoService {
     private TemplateEngine templateEngine;
 
     private static final String DIRECCION_ESTUDIO = "1256 América, Villa María, Córdoba";
-    private static final Logger log = LoggerFactory.getLogger(NotificacionTurnoService.class);
 
     // =========================
     // MÉTODOS PRIVADOS DE APOYO
@@ -86,7 +83,6 @@ public class NotificacionTurnoService {
     @Scheduled(cron = "0 0,45 15 * * *")// Ejecutar a 15:00 y 15:45
     @Scheduled(cron = "0 30 16 * * *")// Ejecutar a 16:30
     public void enviarRecordatorios() throws MessagingException {
-        log.info("Ejecutando tarea: enviarRecordatorios a {}", LocalDateTime.now());
         LocalDateTime ahora = LocalDateTime.now();
         LocalDateTime dentroDe24h = ahora.plusHours(24);
 

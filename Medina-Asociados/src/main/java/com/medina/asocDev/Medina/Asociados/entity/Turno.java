@@ -1,16 +1,21 @@
 package com.medina.asocDev.Medina.Asociados.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Entity
 @Table(name= "Turnos")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Turno {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

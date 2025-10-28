@@ -10,9 +10,9 @@
 - [x] Estado
 - [x] Historial Turno
 - [x] Horario Turno
-- [ ] Localidad
+- [X] Localidad
 - [x] TipoCobro
-- [ ] Turno
+- [x] Turno
 - [x] Permiso
 - [x] Rol
 

@@ -2,12 +2,9 @@ package com.medina.asocDev.Medina.Asociados.utils;
 
 import com.medina.asocDev.Medina.Asociados.dto.*;
 import com.medina.asocDev.Medina.Asociados.entity.*;
-import com.medina.asocDev.Medina.Asociados.repo.EspecialidadRepository;
-import com.medina.asocDev.Medina.Asociados.repo.EstadoRepository;
-import com.medina.asocDev.Medina.Asociados.repo.TurnoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.security.SecureRandom;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +25,12 @@ public class Utils {
     }
 
 
+    public static void validarDiaHabil(LocalDateTime fechaHoraTurno) {
+        DayOfWeek dia = fechaHoraTurno.getDayOfWeek();
+        if (dia == DayOfWeek.SATURDAY || dia == DayOfWeek.SUNDAY) {
+            throw new RuntimeException("No se pueden reservar turnos los fines de semana");
+        }
+    }
     //Usuario(Sin turnos) -> UsuarioDTO
     public static UsuarioDTO mapUserEntityToUserDTO(Usuario usuario) {
         if (usuario == null) return null;
