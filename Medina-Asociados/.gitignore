@@ -33,5 +33,5 @@ build/
 .vscode/
 
 ## Otros archivos ##
-.env.db
+.env
 out/

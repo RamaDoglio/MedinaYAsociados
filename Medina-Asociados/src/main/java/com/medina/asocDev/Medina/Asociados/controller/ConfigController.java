@@ -1,6 +1,6 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
-import com.medina.asocDev.Medina.Asociados.utils.TurnoProperties;
+import com.medina.asocDev.Medina.Asociados.service.ParametroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,23 +10,21 @@ import org.springframework.web.bind.annotation.*;
 public class ConfigController {
 
     @Autowired
-    private TurnoProperties turnoProperties;
+    private ParametroService parametroService;
 
-
-    public ConfigController(TurnoProperties turnoProperties) {
-        this.turnoProperties = turnoProperties;
+    public ConfigController(ParametroService parametroService) {
+        this.parametroService = parametroService;
     }
 
-    // Obtener el precio actual
     @GetMapping("/precio-turno")
-    public ResponseEntity<Float> getPrecioTurno() {
-        return ResponseEntity.ok(turnoProperties.getPrecioBase());
+    public ResponseEntity<Double> getPrecioTurno() {
+        Double precio = Double.valueOf(parametroService.getValor("PRECIO_TURNO"));
+        return ResponseEntity.ok(precio);
     }
 
-    // Modificar el precio (ej: desde un panel de administración)
     @PutMapping("/precio-turno")
-    public ResponseEntity<String> updatePrecioTurno(@RequestBody Float nuevoPrecio) {
-        turnoProperties.setPrecioBase(nuevoPrecio);
+    public ResponseEntity<String> updatePrecioTurno(@RequestBody Double nuevoPrecio) {
+        parametroService.setValor("PRECIO_TURNO", nuevoPrecio.toString());
         return ResponseEntity.ok("Precio de turno actualizado a: " + nuevoPrecio);
     }
 }

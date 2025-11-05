@@ -4,8 +4,10 @@ import com.medina.asocDev.Medina.Asociados.dto.CobroDTO;
 import com.medina.asocDev.Medina.Asociados.dto.EstadoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Cobro;
 import com.medina.asocDev.Medina.Asociados.entity.Estado;
+import com.medina.asocDev.Medina.Asociados.entity.Turno;
 import com.medina.asocDev.Medina.Asociados.repo.CobroRepository;
 import com.medina.asocDev.Medina.Asociados.repo.EstadoRepository;
+import com.medina.asocDev.Medina.Asociados.repo.TurnoRepository;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,10 @@ public class CobroService {
 	private EstadoRepository estadoRepository;
 	@Autowired
 	private DetalleCobroService detalleCobroService;
+	@Autowired
+	private TurnoRepository turnoRepository;
+	@Autowired
+	private HistorialTurnoService historialTurnoService;
 
 	public CobroDTO createCobro(CobroDTO cobroDTO) {
 		Cobro cobro = new Cobro();
@@ -70,30 +76,41 @@ public class CobroService {
 		return false;
 	}
 
-    public CobroDTO reembolsar(Cobro cobro) {
-        Estado estadoReembolsado = estadoRepository.findByNombreAndAmbito("REEMBOLSADO", "COBRO")
-                .orElseThrow(() -> new RuntimeException("Estado REEMBOLSADO no encontrado"));
-        cobro.setEstadoCobro(estadoReembolsado);
+	public CobroDTO reembolsar(Cobro cobro) {
+		Estado estadoReembolsado = estadoRepository.findByNombreAndAmbito("REEMBOLSADO", "COBRO")
+				.orElseThrow(() -> new RuntimeException("Estado REEMBOLSADO no encontrado"));
+		cobro.setEstadoCobro(estadoReembolsado);
 
-        Cobro cobroActualizado = cobroRepository.save(cobro);
+		Cobro cobroActualizado = cobroRepository.save(cobro);
 
-        // 👉 delegar con el id del cobro
-        detalleCobroService.crearDetalleCobro(cobroActualizado.getIdCobro(), 2L);
+		detalleCobroService.crearDetalleCobro(cobroActualizado.getIdCobro(), 2L);
 
-        return Utils.mapCobroEntityToDTO(cobroActualizado);
-    }
+		return Utils.mapCobroEntityToDTO(cobroActualizado);
+	}
 
-    public CobroDTO marcarComoPagado(Cobro cobro) {
-        Estado estadoPagado = estadoRepository.findByNombreAndAmbito("PAGADO", "COBRO")
-                .orElseThrow(() -> new RuntimeException("Estado PAGADO no encontrado"));
-        cobro.setEstadoCobro(estadoPagado);
+	public CobroDTO marcarComoPagado(Cobro cobro) {
+		// 1. Actualizar estado del cobro
+		Estado estadoPagado = estadoRepository.findByNombreAndAmbito("PAGADO", "COBRO")
+				.orElseThrow(() -> new RuntimeException("Estado PAGADO no encontrado"));
+		cobro.setEstadoCobro(estadoPagado);
+		Cobro cobroActualizado = cobroRepository.save(cobro);
 
-        Cobro cobroActualizado = cobroRepository.save(cobro);
+		detalleCobroService.crearDetalleCobro(cobroActualizado.getIdCobro(), 1L);
 
-        // 👉 delegar con el id del cobro
-        detalleCobroService.crearDetalleCobro(cobroActualizado.getIdCobro(), 1L);
+		// 2. Actualizar también el turno asociado
+		Turno turno = cobroActualizado.getTurno();
+		if (turno != null) {
+			Estado estadoTurnoPagado = estadoRepository.findByNombreAndAmbito("PAGADO", "TURNO")
+					.orElseThrow(() -> new RuntimeException("Estado PAGADO de TURNO no encontrado"));
 
-        return Utils.mapCobroEntityToDTO(cobroActualizado);
-    }
+			Estado anterior = turno.getEstadoActual();
+			turno.setEstadoActual(estadoTurnoPagado);
+
+			historialTurnoService.registrarCambio(turno, anterior, estadoTurnoPagado);
+			turnoRepository.save(turno);
+		}
+
+		return Utils.mapCobroEntityToDTO(cobroActualizado);
+	}
 }
 

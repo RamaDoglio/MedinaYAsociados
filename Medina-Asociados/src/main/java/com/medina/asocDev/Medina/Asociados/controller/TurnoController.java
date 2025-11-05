@@ -1,6 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
 
+import com.medina.asocDev.Medina.Asociados.dto.PagarTurnoResponse;
 import com.medina.asocDev.Medina.Asociados.dto.TurnoCreateRequest;
 import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Turno;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/turnos")
@@ -28,8 +30,12 @@ public class TurnoController {
     }
 
     @PostMapping("/{id}/pagar")
-    public ResponseEntity<TurnoDTO> pagarTurno(@PathVariable Long id) {
-        return ResponseEntity.ok(turnoService.pagarTurno(id));
+    public ResponseEntity<PagarTurnoResponse> pagarTurno(@PathVariable Long id) {
+        Map<String, Object> resp = turnoService.pagarTurno(id);
+        return ResponseEntity.ok(new PagarTurnoResponse(
+                (TurnoDTO) resp.get("turno"),
+                (String) resp.get("init_point")
+        ));
     }
 
     // ✅ Listar todos

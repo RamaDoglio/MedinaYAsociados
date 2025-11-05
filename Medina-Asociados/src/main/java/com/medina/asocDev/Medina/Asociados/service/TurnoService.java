@@ -4,14 +4,16 @@ import com.medina.asocDev.Medina.Asociados.dto.TurnoCreateRequest;
 import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.*;
 import com.medina.asocDev.Medina.Asociados.repo.*;
-import com.medina.asocDev.Medina.Asociados.utils.TurnoProperties;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TurnoService {
@@ -41,7 +43,10 @@ public class TurnoService {
     private NotificacionTurnoService notificacionTurnoService;
 
     @Autowired
-    private TurnoProperties turnoProperties;
+    private MercadoPagoService mercadoPagoService;
+
+    @Autowired
+    private ParametroService parametroService;
 
     //Crear turno (reserva)
     @Transactional
@@ -65,9 +70,10 @@ public class TurnoService {
         Especialidad especialidad = especialidadRepository.findById(turnoDTO.getIdEspecialidad())
                 .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
 
-        // 5. Crear cobro (importe desde config, no desde el front)
+        // 5. Crear cobro (importe desde config/BD, no desde el front)
         Cobro cobro = new Cobro();
-        cobro.setImporteTotal(turnoProperties.getPrecioBase());
+        float precio = Float.parseFloat(parametroService.getValor("PRECIO_TURNO"));
+        cobro.setImporteTotal(precio);
 
         Estado estadoCobro = estadoRepository
                 .findByNombreAndAmbito("PENDIENTE", "COBRO")
@@ -169,6 +175,7 @@ public class TurnoService {
         Turno turno = obtenerPorId(id);
         String estado = turno.getEstadoActual().getNombreEstado();
 
+        // Solo se pueden cancelar turnos en estado PAGADO o REPROGRAMADO
         if (!List.of("PAGADO", "REPROGRAMADO").contains(estado)) {
             throw new IllegalStateException("Solo un turno pagado o reprogramado puede cancelarse");
         }
@@ -177,22 +184,47 @@ public class TurnoService {
         Estado anterior = turno.getEstadoActual();
 
         if (fechaTurno.isBefore(LocalDateTime.now().plusHours(24))) {
+            // ❌ Cancelación tardía → sin reembolso
             Estado sinReembolso = estadoRepository.findByNombreAndAmbito("CANCELADO_SIN_REEMBOLSO", "TURNO")
-                    .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+                    .orElseThrow(() -> new RuntimeException("Estado CANCELADO_SIN_REEMBOLSO no encontrado"));
             turno.setEstadoActual(sinReembolso);
+
         } else {
+            // ✅ Cancelación con más de 24h → con reembolso
             Estado conReembolso = estadoRepository.findByNombreAndAmbito("CANCELADO_CON_REEMBOLSO", "TURNO")
-                    .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
+                    .orElseThrow(() -> new RuntimeException("Estado CANCELADO_CON_REEMBOLSO no encontrado"));
             turno.setEstadoActual(conReembolso);
+
             if (turno.getCobro() != null) {
-                cobroService.reembolsar(turno.getCobro());
+                String estadoCobro = turno.getCobro().getEstadoCobro() != null
+                        ? turno.getCobro().getEstadoCobro().getNombreEstado()
+                        : null;
+
+                // Evitar reembolsar dos veces si ya está marcado como REEMBOLSADO
+                if (!"REEMBOLSADO".equals(estadoCobro)) {
+                    // Actualizar estado del cobro en tu sistema
+                    cobroService.reembolsar(turno.getCobro());
+
+                    // Hacer refund real en Mercado Pago si existe paymentId
+                    if (turno.getCobro().getPaymentId() != null) {
+                        try {
+                            mercadoPagoService.reembolsarPago(turno.getCobro().getPaymentId());
+                        } catch (Exception e) {
+                            // Podés loguear o manejar el error según tu necesidad
+                            throw new RuntimeException("Error al reembolsar en Mercado Pago", e);
+                        }
+                    }
+                }
             }
         }
 
+        // Registrar cambio en historial
         historialTurnoService.registrarCambio(turno, anterior, turno.getEstadoActual());
+
+        // Guardar turno actualizado
         Turno actualizado = turnoRepository.save(turno);
 
-        // 👇 Notificación
+        // Enviar notificación de cancelación
         try {
             notificacionTurnoService.enviarCancelacion(actualizado);
         } catch (Exception e) {
@@ -203,31 +235,29 @@ public class TurnoService {
     }
 
     @Transactional
-    public TurnoDTO pagarTurno(Long idTurno) {
+    public Map<String, Object> pagarTurno(Long idTurno) {
         Turno turno = obtenerPorId(idTurno);
 
-        Estado anterior = turno.getEstadoActual();
-        Estado pagado = estadoRepository.findByNombreAndAmbito("PAGADO", "TURNO")
-                .orElseThrow(() -> new RuntimeException("Estado PAGADO no encontrado"));
-
-        turno.setEstadoActual(pagado);
-
-        if (turno.getCobro() != null) {
-            cobroService.marcarComoPagado(turno.getCobro());
+        // Validar que el turno esté en estado RESERVADO y el cobro en PENDIENTE
+        if (!"RESERVADO".equals(turno.getEstadoActual().getNombreEstado()) ||
+                !"PENDIENTE".equals(turno.getCobro().getEstadoCobro().getNombreEstado())) {
+            throw new IllegalStateException("El turno no está disponible para pagar");
         }
 
-        historialTurnoService.registrarCambio(turno, anterior, pagado);
-
-        Turno actualizado = turnoRepository.save(turno);
-
-        // 👇 Notificación
         try {
-            notificacionTurnoService.enviarConfirmacionReserva(actualizado);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            // Crear preferencia de pago en Mercado Pago
+            String initPoint = mercadoPagoService.crearPreferencia(turno.getCobro(), turno);
 
-        return Utils.mapTurnoEntityToDTO(actualizado);
+            // Devolver turno + URL de pago
+            Map<String, Object> response = new HashMap<>();
+            response.put("turno", Utils.mapTurnoEntityToDTO(turno));
+            response.put("init_point", initPoint);
+
+            return response;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al generar preferencia de pago en Mercado Pago", e);
+        }
     }
 
     @Transactional

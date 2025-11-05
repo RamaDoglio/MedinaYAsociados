@@ -19,4 +19,7 @@ public class Cobro {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "idEstado", nullable = false)
     private Estado estadoCobro;
+
+    @Column(name = "payment_id")
+    private Long paymentId; // ID real de Mercado Pago
 }
