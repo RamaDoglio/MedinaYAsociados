@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.medina.asocDev.Medina.Asociados.dto.DireccionDTO;
-import com.medina.asocDev.Medina.Asociados.dto.MensajeResponse;
-import com.medina.asocDev.Medina.Asociados.dto.RegisterDTO;
+import com.medina.asocDev.Medina.Asociados.dto.*;
 import com.medina.asocDev.Medina.Asociados.entity.Direccion;
 import com.medina.asocDev.Medina.Asociados.entity.Localidad;
 import com.medina.asocDev.Medina.Asociados.entity.Rol;
@@ -16,11 +14,11 @@ import com.medina.asocDev.Medina.Asociados.repo.LocalidadRepository;
 import com.medina.asocDev.Medina.Asociados.repo.RolRepository;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.medina.asocDev.Medina.Asociados.dto.UsuarioDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 import com.medina.asocDev.Medina.Asociados.repo.UsuarioRepository;
 
@@ -79,6 +77,61 @@ public class UsuarioService {
 
 		// Retornamos DTO completo
 		return new MensajeResponse("Registro completado, redirigiendo al inicio de sesión");
+	}
+
+	@Transactional
+	public Usuario getOrCreateUsuario(ClienteOfflineRequest clienteRequest) {
+		// Buscar por email o teléfono (únicos)
+		Usuario usuarioExistente = usuarioRepository.findByEmail(clienteRequest.getEmail())
+				.orElse(usuarioRepository.findByTelefono(clienteRequest.getTelefono()).orElse(null));
+
+		if (usuarioExistente != null) {
+			return usuarioExistente;  // Reutilizar si existe
+		}
+
+		// Crear nuevo usuario
+		Usuario nuevoUsuario = new Usuario();
+		nuevoUsuario.setNombre(clienteRequest.getNombre());
+		nuevoUsuario.setApellido(clienteRequest.getApellido());
+		nuevoUsuario.setDni(clienteRequest.getDni());
+		nuevoUsuario.setTelefono(clienteRequest.getTelefono());
+		nuevoUsuario.setEmail(clienteRequest.getEmail());
+
+		// Manejo de dirección (basado en createUsuario)
+		Direccion direccion = null;
+		if (clienteRequest.getDireccion() != null) {
+			DireccionDTO direccionDTO = clienteRequest.getDireccion();  // Asumiendo que DireccionRequest es compatible o mapea a DireccionDTO
+
+			// Caso 1: la dirección ya existe (viene con id)
+			if (direccionDTO.getIdDireccion() != null) {
+				direccion = direccionRepository.findById(direccionDTO.getIdDireccion())
+						.orElseThrow(() -> new EntityNotFoundException("Dirección no encontrada"));
+			}
+			// Caso 2: dirección nueva
+			else {
+				direccion = Utils.mapDireccionDTOToEntity(direccionDTO);
+
+				// Localidad: solo seteamos el id si viene
+				if (direccionDTO.getLocalidad() != null) {
+					Localidad localidad = new Localidad();
+					localidad.setIdLocalidad(direccionDTO.getLocalidad());
+					direccion.setLocalidad(localidad);
+				}
+
+				direccion = direccionRepository.save(direccion);
+			}
+		}
+		nuevoUsuario.setDireccion(direccion);
+
+		// Generar contraseña automática (ej. teléfono + nombre, luego hashearla)
+		String passwordPlana = clienteRequest.getTelefono() + clienteRequest.getNombre().toLowerCase();
+		nuevoUsuario.setPassword(passwordEncoder.encode(passwordPlana));
+
+		// Asignar rol CLIENTE
+		Rol rolCliente = rolRepository.findByNombre("CLIENTE").orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado"));
+		nuevoUsuario.setRol(rolCliente);
+
+		return usuarioRepository.save(nuevoUsuario);
 	}
 
 	public List<UsuarioDTO> getAllUsers() {

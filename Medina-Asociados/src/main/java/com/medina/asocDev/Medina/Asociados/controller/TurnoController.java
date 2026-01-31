@@ -1,20 +1,18 @@
 package com.medina.asocDev.Medina.Asociados.controller;
 
 
-import com.medina.asocDev.Medina.Asociados.dto.PagarTurnoResponse;
-import com.medina.asocDev.Medina.Asociados.dto.TurnoCreateRequest;
-import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
+import com.medina.asocDev.Medina.Asociados.dto.*;
 import com.medina.asocDev.Medina.Asociados.entity.Turno;
 import com.medina.asocDev.Medina.Asociados.service.TurnoService;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/turnos")
@@ -30,12 +28,9 @@ public class TurnoController {
     }
 
     @PostMapping("/{id}/pagar")
-    public ResponseEntity<PagarTurnoResponse> pagarTurno(@PathVariable Long id) {
-        Map<String, Object> resp = turnoService.pagarTurno(id);
-        return ResponseEntity.ok(new PagarTurnoResponse(
-                (TurnoDTO) resp.get("turno"),
-                (String) resp.get("init_point")
-        ));
+    public ResponseEntity<String> pagarTurno(@PathVariable Long id) {
+        String initPoint = turnoService.pagarTurno(id);
+        return ResponseEntity.ok(initPoint);
     }
 
     // ✅ Listar todos
@@ -95,5 +90,52 @@ public class TurnoController {
     @PostMapping("/{id}/finalizar")
     public ResponseEntity<TurnoDTO> finalizarTurno(@PathVariable Long id) {
         return ResponseEntity.ok(turnoService.finalizarTurno(id));
+    }
+
+    // Listado de turnos de un cliente
+    @GetMapping("/cliente/{idCliente}")
+    public ResponseEntity<List<TurnoListadoDTO>> listarTurnosPorCliente(@PathVariable Long idCliente) {
+        return ResponseEntity.ok(turnoService.listarTurnosPorCliente(idCliente));
+    }
+
+    // Listado de turnos de un abogado
+    @GetMapping("/abogado/{idAbogado}")
+    public ResponseEntity<List<TurnoListadoDTO>> listarTurnosPorAbogado(@PathVariable Long idAbogado) {
+        return ResponseEntity.ok(turnoService.listarTurnosPorAbogado(idAbogado));
+    }
+
+
+    // Detalle para cliente
+    @GetMapping("/{id}/detalle-cliente")
+    public ResponseEntity<TurnoDetalleDTO> obtenerDetalleTurnoCliente(@PathVariable Long id) {
+        Turno turno = turnoService.obtenerPorId(id);
+        return ResponseEntity.ok(Utils.mapTurnoToDetalleDTOParaCliente(turno));
+    }
+
+    // Detalle para abogado
+    @GetMapping("/{id}/detalle-abogado")
+    public ResponseEntity<TurnoDetalleDTO> obtenerDetalleTurnoAbogado(@PathVariable Long id) {
+        Turno turno = turnoService.obtenerPorId(id);
+        return ResponseEntity.ok(Utils.mapTurnoToDetalleDTOParaAbogado(turno));
+    }
+    @PutMapping("/{id}/observaciones-abogado")
+    public ResponseEntity<TurnoDTO> agregarObservacionesAbogado(
+            @PathVariable Long id,
+            @RequestBody String observaciones) {
+
+        return ResponseEntity.ok(turnoService.agregarObservacionesAbogado(id, observaciones));
+    }
+
+    @PostMapping("/offline")
+    //@PreAuthorize("hasRole('ADMIN') or hasRole('ABOGADO')")
+    public ResponseEntity<TurnoDTO> createTurnoOffline(@RequestBody TurnoOfflineRequest request) {
+        try {
+            TurnoDTO turno = turnoService.createTurnoOffline(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(turno);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 }

@@ -2,18 +2,18 @@ package com.medina.asocDev.Medina.Asociados.service;
 
 import com.medina.asocDev.Medina.Asociados.dto.TurnoCreateRequest;
 import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
+import com.medina.asocDev.Medina.Asociados.dto.TurnoListadoDTO;
+import com.medina.asocDev.Medina.Asociados.dto.TurnoOfflineRequest;
 import com.medina.asocDev.Medina.Asociados.entity.*;
 import com.medina.asocDev.Medina.Asociados.repo.*;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TurnoService {
@@ -26,6 +26,9 @@ public class TurnoService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private UsuarioService usuarioService;
 
     @Autowired
     private EspecialidadRepository especialidadRepository;
@@ -50,58 +53,81 @@ public class TurnoService {
 
     //Crear turno (reserva)
     @Transactional
-    public Turno crearTurno(TurnoCreateRequest turnoDTO) {
-        // 1. Buscar cliente y abogado
-        Usuario cliente = usuarioRepository.findById(turnoDTO.getIdCliente())
+    public Turno crearTurno(TurnoCreateRequest request) {
+
+        // 👉 Buscar cliente y abogado
+        Usuario cliente = usuarioRepository.findById(request.getIdCliente())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
-        Usuario abogado = usuarioRepository.findById(turnoDTO.getIdAbogado())
+
+        Usuario abogado = usuarioRepository.findById(request.getIdAbogado())
                 .orElseThrow(() -> new RuntimeException("Abogado no encontrado"));
 
-        // 2. Validar disponibilidad
-        LocalDateTime fechaHoraTurno = turnoDTO.getHorarioTurno();
-        if (!abogadoService.verificarDisponibilidad(turnoDTO.getIdAbogado(), fechaHoraTurno)) {
-            throw new RuntimeException("El horario seleccionado no está disponible");
-        }
-
-        // 3. Validar que no sea sábado o domingo
-        Utils.validarDiaHabil(fechaHoraTurno);
-
-        // 4. Buscar especialidad
-        Especialidad especialidad = especialidadRepository.findById(turnoDTO.getIdEspecialidad())
+        Especialidad especialidad = especialidadRepository.findById(request.getIdEspecialidad())
                 .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
 
-        // 5. Crear cobro (importe desde config/BD, no desde el front)
-        Cobro cobro = new Cobro();
-        float precio = Float.parseFloat(parametroService.getValor("PRECIO_TURNO"));
-        cobro.setImporteTotal(precio);
+        // 👉 Buscar estado inicial (RESERVADO = id 4)
+        Estado estadoReservado = estadoRepository.findById(4L)
+                .orElseThrow(() -> new RuntimeException("Estado RESERVADO no encontrado"));
 
+        Cobro cobro = new Cobro();
+        cobro.setImporteTotal(Float.valueOf(parametroService.getValor("PRECIO_TURNO")));
         Estado estadoCobro = estadoRepository
                 .findByNombreAndAmbito("PENDIENTE", "COBRO")
                 .orElseThrow(() -> new RuntimeException("Estado de cobro no encontrado"));
         cobro.setEstadoCobro(estadoCobro);
 
-        // 6. Estado inicial del turno
-        Estado estadoTurno = estadoRepository
-                .findByNombreAndAmbito("RESERVADO", "TURNO")
-                .orElseThrow(() -> new RuntimeException("Estado RESERVADO no encontrado"));
+        // 👉 Crear Turno
+        Turno turno = new Turno();
+        turno.setClienteTurno(cliente);
+        turno.setAbogadoTurno(abogado);
+        turno.setEspecialidad(especialidad);
+        turno.setCobro(cobro);
+        turno.setHorarioTurno(request.getHorarioTurno());
+        turno.setObservacionesCliente(request.getObservacionesCliente());
+        turno.setEstadoActual(estadoReservado); // ⬅ ESTADO INICIAL
 
-        // 7. Crear turno
-        Turno turno = Turno.builder()
-                .clienteTurno(cliente)
-                .abogadoTurno(abogado)
-                .especialidad(especialidad)
-                .cobro(cobro)
-                .estadoActual(estadoTurno)
-                .horarioTurno(fechaHoraTurno)
-                .observacionesCliente(turnoDTO.getObservacionesCliente())
-                .build();
+        // 👉 Guardar el turno en DB
+        Turno turnoGuardado = turnoRepository.save(turno);
 
-        Turno guardado = turnoRepository.save(turno);
+        // 👉 Registrar historial (estadoAnterior = null, estadoNuevo = RESERVADO)
+        historialTurnoService.registrarCambio(
+                turnoGuardado,
+                null,
+                estadoReservado
+        );
 
-        // 8. Registrar en historial (estado inicial RESERVADO)
-        historialTurnoService.registrarCambio(guardado, null, estadoTurno);
+        return turnoGuardado;
+    }
 
-        return guardado;
+    @Transactional
+    public TurnoDTO createTurnoOffline(TurnoOfflineRequest request) {
+        // 1. Obtener o crear el cliente automáticamente
+        Usuario cliente = usuarioService.getOrCreateUsuario(request.getCliente());
+
+        // 3. Crear TurnoCreateRequest para reutilizar crearTurno
+        TurnoCreateRequest createRequest = new TurnoCreateRequest();
+        createRequest.setIdCliente(cliente.getIdUsuario());  // Usar el ID del cliente creado/reutilizado
+        createRequest.setIdAbogado(request.getIdAbogado());
+        createRequest.setIdEspecialidad(request.getIdEspecialidad());
+        createRequest.setHorarioTurno(request.getHorarioTurno());
+        createRequest.setObservacionesCliente(request.getObservacionesCliente());
+        // Nota: Si requiereCobro es true, ajustar importeTotal si es diferente al parámetro; sino, dejar que crearTurno use el valor por defecto
+
+        // 4. Reutilizar crearTurno para manejar cobro, estado y historial
+        Turno turnoGuardado = crearTurno(createRequest);
+
+        /*
+        // 5. Si requiereCobro es false, eliminar el cobro creado (opcional, si no quieres cobro para offline)
+        if (!request.isRequiereCobro()) {
+            turnoGuardado.setCobro(null);  // O eliminar de DB si es necesario
+            turnoRepository.save(turnoGuardado);
+        } else if (request.getImporteTotal() != null) {
+            // Ajustar importe si es personalizado
+            turnoGuardado.getCobro().setImporteTotal(Float.valueOf(request.getImporteTotal()));
+            cobroRepository.save(turnoGuardado.getCobro());
+        }
+         */
+        return Utils.mapTurnoEntityToDTO(turnoGuardado);
     }
 
     //Listar todos los turnos
@@ -119,7 +145,6 @@ public class TurnoService {
     public Turno actualizarTurno(Long id, Turno datos) {
         Turno turno = obtenerPorId(id);
         turno.setObservacionesCliente(datos.getObservacionesCliente());
-        turno.setObservacionesAbogado(datos.getObservacionesAbogado());
         return turnoRepository.save(turno);
     }
 
@@ -235,7 +260,7 @@ public class TurnoService {
     }
 
     @Transactional
-    public Map<String, Object> pagarTurno(Long idTurno) {
+    public String pagarTurno(Long idTurno) {
         Turno turno = obtenerPorId(idTurno);
 
         // Validar que el turno esté en estado RESERVADO y el cobro en PENDIENTE
@@ -248,12 +273,8 @@ public class TurnoService {
             // Crear preferencia de pago en Mercado Pago
             String initPoint = mercadoPagoService.crearPreferencia(turno.getCobro(), turno);
 
-            // Devolver turno + URL de pago
-            Map<String, Object> response = new HashMap<>();
-            response.put("turno", Utils.mapTurnoEntityToDTO(turno));
-            response.put("init_point", initPoint);
-
-            return response;
+            // Devolver solo la URL de pago
+            return initPoint;
 
         } catch (Exception e) {
             throw new RuntimeException("Error al generar preferencia de pago en Mercado Pago", e);
@@ -319,4 +340,31 @@ public class TurnoService {
 
         return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
     }
+
+    // Listar turnos de un cliente
+    public List<TurnoListadoDTO> listarTurnosPorCliente(Long idCliente) {
+        return turnoRepository.findByClienteTurno_IdUsuario(idCliente)
+                .stream()
+                .map(Utils::mapTurnoToListadoDTOParaCliente)
+                .collect(Collectors.toList());
+    }
+
+    // Listar turnos de un abogado
+    public List<TurnoListadoDTO> listarTurnosPorAbogado(Long idAbogado) {
+        return turnoRepository.findByAbogadoTurno_IdUsuario(idAbogado)
+                .stream()
+                .map(Utils::mapTurnoToListadoDTOParaAbogado)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public TurnoDTO agregarObservacionesAbogado(Long idTurno, String observaciones) {
+        Turno turno = obtenerPorId(idTurno);
+        turno.setObservacionesAbogado(observaciones);
+
+        Turno actualizado = turnoRepository.save(turno);
+        return Utils.mapTurnoEntityToDTO(actualizado);
+    }
+
+
 }

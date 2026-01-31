@@ -352,4 +352,74 @@ public class Utils {
 
         return cobro;
     }
+
+    // Para listado de turnos de un cliente (mostrar abogado)
+    public static TurnoListadoDTO mapTurnoToListadoDTOParaCliente(Turno turno) {
+        if (turno == null) return null;
+        TurnoListadoDTO dto = new TurnoListadoDTO();
+        dto.setIdTurno(turno.getIdTurno());
+        dto.setPersona(turno.getAbogadoTurno().getNombre() + " " + turno.getAbogadoTurno().getApellido());
+        dto.setFechaHora(turno.getHorarioTurno());
+        dto.setEstado(turno.getEstadoActual().getNombreEstado());
+        return dto;
+    }
+
+    // Para listado de turnos de un abogado (mostrar cliente)
+    public static TurnoListadoDTO mapTurnoToListadoDTOParaAbogado(Turno turno) {
+        if (turno == null) return null;
+        TurnoListadoDTO dto = new TurnoListadoDTO();
+        dto.setIdTurno(turno.getIdTurno());
+        dto.setPersona(turno.getClienteTurno().getNombre() + " " + turno.getClienteTurno().getApellido());
+        dto.setFechaHora(turno.getHorarioTurno());
+        dto.setEstado(turno.getEstadoActual().getNombreEstado());
+        return dto;
+    }
+
+    // Vista para el CLIENTE (mostrar datos del abogado)
+    public static TurnoDetalleDTO mapTurnoToDetalleDTOParaCliente(Turno turno) {
+        if (turno == null) return null;
+        TurnoDetalleDTO dto = new TurnoDetalleDTO();
+
+        Usuario abogado = turno.getAbogadoTurno();
+        dto.setIdTurno(turno.getIdTurno());
+        dto.setPersona(abogado.getNombre() + " " + abogado.getApellido());
+        dto.setDni(abogado.getDni());
+        dto.setTelefono(abogado.getTelefono());
+        if (abogado.getDireccion() != null) {
+            Direccion dir = abogado.getDireccion();
+            dto.setDireccion(dir.getCalle() + " " + dir.getNumeroCalle());
+        }
+        dto.setEspecialidad(turno.getEspecialidad().getNombreEspecialidad());
+        dto.setFechaHora(turno.getHorarioTurno());
+        dto.setObservacionesCliente(turno.getObservacionesCliente());
+        dto.setObservacionesAbogado(turno.getObservacionesAbogado());
+        dto.setEstado(turno.getEstadoActual().getNombreEstado());
+
+        return dto;
+    }
+
+    // Vista para el ABOGADO (mostrar datos del cliente)
+    public static TurnoDetalleDTO mapTurnoToDetalleDTOParaAbogado(Turno turno) {
+        if (turno == null) return null;
+        TurnoDetalleDTO dto = new TurnoDetalleDTO();
+
+        Usuario cliente = turno.getClienteTurno();
+        dto.setIdTurno(turno.getIdTurno());
+        dto.setPersona(cliente.getNombre() + " " + cliente.getApellido());
+        dto.setDni(cliente.getDni());
+        dto.setTelefono(cliente.getTelefono());
+        if (cliente.getDireccion() != null) {
+            Direccion dir = cliente.getDireccion();
+            dto.setDireccion(dir.getCalle() + " " + dir.getNumeroCalle());
+        }
+        dto.setEspecialidad(turno.getEspecialidad().getNombreEspecialidad());
+        dto.setFechaHora(turno.getHorarioTurno());
+        dto.setObservacionesCliente(turno.getObservacionesCliente());
+        dto.setObservacionesAbogado(turno.getObservacionesAbogado());
+        dto.setEstado(turno.getEstadoActual().getNombreEstado());
+
+        return dto;
+    }
+
+
 }

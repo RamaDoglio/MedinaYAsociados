@@ -34,4 +34,6 @@ build/
 
 ## Otros archivos ##
 .env
+ngrok.exe
 out/
+.ngrok.exe.old
