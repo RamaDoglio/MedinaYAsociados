@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.DayOfWeek;
 
 @Service
 public class AbogadoService {
@@ -109,6 +110,11 @@ public class AbogadoService {
 		return dtos;
 	}
 
+	public boolean esFinDeSemana(LocalDate fecha) {
+		DayOfWeek diaSemana = fecha.getDayOfWeek();
+		return diaSemana == DayOfWeek.SATURDAY || diaSemana == DayOfWeek.SUNDAY;
+	}
+
 	// Obtener los horarios ocupados de un abogado en una fecha específica
 	public List<LocalTime> obtenerHorariosOcupados(Long idAbogado, LocalDate fecha) {
 		List<Turno> turnos = turnoRepository.findTurnosOcupadosPorAbogadoEnFecha(idAbogado, fecha);
@@ -119,6 +125,10 @@ public class AbogadoService {
 
 	// Generar horarios disponibles entre 12:00 y 16:30 (intervalos de 45 minutos)
 	public List<LocalTime> obtenerHorariosDisponibles(Long idAbogado, LocalDate fecha) {
+		if (esFinDeSemana(fecha)) {
+			return new ArrayList<>(); // Retorna lista vacía = NO hay horarios disponibles
+		}
+
 		List<LocalTime> horariosTotales = new ArrayList<>();
 		LocalTime inicio = LocalTime.of(12, 0);
 		LocalTime fin = LocalTime.of(16, 30);
@@ -135,6 +145,11 @@ public class AbogadoService {
 	// Verificar si un horario específico está disponible
 	public boolean verificarDisponibilidad(Long idAbogado, LocalDateTime fechaHora) {
 		LocalDate fecha = fechaHora.toLocalDate();
+
+		if (esFinDeSemana(fecha)) {
+			return false;
+		}
+
 		List<LocalTime> ocupados = obtenerHorariosOcupados(idAbogado, fecha);
 		return !ocupados.contains(fechaHora.toLocalTime());
 	}

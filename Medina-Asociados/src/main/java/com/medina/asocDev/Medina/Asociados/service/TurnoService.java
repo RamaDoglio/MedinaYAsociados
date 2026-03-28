@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,7 +56,7 @@ public class TurnoService {
     @Transactional
     public Turno crearTurno(TurnoCreateRequest request) {
 
-        // 👉 Buscar cliente y abogado
+        // Buscar cliente y abogado
         Usuario cliente = usuarioRepository.findById(request.getIdCliente())
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
@@ -65,11 +66,15 @@ public class TurnoService {
         Especialidad especialidad = especialidadRepository.findById(request.getIdEspecialidad())
                 .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
 
-        // 👉 Buscar estado inicial (RESERVADO = id 4)
+        // Buscar estado inicial (RESERVADO = id 4)
         Estado estadoReservado = estadoRepository.findById(4L)
                 .orElseThrow(() -> new RuntimeException("Estado RESERVADO no encontrado"));
-        
-        
+
+        LocalDate fechaTurno = request.getHorarioTurno().toLocalDate();
+
+        if (abogadoService.esFinDeSemana(fechaTurno)) {
+            throw new RuntimeException("No se pueden reservar turnos los sábados ni domingos");
+        }
 
         Cobro cobro = new Cobro();
         cobro.setImporteTotal(Float.valueOf(parametroService.getValor("PRECIO_TURNO")));
@@ -78,7 +83,7 @@ public class TurnoService {
                 .orElseThrow(() -> new RuntimeException("Estado de cobro no encontrado"));
         cobro.setEstadoCobro(estadoCobro);
 
-        // 👉 Crear Turno
+        //Crear Turno
         Turno turno = new Turno();
         turno.setClienteTurno(cliente);
         turno.setAbogadoTurno(abogado);
@@ -88,10 +93,10 @@ public class TurnoService {
         turno.setObservacionesCliente(request.getObservacionesCliente());
         turno.setEstadoActual(estadoReservado); // ⬅ ESTADO INICIAL
 
-        // 👉 Guardar el turno en DB
+        //Guardar el turno en DB
         Turno turnoGuardado = turnoRepository.save(turno);
 
-        // 👉 Registrar historial (estadoAnterior = null, estadoNuevo = RESERVADO)
+        // Registrar historial (estadoAnterior = null, estadoNuevo = RESERVADO)
         historialTurnoService.registrarCambio(
                 turnoGuardado,
                 null,
@@ -111,6 +116,13 @@ public class TurnoService {
         createRequest.setIdCliente(cliente.getIdUsuario());  // Usar el ID del cliente creado/reutilizado
         createRequest.setIdAbogado(request.getIdAbogado());
         createRequest.setIdEspecialidad(request.getIdEspecialidad());
+
+        LocalDate fechaTurno = request.getHorarioTurno().toLocalDate();
+
+        if (abogadoService.esFinDeSemana(fechaTurno)) {
+            throw new RuntimeException("No se pueden reservar turnos los sábados ni domingos");
+        }
+
         createRequest.setHorarioTurno(request.getHorarioTurno());
         createRequest.setObservacionesCliente(request.getObservacionesCliente());
         
@@ -188,7 +200,7 @@ public class TurnoService {
 
         Turno actualizado = turnoRepository.save(turno);
 
-        // 👇 Notificación
+        // Notificación
         try {
             notificacionTurnoService.enviarReprogramacion(actualizado);
         } catch (Exception e) {
@@ -214,13 +226,13 @@ public class TurnoService {
         Estado anterior = turno.getEstadoActual();
 
         if (fechaTurno.isBefore(LocalDateTime.now().plusHours(24))) {
-            // ❌ Cancelación tardía → sin reembolso
+            //Cancelación tardía → sin reembolso
             Estado sinReembolso = estadoRepository.findByNombreAndAmbito("CANCELADO_SIN_REEMBOLSO", "TURNO")
                     .orElseThrow(() -> new RuntimeException("Estado CANCELADO_SIN_REEMBOLSO no encontrado"));
             turno.setEstadoActual(sinReembolso);
 
         } else {
-            // ✅ Cancelación con más de 24h → con reembolso
+            //Cancelación con más de 24h → con reembolso
             Estado conReembolso = estadoRepository.findByNombreAndAmbito("CANCELADO_CON_REEMBOLSO", "TURNO")
                     .orElseThrow(() -> new RuntimeException("Estado CANCELADO_CON_REEMBOLSO no encontrado"));
             turno.setEstadoActual(conReembolso);
