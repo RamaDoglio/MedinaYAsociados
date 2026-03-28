@@ -1,8 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.service;
 
-import java.util.ArrayList;
+
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.medina.asocDev.Medina.Asociados.dto.*;
