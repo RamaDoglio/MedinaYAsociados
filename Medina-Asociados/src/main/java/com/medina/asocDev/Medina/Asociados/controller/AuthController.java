@@ -1,4 +1,4 @@
-package com.phegondev.PhegonHotel.controller;
+package com.medina.asocDev.Medina.Asociados.controller;
 
 
 import com.medina.asocDev.Medina.Asociados.dto.LogInRequest;

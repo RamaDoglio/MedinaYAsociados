@@ -6,9 +6,8 @@ import lombok.Data;
 @Data
 public class LogInRequest {
 
-    @NotBlank(message = "El correo no debe estar en blanco")
+    @NotBlank(message = "Email is required")
     private String email;
-    @NotBlank(message = "La contraseña no debe estar en blanco")
+    @NotBlank(message = "Password is required")
     private String password;
-
 }
