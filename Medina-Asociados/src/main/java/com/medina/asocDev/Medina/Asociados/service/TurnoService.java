@@ -68,6 +68,8 @@ public class TurnoService {
         // 👉 Buscar estado inicial (RESERVADO = id 4)
         Estado estadoReservado = estadoRepository.findById(4L)
                 .orElseThrow(() -> new RuntimeException("Estado RESERVADO no encontrado"));
+        
+        
 
         Cobro cobro = new Cobro();
         cobro.setImporteTotal(Float.valueOf(parametroService.getValor("PRECIO_TURNO")));
@@ -111,22 +113,25 @@ public class TurnoService {
         createRequest.setIdEspecialidad(request.getIdEspecialidad());
         createRequest.setHorarioTurno(request.getHorarioTurno());
         createRequest.setObservacionesCliente(request.getObservacionesCliente());
+        
         // Nota: Si requiereCobro es true, ajustar importeTotal si es diferente al parámetro; sino, dejar que crearTurno use el valor por defecto
 
         // 4. Reutilizar crearTurno para manejar cobro, estado y historial
         Turno turnoGuardado = crearTurno(createRequest);
 
-        /*
-        // 5. Si requiereCobro es false, eliminar el cobro creado (opcional, si no quieres cobro para offline)
-        if (!request.isRequiereCobro()) {
-            turnoGuardado.setCobro(null);  // O eliminar de DB si es necesario
-            turnoRepository.save(turnoGuardado);
-        } else if (request.getImporteTotal() != null) {
-            // Ajustar importe si es personalizado
-            turnoGuardado.getCobro().setImporteTotal(Float.valueOf(request.getImporteTotal()));
-            cobroRepository.save(turnoGuardado.getCobro());
-        }
-         */
+        Estado pendienteCobro = estadoRepository.findByNombreAndAmbito("PENDIENTE_COBRO", "TURNO")
+                .orElseThrow(() -> new RuntimeException("Estado PENDIENTE_COBRO no encontrado"));
+
+        Estado anterior= turnoGuardado.getEstadoActual();
+
+        turnoGuardado.setEstadoActual(pendienteCobro);
+
+        historialTurnoService.registrarCambio(
+                turnoGuardado, anterior,
+                pendienteCobro
+        );
+
+        turnoRepository.save(turnoGuardado);
         return Utils.mapTurnoEntityToDTO(turnoGuardado);
     }
 

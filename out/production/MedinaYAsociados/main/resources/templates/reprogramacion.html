@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; color: #333; background-color: #f9f9f9; }
+    .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .header img { max-height: 60px; }
+    .title { font-size: 20px; font-weight: bold; margin-bottom: 10px; color: #ffc107; }
+    .info { margin: 15px 0; }
+    .button {
+      display: inline-block;
+      padding: 12px 20px;
+      background-color: #007BFF;
+      color: #fff !important;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    .footer { margin-top: 20px; font-size: 12px; color: #777; text-align: center; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <img src="https://via.placeholder.com/200x60?text=LOGO" alt="Logo Estudio Jurídico">
+  </div>
+  <div class="title">🔄 Reprogramación de turno</div>
+  <p>Hola <b th:text="${nombreCliente}"></b>,</p>
+  <p>Tu turno ha sido reprogramado con la siguiente información:</p>
+  <div class="info">
+    <ul>
+      <li><b>Nueva fecha y hora:</b> <span th:text="${fechaHora}"></span></li>
+      <li><b>Abogado:</b> <span th:text="${abogado}"></span></li>
+      <li><b>Dirección del estudio:</b> <span th:text="${direccion}"></span></li>
+    </ul>
+  </div>
+  <p style="text-align: center;">
+    <a th:href="@{'https://www.google.com/maps/search/?api=1&query=' + ${direccionEncoded}}" class="button">
+      📍 Ver en Google Maps
+    </a>
+  </p>
+  <div class="footer">
+    Este correo fue generado automáticamente. No responda a este mensaje.
+  </div>
+</div>
+</body>
+</html>
