@@ -9,7 +9,7 @@ public interface IUserService {
 
     Response login(LogInRequest loginRequest);
 
-    Response getAllUsers();
+    Response getAllUsersResponse();
 
     Response getUserBookingHistory(String userId);
 

@@ -30,12 +30,16 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || authHeader.isBlank()) {
+        if (authHeader == null || authHeader.isBlank() || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String jwtToken = authHeader.substring(7);
+        final String jwtToken = authHeader.substring(7).trim();
+        if (jwtToken.isBlank()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         final String userEmail = jwtUtils.extractUsername(jwtToken);
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
