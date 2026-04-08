@@ -1,5 +1,6 @@
 package com.medina.asocDev.Medina.Asociados.repo;
 
+import com.medina.asocDev.Medina.Asociados.dto.EstadisticaDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Turno;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -7,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,4 +60,23 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
     // Busca turnos cuya fecha/hora esté entre dos valores
     List<Turno> findByHorarioTurnoBetween(LocalDateTime desde, LocalDateTime hasta);
+
+    @Query("SELECT new com.medina.asocDev.Medina.Asociados.dto.EstadisticaDTO(" +
+            "CASE " +
+            "WHEN t.estadoActual.nombreEstado = 'FINALIZADO' THEN 'COMPLETADOS' " +
+            "WHEN t.estadoActual.nombreEstado = 'NO_ASISTIO' THEN 'INASISTENCIAS' " +
+            "WHEN t.estadoActual.nombreEstado IN ('CANCELADO_SIN_REEMBOLSO', 'CANCELADO_CON_REEMBOLSO', 'EXPIRO_PAGO') THEN 'CANCELADOS' " +
+            "END, COUNT(t)) " +
+            "FROM Turno t " +
+            "WHERE t.estadoActual.nombreEstado IN ('FINALIZADO', 'NO_ASISTIO', 'CANCELADO_SIN_REEMBOLSO', 'CANCELADO_CON_REEMBOLSO', 'EXPIRO_PAGO') " +
+            "GROUP BY CASE " +
+            "WHEN t.estadoActual.nombreEstado = 'FINALIZADO' THEN 'COMPLETADOS' " +
+            "WHEN t.estadoActual.nombreEstado = 'NO_ASISTIO' THEN 'INASISTENCIAS' " +
+            "WHEN t.estadoActual.nombreEstado IN ('CANCELADO_SIN_REEMBOLSO', 'CANCELADO_CON_REEMBOLSO', 'EXPIRO_PAGO') THEN 'CANCELADOS' " +
+            "END")
+    List<EstadisticaDTO> getVolumenTurnosPorEstado();
+
+    @Query("SELECT new com.medina.asocDev.Medina.Asociados.dto.EstadisticaDTO(t.especialidad.nombreEspecialidad, COUNT(t)) " +
+            "FROM Turno t GROUP BY t.especialidad.nombreEspecialidad")
+    List<EstadisticaDTO> getTurnosPorEspecialidad();
 }

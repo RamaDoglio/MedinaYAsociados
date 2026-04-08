@@ -2,6 +2,7 @@ package com.medina.asocDev.Medina.Asociados.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 import lombok.Data;
 
 import java.util.List;
@@ -19,5 +20,9 @@ public class Response {
 
     private UsuarioDTO user;
     private TurnoDTO booking;
-    private List<UsuarioDTO> userList;
+    private Object data;
+
+    public void setData(Object data) {
+        this.data = data;
+    }
 }

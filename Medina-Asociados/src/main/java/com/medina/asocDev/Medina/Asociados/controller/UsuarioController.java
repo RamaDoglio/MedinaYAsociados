@@ -2,6 +2,7 @@ package com.medina.asocDev.Medina.Asociados.controller;
 
 import com.medina.asocDev.Medina.Asociados.dto.MensajeResponse;
 import com.medina.asocDev.Medina.Asociados.dto.RegisterDTO;
+import com.medina.asocDev.Medina.Asociados.dto.Response;
 import com.medina.asocDev.Medina.Asociados.dto.UsuarioDTO;
 import com.medina.asocDev.Medina.Asociados.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +24,14 @@ public class UsuarioController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<UsuarioDTO>> getAllUsers() {
-		List<UsuarioDTO> usuarios = usuarioService.getAllUsers();
-		return ResponseEntity.ok(usuarios);
+	public ResponseEntity<Response> getAllUsers() {  // ← Cambia a Response
+		Response response = usuarioService.getAllUsers();
+		return ResponseEntity.status(response.getStatusCode()).body(response);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<UsuarioDTO> getUserById(@PathVariable Long id) {
-		UsuarioDTO usuario = usuarioService.getUserById(id);
+		UsuarioDTO usuario = usuarioService.getUserByIdInternal(id);
 		if (usuario == null) {
 			return ResponseEntity.notFound().build();
 		}
@@ -48,7 +49,7 @@ public class UsuarioController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-		boolean borrado = usuarioService.deleteUser(id);
+		boolean borrado = usuarioService.deleteUserInternal(id);
 		if (borrado) {
 			return ResponseEntity.noContent().build();
 		} else {

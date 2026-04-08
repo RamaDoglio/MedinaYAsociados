@@ -1,6 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.service;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,13 +9,20 @@ import com.medina.asocDev.Medina.Asociados.dto.*;
 import com.medina.asocDev.Medina.Asociados.entity.Direccion;
 import com.medina.asocDev.Medina.Asociados.entity.Localidad;
 import com.medina.asocDev.Medina.Asociados.entity.Rol;
+import com.medina.asocDev.Medina.Asociados.excepetion.OurException;
 import com.medina.asocDev.Medina.Asociados.repo.DireccionRepository;
 import com.medina.asocDev.Medina.Asociados.repo.LocalidadRepository;
 import com.medina.asocDev.Medina.Asociados.repo.RolRepository;
+import com.medina.asocDev.Medina.Asociados.service.interfac.IUserService;
+import com.medina.asocDev.Medina.Asociados.utils.JWTUtils;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +30,7 @@ import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 import com.medina.asocDev.Medina.Asociados.repo.UsuarioRepository;
 
 @Service
-public class UsuarioService {
+public class UsuarioService implements IUserService {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;
@@ -34,6 +42,10 @@ public class UsuarioService {
 	private LocalidadRepository localidadRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private JWTUtils jwtUtils;
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
 
 	public MensajeResponse createUsuario(RegisterDTO registerDTO) {
@@ -133,25 +145,169 @@ public class UsuarioService {
 		return usuarioRepository.save(nuevoUsuario);
 	}
 
-	public List<UsuarioDTO> getAllUsers() {
-		List<Usuario> usuarios = usuarioRepository.findAll();
-		return usuarios.stream()
-				.map(Utils::mapUserEntityToUserDTO)
-				.collect(Collectors.toList());
-	}
+	public Response login(LogInRequest loginRequest) {
+		Response response = new Response();
 
-	public UsuarioDTO getUserById(Long id) {
-		return usuarioRepository.findById(id)
-				.map(Utils::mapUserEntityToUserDTO)
-				.orElse(null);
-	}
+		try {
+			// 1. Autenticar
+			authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(
+							loginRequest.getEmail(),
+							loginRequest.getPassword()
+					)
+			);
 
-	public boolean deleteUser(Long id) {
-		if (usuarioRepository.existsById(id)) {
-			usuarioRepository.deleteById(id);
-			return true;
+			// 2. Buscar usuario
+			var usuario = usuarioRepository.findByEmail(loginRequest.getEmail())
+					.orElseThrow(() -> new OurException("user Not found"));
+
+			// ⭐ 3. CREAR UserDetails CORRECTO (SOLUCIÓN)
+			UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+					.username(usuario.getEmail())
+					.password(usuario.getPassword())
+					.authorities(usuario.getRol().getNombre())
+					.build();
+
+			// 4. Generar JWT
+			var token = jwtUtils.generateToken(userDetails);
+
+			response.setStatusCode(200);
+			response.setToken(token);
+			response.setRole(usuario.getRol().getNombre());
+			response.setExpirationTime("7 Days");
+			response.setMessage("successful");
+
+		} catch (OurException e) {
+			response.setStatusCode(404);
+			response.setMessage(e.getMessage());
+		} catch (BadCredentialsException e) {
+			response.setStatusCode(401);
+			response.setMessage("Credenciales inválidas");
+		} catch (Exception e) {
+			response.setStatusCode(500);
+			response.setMessage("Error en login: " + e.getMessage());
 		}
-		return false;
+		return response;
+	}
+
+	@Override
+	public Response getMyInfo(String email) {
+		Response response = new Response();
+		try {
+			Usuario user = usuarioRepository.findByEmail(email)
+					.orElseThrow(() -> new OurException("Usuario no encontrado"));
+
+			UsuarioDTO userDTO = Utils.mapUserEntityToUserDTO(user);
+			response.setStatusCode(200);
+			response.setData(userDTO);  // ← Usa DTO, no Entity
+			response.setMessage("Información del usuario");
+		} catch (OurException | EntityNotFoundException e) {
+			response.setStatusCode(404);
+			response.setMessage(e.getMessage());
+		} catch (Exception e) {
+			response.setStatusCode(500);
+			response.setMessage("Error al obtener información: " + e.getMessage());
+		}
+		return response;
+	}
+
+	@Override
+	public Response getUserTurnoHistory(String userId) {
+		Response response = new Response();
+		try {
+			Long id = Long.parseLong(userId);
+			response.setStatusCode(200);
+			response.setData(new ArrayList<>()); // Lista vacía por ahora
+			response.setMessage("Historial de turnos del usuario");
+		} catch (NumberFormatException e) {
+			response.setStatusCode(400);
+			response.setMessage("ID de usuario inválido");
+		} catch (Exception e) {
+			response.setStatusCode(500);
+			response.setMessage("Error al obtener historial: " + e.getMessage());
+		}
+		return response;
+	}
+
+	@Override
+	public Response getAllUsers() {
+		Response response = new Response();
+		try {
+			List<Usuario> usuarios = usuarioRepository.findAll();
+			List<UsuarioDTO> usuariosDTO = usuarios.stream()
+					.map(Utils::mapUserEntityToUserDTO)
+					.collect(Collectors.toList());
+
+			response.setStatusCode(200);
+			response.setData((UsuarioDTO) usuariosDTO);  // ← La lista va en "data"
+			response.setMessage("Usuarios obtenidos correctamente");
+			return response;
+		} catch (Exception e) {
+			response.setStatusCode(500);
+			response.setMessage("Error al obtener usuarios: " + e.getMessage());
+			return response;
+		}
+	}
+
+	@Override
+	public Response register(Usuario user) {
+		// Convierte Usuario a RegisterDTO o adapta la lógica
+		RegisterDTO dto = Utils.mapUsuarioToRegisterDTO(user); // Implementa este mapper si no existe
+		MensajeResponse mensaje = createUsuario(dto);
+		Response response = new Response();
+		response.setStatusCode(200);
+		response.setMessage(mensaje.getMessage());
+		return response;
+	}
+
+	@Override
+	public Response getUserById(String userId) {
+		Response response = new Response();
+		try {
+			Long id = Long.parseLong(userId);
+			UsuarioDTO user = usuarioRepository.findById(id)
+					.map(Utils::mapUserEntityToUserDTO)
+					.orElse(null);
+
+			if (user != null) {
+				response.setStatusCode(200);
+				response.setData(user);
+				response.setMessage("Usuario encontrado");
+			} else {
+				response.setStatusCode(404);
+				response.setMessage("Usuario no encontrado");
+			}
+		} catch (NumberFormatException e) {
+			response.setStatusCode(400);
+			response.setMessage("ID de usuario inválido");
+		} catch (Exception e) {
+			response.setStatusCode(500);
+			response.setMessage("Error al obtener usuario: " + e.getMessage());
+		}
+		return response;
+	}
+
+	@Override
+	public Response deleteUser(String userId) {
+		Response response = new Response();
+		try {
+			Long id = Long.parseLong(userId);
+			if (usuarioRepository.existsById(id)) {
+				usuarioRepository.deleteById(id);
+				response.setStatusCode(200);
+				response.setMessage("Usuario eliminado correctamente");
+			} else {
+				response.setStatusCode(404);
+				response.setMessage("Usuario no encontrado");
+			}
+		} catch (NumberFormatException e) {
+			response.setStatusCode(400);
+			response.setMessage("ID de usuario inválido");
+		} catch (Exception e) {
+			response.setStatusCode(500);
+			response.setMessage("Error al eliminar usuario: " + e.getMessage());
+		}
+		return response;
 	}
 
 	public UsuarioDTO updateUser(Long id, UsuarioDTO usuarioDTO) {
@@ -164,6 +320,20 @@ public class UsuarioService {
 			Usuario actualizado = usuarioRepository.save(usuario);
 			return Utils.mapUserEntityToUserDTO(actualizado);
 		}).orElse(null);
+	}
+
+	public boolean deleteUserInternal(Long id) {
+		if (usuarioRepository.existsById(id)) {
+			usuarioRepository.deleteById(id);
+			return true;
+		}
+		return false;
+	}
+
+	public UsuarioDTO getUserByIdInternal(Long id) {
+		return usuarioRepository.findById(id)
+				.map(Utils::mapUserEntityToUserDTO)
+				.orElse(null);
 	}
 }
 

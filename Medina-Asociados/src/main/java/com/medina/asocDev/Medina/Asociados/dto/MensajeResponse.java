@@ -10,4 +10,12 @@ public class MensajeResponse {
     public MensajeResponse(String mensaje) {
         this.mensaje = mensaje;
     }
+
+    public String getMessage() {
+        return mensaje;
+    }
+
+    public void setMessage(String message) {
+        this.mensaje = message;
+    }
 }
