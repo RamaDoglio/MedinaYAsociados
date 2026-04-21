@@ -5,13 +5,14 @@ import com.medina.asocDev.Medina.Asociados.dto.Response;
 import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 
 public interface IUserService {
+
     Response register(Usuario user);
 
     Response login(LogInRequest loginRequest);
 
     Response getAllUsersResponse();
 
-    Response getUserBookingHistory(String userId);
+    Response getUserTurnoHistory(String userId);
 
     Response deleteUser(String userId);
 

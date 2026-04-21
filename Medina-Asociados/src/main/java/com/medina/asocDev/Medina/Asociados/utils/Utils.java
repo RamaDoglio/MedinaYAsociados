@@ -422,4 +422,26 @@ public class Utils {
     }
 
 
+    public static RegisterDTO mapUsuarioToRegisterDTO(Usuario usuario) {
+        RegisterDTO dto = new RegisterDTO();
+        dto.setNombre(usuario.getNombre());
+        dto.setApellido(usuario.getApellido());
+        dto.setEmail(usuario.getEmail());
+        dto.setTelefono(usuario.getTelefono());
+        dto.setDni(usuario.getDni());
+        dto.setPassword(""); // No mapeamos password por seguridad
+
+        // Dirección si existe
+        if (usuario.getDireccion() != null) {
+            DireccionDTO direccionDTO = mapDireccionEntityToDTO(usuario.getDireccion());
+            dto.setDireccion(direccionDTO);
+        }
+
+        // Rol si existe
+        if (usuario.getRol() != null) {
+            dto.setIdRol(usuario.getRol().getIdRol());
+        }
+
+        return dto;
+    }
 }
