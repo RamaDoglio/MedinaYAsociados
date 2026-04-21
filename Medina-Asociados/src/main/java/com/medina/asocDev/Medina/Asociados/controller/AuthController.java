@@ -5,9 +5,7 @@ import com.medina.asocDev.Medina.Asociados.dto.LogInRequest;
 import com.medina.asocDev.Medina.Asociados.dto.MensajeResponse;
 import com.medina.asocDev.Medina.Asociados.dto.RegisterDTO;
 import com.medina.asocDev.Medina.Asociados.dto.Response;
-import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 import com.medina.asocDev.Medina.Asociados.service.UsuarioService;
-import com.medina.asocDev.Medina.Asociados.service.interfac.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,8 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private IUserService userService;
 
     @Autowired
     private UsuarioService usuarioService;

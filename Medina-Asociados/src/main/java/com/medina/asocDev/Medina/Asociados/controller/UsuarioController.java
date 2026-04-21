@@ -25,12 +25,12 @@ public class UsuarioController {
 	@GetMapping
 
 	public ResponseEntity<List<UsuarioDTO>> getAllUsers() {
-		List<UsuarioDTO> usuarios = usuarioService.getAllUsersList();
-		return ResponseEntity.ok(usuarios);
-
+				List<UsuarioDTO> usuarios = usuarioService.getAllUsers();
+        return ResponseEntity.ok(usuarios);
+    }
 	@GetMapping("/{id}")
 	public ResponseEntity<UsuarioDTO> getUserById(@PathVariable Long id) {
-		UsuarioDTO usuario = usuarioService.getUserByIdInternal(id);
+		UsuarioDTO usuario = usuarioService.getUserById(id);
 		if (usuario == null) {
 			return ResponseEntity.notFound().build();
 		}

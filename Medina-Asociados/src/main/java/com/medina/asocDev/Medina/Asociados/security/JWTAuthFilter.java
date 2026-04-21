@@ -37,16 +37,10 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
         final String jwtToken = authHeader.substring(7).trim();
         if (jwtToken.isBlank()) {
-        final String jwtToken;
-        final String userEmail;
-
-        if (authHeader == null || authHeader.isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwtToken = authHeader.substring(7);
-        userEmail = jwtUtils.extractUsername(jwtToken);
         final String userEmail = jwtUtils.extractUsername(jwtToken);
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {

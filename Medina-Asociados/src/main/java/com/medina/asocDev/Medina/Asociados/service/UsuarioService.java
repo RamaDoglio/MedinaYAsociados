@@ -9,12 +9,17 @@ import com.medina.asocDev.Medina.Asociados.entity.Direccion;
 import com.medina.asocDev.Medina.Asociados.entity.Localidad;
 import com.medina.asocDev.Medina.Asociados.entity.Rol;
 import com.medina.asocDev.Medina.Asociados.repo.DireccionRepository;
-import com.medina.asocDev.Medina.Asociados.repo.LocalidadRepository;
 import com.medina.asocDev.Medina.Asociados.repo.RolRepository;
+import com.medina.asocDev.Medina.Asociados.utils.JWTUtils;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,8 +37,6 @@ public class UsuarioService {
 	private RolRepository rolRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	@Autowired
-	private JWTUtils jwtUtils;
 	@Autowired
 	private JWTUtils jwtUtils;
 	@Autowired
@@ -80,6 +83,38 @@ public class UsuarioService {
 
 		// Retornamos DTO completo
 		return new MensajeResponse("Registro completado, redirigiendo al inicio de sesión");
+	}
+
+	public Response login(LogInRequest loginRequest) {
+		Response response = new Response();
+		try {
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+			);
+
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			String token = jwtUtils.generateToken(userDetails);
+
+			response.setStatusCode(200);
+			response.setMessage("Inicio de sesión exitoso");
+			response.setToken(token);
+			response.setExpirationTime("3 horas");
+
+			if (userDetails.getAuthorities() != null && !userDetails.getAuthorities().isEmpty()) {
+				response.setRole(userDetails.getAuthorities().iterator().next().getAuthority());
+			}
+
+			usuarioRepository.findByEmail(loginRequest.getEmail())
+					.map(Utils::mapUserEntityToUserDTO)
+					.ifPresent(response::setUser);
+		} catch (AuthenticationException e) {
+			response.setStatusCode(401);
+			response.setMessage("Credenciales inválidas");
+		} catch (Exception e) {
+			response.setStatusCode(500);
+			response.setMessage("Error interno al iniciar sesión");
+		}
+		return response;
 	}
 
 	@Transactional
