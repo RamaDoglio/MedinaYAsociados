@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -94,12 +95,14 @@ public class TurnoController {
 
     // Listado de turnos de un cliente
     @GetMapping("/cliente/{idCliente}")
+    @PreAuthorize("@securityService.canAccessClienteTurnos(authentication, #idCliente)")
     public ResponseEntity<List<TurnoListadoDTO>> listarTurnosPorCliente(@PathVariable Long idCliente) {
         return ResponseEntity.ok(turnoService.listarTurnosPorCliente(idCliente));
     }
 
     // Listado de turnos de un abogado
     @GetMapping("/abogado/{idAbogado}")
+    @PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
     public ResponseEntity<List<TurnoListadoDTO>> listarTurnosPorAbogado(@PathVariable Long idAbogado) {
         return ResponseEntity.ok(turnoService.listarTurnosPorAbogado(idAbogado));
     }

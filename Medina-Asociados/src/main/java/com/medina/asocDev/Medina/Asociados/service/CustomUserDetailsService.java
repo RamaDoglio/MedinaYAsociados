@@ -1,5 +1,6 @@
 package com.medina.asocDev.Medina.Asociados.service;
 
+import com.medina.asocDev.Medina.Asociados.dto.CustomUserDetails;
 import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 import com.medina.asocDev.Medina.Asociados.repo.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,25 +27,19 @@ public class CustomUserDetailsService implements UserDetailsService {
         Usuario usuario = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        // ⭐ EXTRAE EL ROL (nombre debe ser "ROLE_ADMIN", "ROLE_USER", etc.)
         List<GrantedAuthority> authorities = new ArrayList<>();
-
         if (usuario.getRol() != null && usuario.getRol().getNombre() != null) {
-            // Agregar el rol como autoridad
             authorities.add(new SimpleGrantedAuthority(usuario.getRol().getNombre()));
         } else {
-            // Rol por defecto
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         }
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(usuario.getEmail())
-                .password(usuario.getPassword())
-                .authorities(authorities)
-                .accountExpired(false)
-                .accountLocked(false)
-                .credentialsExpired(false)
-                .disabled(false)
-                .build();
+        // 🔥 AGREGAR ESTO: CustomUserDetails con ID
+        return new CustomUserDetails(
+                usuario.getIdUsuario(),  // ← ID del usuario
+                usuario.getEmail(),
+                usuario.getPassword(),
+                authorities
+        );
     }
 }
