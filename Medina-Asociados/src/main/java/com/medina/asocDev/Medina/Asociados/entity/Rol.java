@@ -18,11 +18,6 @@ public class Rol {
 
     private String descripcion;
 
-    @ManyToMany
-    @JoinTable(
-            name = "rolXpermiso",
-            joinColumns = @JoinColumn(name = "idRol"),
-            inverseJoinColumns = @JoinColumn(name = "idPermiso")
-    )
-    private List<Permiso> permisos = new ArrayList<>();
+    @ManyToMany(mappedBy = "rolesUsuario")
+    private List<Usuario> usuarios = new ArrayList<>();
 }

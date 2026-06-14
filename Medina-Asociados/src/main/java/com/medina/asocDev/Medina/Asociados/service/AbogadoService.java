@@ -33,14 +33,15 @@ public class AbogadoService {
 		Usuario usuario = usuarioRepository.findById(idUsuario)
 				.orElseThrow(() -> new RuntimeException("Usuario no encontrado con id " + idUsuario));
 
-		// 2. Cambiar rol a ABOGADO
+		// 2. Cambiar rol a ABOGADO (agregar a la lista)
 		Rol rol = rolRepository.findById(2L)
 				.orElseThrow(() -> new RuntimeException("Rol no encontrado con id " + 2));
 
-		usuario.setRol(rol);
+		// 🔥 CAMBIO: Agregar a la lista en lugar de setRol()
+		usuario.getRolesUsuario().add(rol);
 		usuarioRepository.save(usuario);
 
-		// 3. Resolver especialidades (puede ser lista vacía)
+		// 3. Resolver especialidades (el resto igual)
 		List<Especialidad> especialidades = new ArrayList<>();
 		if (abogadoDTO.getEspecialidadesAbogado() != null && !abogadoDTO.getEspecialidadesAbogado().isEmpty()) {
 			for (Long espId : abogadoDTO.getEspecialidadesAbogado()) {

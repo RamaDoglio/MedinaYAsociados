@@ -2,9 +2,13 @@ package com.medina.asocDev.Medina.Asociados.service;
 
 import com.medina.asocDev.Medina.Asociados.dto.RolDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Rol;
+import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 import com.medina.asocDev.Medina.Asociados.repo.RolRepository;
+import com.medina.asocDev.Medina.Asociados.repo.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +19,49 @@ public class RolService {
 
     @Autowired
     private RolRepository rolRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    // 🔥 NUEVO: Asignar rol a usuario
+    @Transactional
+    public void asignarRol(Long userId, Long rolId) {
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + userId));
+        Rol rol = rolRepository.findById(rolId)
+                .orElseThrow(() -> new EntityNotFoundException("Rol no encontrado: " + rolId));
+
+        // Verificar si ya tiene el rol
+        if (!usuario.getRolesUsuario().contains(rol)) {
+            usuario.getRolesUsuario().add(rol);
+            usuarioRepository.save(usuario);
+        }
+    }
+
+    // 🔥 NUEVO: Remover rol de usuario
+    @Transactional
+    public void removerRol(Long userId, Long rolId) {
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + userId));
+        Rol rol = rolRepository.findById(rolId)
+                .orElseThrow(() -> new EntityNotFoundException("Rol no encontrado: " + rolId));
+
+        // Remover si existe
+        if (usuario.getRolesUsuario().contains(rol)) {
+            usuario.getRolesUsuario().remove(rol);
+            usuarioRepository.save(usuario);
+        }
+    }
+
+    // 🔥 NUEVO: Obtener roles de usuario
+    public List<String> getRolesByUserId(Long userId) {
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + userId));
+
+        return usuario.getRolesUsuario().stream()
+                .map(Rol::getNombre)
+                .collect(Collectors.toList());
+    }
 
     // Crear nuevo rol
     public RolDTO createRol(RolDTO rolDTO) {

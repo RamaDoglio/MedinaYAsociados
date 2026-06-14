@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -27,16 +28,21 @@ public class CustomUserDetailsService implements UserDetailsService {
         Usuario usuario = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
+        // 🔥 CAMBIO: Obtener TODOS los roles de la lista
         List<GrantedAuthority> authorities = new ArrayList<>();
-        if (usuario.getRol() != null && usuario.getRol().getNombre() != null) {
-            authorities.add(new SimpleGrantedAuthority(usuario.getRol().getNombre()));
+
+        if (usuario.getRolesUsuario() != null && !usuario.getRolesUsuario().isEmpty()) {
+            // Tiene roles asignados
+            authorities = usuario.getRolesUsuario().stream()
+                    .map(rol -> new SimpleGrantedAuthority(rol.getNombre()))
+                    .collect(Collectors.toList());
         } else {
+            // Rol por defecto
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         }
 
-        // 🔥 AGREGAR ESTO: CustomUserDetails con ID
         return new CustomUserDetails(
-                usuario.getIdUsuario(),  // ← ID del usuario
+                usuario.getIdUsuario(),
                 usuario.getEmail(),
                 usuario.getPassword(),
                 authorities

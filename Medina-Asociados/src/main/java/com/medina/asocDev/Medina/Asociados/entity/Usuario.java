@@ -33,9 +33,13 @@ public class Usuario {
 
     private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idRol", nullable = false)
-    private Rol rol;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "usuarioXrol",
+            joinColumns = @JoinColumn(name = "idUsuario"),
+            inverseJoinColumns = @JoinColumn(name = "idRol")
+    )
+    private List<Rol> rolesUsuario = new ArrayList<>();
 
     @OneToMany(mappedBy = "clienteTurno", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Turno> listaTurnos= new ArrayList<>();
@@ -61,9 +65,6 @@ public class Usuario {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
-
-    public Rol getRol() { return rol; }
-    public void setRol(Rol rol) { this.rol = rol; }
 
     public List<Turno> getListaTurnos() { return listaTurnos; }
     public void setListaTurnos(List<Turno> listaTurnos) { this.listaTurnos = listaTurnos; }

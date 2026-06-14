@@ -50,9 +50,9 @@ public class UsuarioService implements IUserService {
 
 	public MensajeResponse createUsuario(RegisterDTO registerDTO) {
 		// Rol por defecto (ej: cliente)
-		Rol rol = rolRepository.findById(registerDTO.getIdRol())
+		Rol rol = rolRepository.findByNombre("CLIENTE")
 				.orElseThrow(() -> new RuntimeException(
-						"Rol no encontrado con id " + registerDTO.getIdRol()));
+						"Rol no encontrado el rol"));
 
 		// Dirección: si viene en el DTO, la mapeamos con Utils
 		Direccion direccion = null;
@@ -97,7 +97,7 @@ public class UsuarioService implements IUserService {
 				.orElse(usuarioRepository.findByTelefono(clienteRequest.getTelefono()).orElse(null));
 
 		if (usuarioExistente != null) {
-			return usuarioExistente;  // Reutilizar si existe
+			return usuarioExistente;
 		}
 
 		// Crear nuevo usuario
@@ -108,21 +108,17 @@ public class UsuarioService implements IUserService {
 		nuevoUsuario.setTelefono(clienteRequest.getTelefono());
 		nuevoUsuario.setEmail(clienteRequest.getEmail());
 
-		// Manejo de dirección (basado en createUsuario)
+		// Manejo de dirección
 		Direccion direccion = null;
 		if (clienteRequest.getDireccion() != null) {
-			DireccionDTO direccionDTO = clienteRequest.getDireccion();  // Asumiendo que DireccionRequest es compatible o mapea a DireccionDTO
+			DireccionDTO direccionDTO = clienteRequest.getDireccion();
 
-			// Caso 1: la dirección ya existe (viene con id)
 			if (direccionDTO.getIdDireccion() != null) {
 				direccion = direccionRepository.findById(direccionDTO.getIdDireccion())
 						.orElseThrow(() -> new EntityNotFoundException("Dirección no encontrada"));
-			}
-			// Caso 2: dirección nueva
-			else {
+			} else {
 				direccion = Utils.mapDireccionDTOToEntity(direccionDTO);
 
-				// Localidad: solo seteamos el id si viene
 				if (direccionDTO.getLocalidad() != null) {
 					Localidad localidad = new Localidad();
 					localidad.setIdLocalidad(direccionDTO.getLocalidad());
@@ -134,13 +130,14 @@ public class UsuarioService implements IUserService {
 		}
 		nuevoUsuario.setDireccion(direccion);
 
-		// Generar contraseña automática (ej. teléfono + nombre, luego hashearla)
+		// Generar contraseña automática
 		String passwordPlana = clienteRequest.getTelefono() + clienteRequest.getNombre().toLowerCase();
 		nuevoUsuario.setPassword(passwordEncoder.encode(passwordPlana));
 
-		// Asignar rol CLIENTE
-		Rol rolCliente = rolRepository.findByNombre("CLIENTE").orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado"));
-		nuevoUsuario.setRol(rolCliente);
+		// 🔥 CAMBIO: Asignar rol CLIENTE a la lista
+		Rol rolCliente = rolRepository.findByNombre("CLIENTE")
+				.orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado"));
+		nuevoUsuario.getRolesUsuario().add(rolCliente);
 
 		return usuarioRepository.save(nuevoUsuario);
 	}
@@ -161,19 +158,26 @@ public class UsuarioService implements IUserService {
 			var usuario = usuarioRepository.findByEmail(loginRequest.getEmail())
 					.orElseThrow(() -> new OurException("user Not found"));
 
-			// ⭐ 3. CREAR UserDetails CORRECTO (SOLUCIÓN)
+			// 3. Obtener todos los roles del usuario
+			List<String> roles = usuario.getRolesUsuario()
+					.stream()
+					.map(Rol::getNombre)
+					.collect(Collectors.toList());
+
+			// 4. Crear UserDetails con todos los roles
 			UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
 					.username(usuario.getEmail())
 					.password(usuario.getPassword())
-					.authorities(usuario.getRol().getNombre())
+					.authorities(roles.toArray(new String[0]))
 					.build();
 
-			// 4. Generar JWT
+			// 5. Generar JWT
 			var token = jwtUtils.generateToken(userDetails);
 
+			// 6. Armar respuesta
 			response.setStatusCode(200);
 			response.setToken(token);
-			response.setRole(usuario.getRol().getNombre());
+			response.setRoles(roles);
 			response.setExpirationTime("7 Days");
 			response.setMessage("successful");
 
@@ -189,6 +193,7 @@ public class UsuarioService implements IUserService {
 		}
 		return response;
 	}
+
 
 	@Override
 	public Response getMyInfo(String email) {

@@ -44,8 +44,9 @@ public class Utils {
         usuarioDTO.setEmail(usuario.getEmail());
         usuarioDTO.setPassword(usuario.getPassword());
 
-        if (usuario.getRol() != null) {
-            usuarioDTO.setIdRol(usuario.getRol().getIdRol());
+        // 🔥 CAMBIO: Obtener rol de la lista (primer rol o null)
+        if (usuario.getRolesUsuario() != null && !usuario.getRolesUsuario().isEmpty()) {
+            usuarioDTO.setIdRol(usuario.getRolesUsuario().get(0).getIdRol());
         }
 
         if (usuario.getDireccion() != null) {
@@ -119,14 +120,15 @@ public class Utils {
     }
 
     //Usuario con Turno
-    public static UsuarioDTO mapUsuarioEntityToDTOxTurnos(Usuario usuario){
+    public static UsuarioDTO mapUsuarioEntityToDTOxTurnos(Usuario usuario) {
         if (usuario == null) return null;
         UsuarioDTO userDTO;
 
-        userDTO = mapUserEntityToUserDTO(usuario);
+        userDTO = mapUserEntityToUserDTO(usuario); // Ya incluye el cambio anterior
 
-        if (usuario.getRol() != null) {
-            userDTO.setIdRol(usuario.getRol().getIdRol());
+        // 🔥 CAMBIO: Obtener rol de la lista (el resto igual)
+        if (usuario.getRolesUsuario() != null && !usuario.getRolesUsuario().isEmpty()) {
+            userDTO.setIdRol(usuario.getRolesUsuario().get(0).getIdRol());
         }
 
         if (usuario.getDireccion() != null) {
@@ -280,8 +282,13 @@ public class Utils {
         usuario.setDni(registerDTO.getDni());
         usuario.setEmail(registerDTO.getEmail());
         usuario.setTelefono(registerDTO.getTelefono());
-        usuario.setPassword(registerDTO.getPassword()); // 🔒 después encriptás antes de persistir
-        usuario.setRol(rol);
+        usuario.setPassword(registerDTO.getPassword());
+
+        // 🔥 CAMBIO: Agregar rol a la lista
+        if (rol != null) {
+            usuario.getRolesUsuario().add(rol);
+        }
+
         usuario.setDireccion(direccion);
         return usuario;
     }
@@ -322,7 +329,12 @@ public class Utils {
         usuario.setEmail(usuarioDTO.getEmail());
         usuario.setTelefono(usuarioDTO.getTelefono());
         usuario.setPassword(usuarioDTO.getPassword());
-        usuario.setRol(rol);
+
+        // 🔥 CAMBIO: Agregar rol a la lista
+        if (rol != null) {
+            usuario.getRolesUsuario().add(rol);
+        }
+
         usuario.setDireccion(direccion);
         return usuario;
     }
@@ -437,9 +449,9 @@ public class Utils {
             dto.setDireccion(direccionDTO);
         }
 
-        // Rol si existe
-        if (usuario.getRol() != null) {
-            dto.setIdRol(usuario.getRol().getIdRol());
+        // 🔥 CAMBIO: Obtener rol de la lista
+        if (usuario.getRolesUsuario() != null && !usuario.getRolesUsuario().isEmpty()) {
+            dto.setIdRol(usuario.getRolesUsuario().get(0).getIdRol());
         }
 
         return dto;
