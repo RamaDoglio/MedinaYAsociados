@@ -14,6 +14,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -127,7 +128,7 @@ public class DataInitializer implements CommandLineRunner {
                     usuario.setDni(dni);
                     usuario.setTelefono(telefono);
                     usuario.setEmail(email);
-                    usuario.setRol(rol);
+                    usuario.setRolesUsuario((List<Rol>) rol);
                     usuario.setPassword("demo");
                     return usuarioRepository.save(usuario);
                 });

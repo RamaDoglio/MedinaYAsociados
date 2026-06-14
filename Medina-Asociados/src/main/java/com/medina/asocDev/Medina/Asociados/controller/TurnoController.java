@@ -29,6 +29,7 @@ public class TurnoController {
     }
 
     @PostMapping("/{id}/pagar")
+    @PreAuthorize("@securityService.canAccessClienteTurnos(authentication, #idCliente)")
     public ResponseEntity<String> pagarTurno(@PathVariable Long id) {
         String initPoint = turnoService.pagarTurno(id);
         return ResponseEntity.ok(initPoint);
@@ -78,6 +79,7 @@ public class TurnoController {
 
     // 🔥 Marcar no asistió
     @PostMapping("/{id}/noAsistio")
+    @PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
     public ResponseEntity<TurnoDTO> marcarNoAsistio(@PathVariable Long id) {
         return ResponseEntity.ok(turnoService.marcarNoAsistio(id));
     }
@@ -89,6 +91,7 @@ public class TurnoController {
 
     // 🔥 Finalizar turno
     @PostMapping("/{id}/finalizar")
+    @PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
     public ResponseEntity<TurnoDTO> finalizarTurno(@PathVariable Long id) {
         return ResponseEntity.ok(turnoService.finalizarTurno(id));
     }
@@ -110,6 +113,7 @@ public class TurnoController {
 
     // Detalle para cliente
     @GetMapping("/{id}/detalle-cliente")
+    @PreAuthorize("@securityService.canAccessClienteTurnos(authentication, #idCliente)")
     public ResponseEntity<TurnoDetalleDTO> obtenerDetalleTurnoCliente(@PathVariable Long id) {
         Turno turno = turnoService.obtenerPorId(id);
         return ResponseEntity.ok(Utils.mapTurnoToDetalleDTOParaCliente(turno));
@@ -117,11 +121,13 @@ public class TurnoController {
 
     // Detalle para abogado
     @GetMapping("/{id}/detalle-abogado")
+    @PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
     public ResponseEntity<TurnoDetalleDTO> obtenerDetalleTurnoAbogado(@PathVariable Long id) {
         Turno turno = turnoService.obtenerPorId(id);
         return ResponseEntity.ok(Utils.mapTurnoToDetalleDTOParaAbogado(turno));
     }
     @PutMapping("/{id}/observaciones-abogado")
+    @PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
     public ResponseEntity<TurnoDTO> agregarObservacionesAbogado(
             @PathVariable Long id,
             @RequestBody String observaciones) {
@@ -130,7 +136,7 @@ public class TurnoController {
     }
 
     @PostMapping("/offline")
-    //@PreAuthorize("hasRole('ADMIN') or hasRole('ABOGADO')")
+    @PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
     public ResponseEntity<TurnoDTO> createTurnoOffline(@RequestBody TurnoOfflineRequest request) {
         try {
             TurnoDTO turno = turnoService.createTurnoOffline(request);

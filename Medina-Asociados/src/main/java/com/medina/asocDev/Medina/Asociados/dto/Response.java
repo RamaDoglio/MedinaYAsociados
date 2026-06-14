@@ -15,7 +15,7 @@ public class Response {
     private String message;
 
     private String token;
-    private String role;
+    private List<String> roles; // ahora es una lista
     private String expirationTime;
 
     private UsuarioDTO user;
@@ -24,5 +24,14 @@ public class Response {
 
     public void setData(Object data) {
         this.data = data;
+    }
+
+    // getters y setters
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }

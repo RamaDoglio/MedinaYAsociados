@@ -7,6 +7,7 @@ import com.medina.asocDev.Medina.Asociados.dto.UsuarioDTO;
 import com.medina.asocDev.Medina.Asociados.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class UsuarioController {
 	}
 
 	@GetMapping
+	@PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
 	public ResponseEntity<Response> getAllUsers() {  // ← Cambia a Response
 		Response response = usuarioService.getAllUsers();
 		return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -39,6 +41,7 @@ public class UsuarioController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("@securityService.isAdmin(authentication)")
 	public ResponseEntity<UsuarioDTO> updateUser(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO) {
 		UsuarioDTO actualizado = usuarioService.updateUser(id, usuarioDTO);
 		if (actualizado == null) {
@@ -48,6 +51,7 @@ public class UsuarioController {
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("@securityService.isAdmin(authentication)")
 	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
 		boolean borrado = usuarioService.deleteUserInternal(id);
 		if (borrado) {

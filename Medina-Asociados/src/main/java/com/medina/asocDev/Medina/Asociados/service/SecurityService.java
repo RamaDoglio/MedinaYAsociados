@@ -47,13 +47,6 @@ public class SecurityService {
         return isOwner(authentication, idAbogado) || isAdmin(authentication) || isAbogado(authentication);
     }
 
-    // 🔥 NUEVO: Cliente puede ver turnos de su abogado asignado
-    public boolean isClienteDelAbogado(Authentication authentication, Long idAbogado) {
-        // Lógica adicional si necesitas verificar relación cliente-abogado
-        // Por ahora: cliente autenticado + abogado específico
-        return isCliente(authentication);
-    }
-
     // 🔥 UTIL: Verificar múltiples roles
     public boolean hasAnyRole(Authentication authentication, String... roles) {
         return Arrays.stream(roles).anyMatch(role ->
