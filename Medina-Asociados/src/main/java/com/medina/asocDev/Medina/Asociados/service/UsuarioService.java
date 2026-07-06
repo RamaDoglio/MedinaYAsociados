@@ -2,6 +2,7 @@ package com.medina.asocDev.Medina.Asociados.service;
 
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,8 @@ import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +29,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.medina.asocDev.Medina.Asociados.entity.TokenBlacklisted;
 import com.medina.asocDev.Medina.Asociados.entity.Usuario;
+import com.medina.asocDev.Medina.Asociados.repo.TokenBlacklistedRepository;
+import com.medina.asocDev.Medina.Asociados.repo.TurnoRepository;
 import com.medina.asocDev.Medina.Asociados.repo.UsuarioRepository;
 
 @Service
@@ -46,6 +52,12 @@ public class UsuarioService implements IUserService {
 	private JWTUtils jwtUtils;
 	@Autowired
 	private AuthenticationManager authenticationManager;
+
+	@Autowired
+	private TokenBlacklistedRepository tokenBlacklistedRepository;
+
+	@Autowired
+	private TurnoRepository turnoRepository;
 
 
 	public MensajeResponse createUsuario(RegisterDTO registerDTO) {
@@ -254,6 +266,11 @@ public class UsuarioService implements IUserService {
 		}
 	}
 
+	public Page<UsuarioDTO> getAllUsers(Pageable pageable) {
+		return usuarioRepository.findAll(pageable)
+				.map(Utils::mapUserEntityToUserDTO);
+	}
+
 	@Override
 	public Response register(Usuario user) {
 		// Convierte Usuario a RegisterDTO o adapta la lógica
@@ -339,6 +356,92 @@ public class UsuarioService implements IUserService {
 		return usuarioRepository.findById(id)
 				.map(Utils::mapUserEntityToUserDTO)
 				.orElse(null);
+	}
+
+	public Response buscarPorDni(String dni) {
+		Response response = new Response();
+		try {
+			List<Usuario> usuarios = usuarioRepository.findByDniStartingWithAndRolCliente(dni);
+			List<UsuarioDTO> usuariosDTO = usuarios.stream()
+					.map(u -> {
+						UsuarioDTO dto = Utils.mapUserEntityToUserDTO(u);
+						dto.setPassword(null);
+						dto.setIdRol(null);
+						return dto;
+					})
+					.collect(Collectors.toList());
+			response.setStatusCode(200);
+			response.setData(usuariosDTO);
+			response.setMessage("Usuarios encontrados: " + usuariosDTO.size());
+		} catch (Exception e) {
+			response.setStatusCode(500);
+			response.setMessage("Error al buscar usuarios por DNI: " + e.getMessage());
+		}
+		return response;
+	}
+
+	public Page<UsuarioDTO> buscarPorDni(String dni, Pageable pageable) {
+		return usuarioRepository.findByDniStartingWithAndRolCliente(dni, pageable)
+				.map(u -> {
+					UsuarioDTO dto = Utils.mapUserEntityToUserDTO(u);
+					dto.setPassword(null);
+					dto.setIdRol(null);
+					return dto;
+				});
+	}
+
+	public Response getClienteDetalle(Long id) {
+		Response response = new Response();
+		try {
+			Usuario usuario = usuarioRepository.findById(id)
+					.orElseThrow(() -> new OurException("Cliente no encontrado"));
+
+			ClienteDetalleDTO detalle = new ClienteDetalleDTO();
+			detalle.setIdUsuario(usuario.getIdUsuario());
+			detalle.setNombre(usuario.getNombre());
+			detalle.setApellido(usuario.getApellido());
+			detalle.setDni(usuario.getDni());
+			detalle.setTelefono(usuario.getTelefono());
+			detalle.setEmail(usuario.getEmail());
+			if (usuario.getDireccion() != null) {
+				detalle.setDireccion(Utils.mapDireccionEntityToDTO(usuario.getDireccion()));
+				if (usuario.getDireccion().getLocalidad() != null) {
+					detalle.setLocalidad(Utils.mapLocalidadEntityToDTO(usuario.getDireccion().getLocalidad()));
+				}
+			}
+
+			List<String> estadosFinales = List.of("FINALIZADO", "NO_ASISTIO",
+					"CANCELADO_SIN_REEMBOLSO", "CANCELADO_CON_REEMBOLSO", "EXPIRO_PAGO");
+			List<EstadisticaDTO> turnosPorEstado = turnoRepository.countTurnosByClienteAndEstados(id, estadosFinales);
+			detalle.setTurnosPorEstado(turnosPorEstado);
+
+			response.setStatusCode(200);
+			response.setData(detalle);
+			response.setMessage("Detalle del cliente obtenido correctamente");
+		} catch (OurException e) {
+			response.setStatusCode(404);
+			response.setMessage(e.getMessage());
+		} catch (Exception e) {
+			response.setStatusCode(500);
+			response.setMessage("Error al obtener detalle del cliente: " + e.getMessage());
+		}
+		return response;
+	}
+
+	@Transactional
+	public MensajeResponse logout(String token) {
+		if (tokenBlacklistedRepository.findByToken(token).isPresent()) {
+			return new MensajeResponse("La sesión ya fue cerrada");
+		}
+
+		Date expiracion = jwtUtils.extractExpiration(token);
+
+		TokenBlacklisted tokenBlacklisted = new TokenBlacklisted();
+		tokenBlacklisted.setToken(token);
+		tokenBlacklisted.setFechaExpiracion(expiracion);
+		tokenBlacklistedRepository.save(tokenBlacklisted);
+
+		return new MensajeResponse("Sesión cerrada exitosamente");
 	}
 }
 

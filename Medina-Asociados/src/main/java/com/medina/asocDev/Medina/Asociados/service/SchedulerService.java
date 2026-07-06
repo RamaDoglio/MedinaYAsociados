@@ -5,6 +5,7 @@ import com.medina.asocDev.Medina.Asociados.entity.HistorialTurno;
 import com.medina.asocDev.Medina.Asociados.entity.Turno;
 import com.medina.asocDev.Medina.Asociados.repo.EstadoRepository;
 import com.medina.asocDev.Medina.Asociados.repo.HistorialTurnoRepository;
+import com.medina.asocDev.Medina.Asociados.repo.TokenBlacklistedRepository;
 import com.medina.asocDev.Medina.Asociados.repo.TurnoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +34,9 @@ public class SchedulerService {
 
     @Autowired
     private EstadoRepository estadoRepository;
+
+    @Autowired
+    private TokenBlacklistedRepository tokenBlacklistedRepository;
 
     // Expirar turnos reservados que no se pagaron en 15 minutos
     @Scheduled(fixedDelay = 60000) // espera 1 minuto después de terminar
@@ -79,6 +84,13 @@ public class SchedulerService {
                 }
             }
         }
+    }
+
+    // Limpiar tokens expirados de la blacklist (todos los días a las 3 AM)
+    @Scheduled(cron = "0 0 3 * * ?")
+    @Transactional
+    public void limpiarTokenBlacklist() {
+        tokenBlacklistedRepository.deleteByFechaExpiracionBefore(new Date());
     }
 
 }

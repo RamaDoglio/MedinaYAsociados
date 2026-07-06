@@ -5,6 +5,9 @@ import com.medina.asocDev.Medina.Asociados.dto.AbogadoEspecialidadesDTO;
 import com.medina.asocDev.Medina.Asociados.dto.AbogadoMatriculaDTO;
 import com.medina.asocDev.Medina.Asociados.service.AbogadoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,10 +33,10 @@ public class AbogadoController {
 		return ResponseEntity.ok(creado);
 	}
 
-	// Listar todos los abogados
+	// Listar todos los abogados (paginado, max 10 por pagina)
 	@GetMapping
-	public ResponseEntity<List<AbogadoDTO>> getAll() {
-		return ResponseEntity.ok(abogadoService.getAll());
+	public ResponseEntity<Page<AbogadoDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
+		return ResponseEntity.ok(abogadoService.getAll(pageable));
 	}
 
 	// Obtener abogado por ID
@@ -71,11 +74,12 @@ public class AbogadoController {
 		else return ResponseEntity.notFound().build();
 	}
 
-	// Obtener abogados por id de especialidad
+	// Obtener abogados por id de especialidad (paginado, max 10 por pagina)
 	@GetMapping("/especialidad/{idEspecialidad}")
-	public ResponseEntity<List<AbogadoDTO>> getAbogadosByEspecialidad(@PathVariable Long idEspecialidad) {
-		List<AbogadoDTO> abogados = abogadoService.getAbogadosByEspecialidad(idEspecialidad);
-		return ResponseEntity.ok(abogados);
+	public ResponseEntity<Page<AbogadoDTO>> getAbogadosByEspecialidad(
+			@PathVariable Long idEspecialidad,
+			@PageableDefault(size = 10) Pageable pageable) {
+		return ResponseEntity.ok(abogadoService.getAbogadosByEspecialidad(idEspecialidad, pageable));
 	}
 
 	@GetMapping("/{idAbogado}/horarios-disponibles")

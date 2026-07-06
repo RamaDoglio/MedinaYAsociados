@@ -5,13 +5,13 @@ import com.medina.asocDev.Medina.Asociados.dto.LogInRequest;
 import com.medina.asocDev.Medina.Asociados.dto.MensajeResponse;
 import com.medina.asocDev.Medina.Asociados.dto.RegisterDTO;
 import com.medina.asocDev.Medina.Asociados.dto.Response;
-import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 import com.medina.asocDev.Medina.Asociados.service.UsuarioService;
 import com.medina.asocDev.Medina.Asociados.service.interfac.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,5 +35,15 @@ public class AuthController {
     public ResponseEntity<Response> login(@RequestBody LogInRequest loginRequest) {
         Response response = usuarioService.login(loginRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<MensajeResponse> logout(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(new MensajeResponse("Token no proporcionado"));
+        }
+        String token = authHeader.substring(7);
+        MensajeResponse response = usuarioService.logout(token);
+        return ResponseEntity.ok(response);
     }
 }

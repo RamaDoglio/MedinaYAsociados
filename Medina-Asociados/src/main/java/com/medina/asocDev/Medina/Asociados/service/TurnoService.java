@@ -9,6 +9,8 @@ import com.medina.asocDev.Medina.Asociados.repo.*;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -147,9 +149,9 @@ public class TurnoService {
         return Utils.mapTurnoEntityToDTO(turnoGuardado);
     }
 
-    //Listar todos los turnos
-    public List<Turno> listarTurnos() {
-        return turnoRepository.findAll();
+    //Listar todos los turnos (paginado, max 10 por pagina)
+    public Page<Turno> listarTurnos(Pageable pageable) {
+        return turnoRepository.findAll(pageable);
     }
 
     //Obtener turno por ID
@@ -358,20 +360,16 @@ public class TurnoService {
         return Utils.mapTurnoEntityToDTO(turnoRepository.save(turno));
     }
 
-    // Listar turnos de un cliente
-    public List<TurnoListadoDTO> listarTurnosPorCliente(Long idCliente) {
-        return turnoRepository.findByClienteTurno_IdUsuario(idCliente)
-                .stream()
-                .map(Utils::mapTurnoToListadoDTOParaCliente)
-                .collect(Collectors.toList());
+    // Listar turnos de un cliente (paginado, max 10 por pagina)
+    public Page<TurnoListadoDTO> listarTurnosPorCliente(Long idCliente, Pageable pageable) {
+        return turnoRepository.findByClienteTurno_IdUsuario(idCliente, pageable)
+                .map(Utils::mapTurnoToListadoDTOParaCliente);
     }
 
-    // Listar turnos de un abogado
-    public List<TurnoListadoDTO> listarTurnosPorAbogado(Long idAbogado) {
-        return turnoRepository.findByAbogadoTurno_IdUsuario(idAbogado)
-                .stream()
-                .map(Utils::mapTurnoToListadoDTOParaAbogado)
-                .collect(Collectors.toList());
+    // Listar turnos de un abogado (paginado, max 10 por pagina)
+    public Page<TurnoListadoDTO> listarTurnosPorAbogado(Long idAbogado, Pageable pageable) {
+        return turnoRepository.findByAbogadoTurno_IdUsuario(idAbogado, pageable)
+                .map(Utils::mapTurnoToListadoDTOParaAbogado);
     }
 
     @Transactional
@@ -383,5 +381,45 @@ public class TurnoService {
         return Utils.mapTurnoEntityToDTO(actualizado);
     }
 
+    @Transactional
+    public TurnoDTO marcarPagado(Long idTurno) {
+        Turno turno = obtenerPorId(idTurno);
+
+        // Validaciones de estado
+        String estadoActual = turno.getEstadoActual().getNombreEstado();
+        if (!"RESERVADO".equals(estadoActual) && !"PENDIENTE_COBRO".equals(estadoActual)) {
+            throw new IllegalStateException("Solo un turno reservado o pendiente de cobro puede marcarse como pagado");
+        }
+
+        // Evitar doble marcado
+        if (turno.getCobro() != null && turno.getCobro().getEstadoCobro() != null
+                && ("PAGADO".equals(turno.getCobro().getEstadoCobro().getNombreEstado())
+                || "PAGADO EFECTIVO/TRANSFERENCIA".equals(turno.getCobro().getEstadoCobro().getNombreEstado()))) {
+            throw new IllegalStateException("El cobro ya está marcado como pagado");
+        }
+
+        // 1) Actualizar cobro a PAGADO EFECTIVO/TRANSFERENCIA
+        Cobro cobro = turno.getCobro();
+        if (cobro == null) {
+            cobro = new Cobro();
+            cobro.setImporteTotal(Float.valueOf(parametroService.getValor("PRECIO_TURNO")));
+            turno.setCobro(cobro);
+        }
+        cobroService.marcarComoPagadoEfectivoTransferencia(cobro);
+
+        // 2) Actualizar estado del turno a PAGADO y registrar historial
+        Estado estadoTurnoPagado = estadoRepository.findByNombreAndAmbito("PAGADO", "TURNO")
+                .orElseThrow(() -> new RuntimeException("Estado PAGADO de TURNO no encontrado"));
+
+        Estado anterior = turno.getEstadoActual();
+        turno.setEstadoActual(estadoTurnoPagado);
+
+        historialTurnoService.registrarCambio(turno, anterior, estadoTurnoPagado);
+
+        Turno guardado = turnoRepository.save(turno);
+
+
+        return Utils.mapTurnoEntityToDTO(guardado);
+    }
 
 }

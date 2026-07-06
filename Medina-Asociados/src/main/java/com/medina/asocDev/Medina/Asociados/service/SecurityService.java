@@ -22,19 +22,17 @@ public class SecurityService {
 
     public boolean isAdmin(Authentication authentication) {
         return authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
     }
 
-    // 🔥 NUEVO: Verificar si es CLIENTE
     public boolean isCliente(Authentication authentication) {
         return authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CLIENTE"));
+                .anyMatch(a -> a.getAuthority().equals("CLIENTE"));
     }
 
-    // 🔥 NUEVO: Verificar si es ABOGADO
     public boolean isAbogado(Authentication authentication) {
         return authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ABOGADO"));
+                .anyMatch(a -> a.getAuthority().equals("ABOGADO"));
     }
 
     // 🔥 NUEVO: Cliente puede ver sus propios turnos
@@ -45,6 +43,11 @@ public class SecurityService {
     // 🔥 NUEVO: Abogado puede ver sus propios turnos
     public boolean canAccessAbogadoTurnos(Authentication authentication, Long idAbogado) {
         return isOwner(authentication, idAbogado) || isAdmin(authentication) || isAbogado(authentication);
+    }
+
+    // Cliente puede ver su propio detalle; abogados y admins pueden ver cualquier detalle
+    public boolean canAccessClienteDetalle(Authentication authentication, Long idCliente) {
+        return isAdmin(authentication) || isAbogado(authentication) || isOwner(authentication, idCliente);
     }
 
     // 🔥 UTIL: Verificar múltiples roles

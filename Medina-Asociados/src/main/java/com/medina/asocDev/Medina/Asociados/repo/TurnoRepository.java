@@ -2,6 +2,8 @@ package com.medina.asocDev.Medina.Asociados.repo;
 
 import com.medina.asocDev.Medina.Asociados.dto.EstadisticaDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Turno;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,9 +20,11 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
 
     // Turnos de un cliente
     List<Turno> findByClienteTurno_IdUsuario(Long idCliente);
+    Page<Turno> findByClienteTurno_IdUsuario(Long idCliente, Pageable pageable);
 
     // Turnos de un abogado
     List<Turno> findByAbogadoTurno_IdUsuario(Long idAbogado);
+    Page<Turno> findByAbogadoTurno_IdUsuario(Long idAbogado, Pageable pageable);
 
     // Turnos futuros de un abogado (a partir de una fecha)
     List<Turno> findByAbogadoTurno_IdUsuarioAndHorarioTurnoAfter(Long idAbogado, LocalDateTime fecha);
@@ -79,4 +83,11 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
     @Query("SELECT new com.medina.asocDev.Medina.Asociados.dto.EstadisticaDTO(t.especialidad.nombreEspecialidad, COUNT(t)) " +
             "FROM Turno t GROUP BY t.especialidad.nombreEspecialidad")
     List<EstadisticaDTO> getTurnosPorEspecialidad();
+
+    @Query("SELECT new com.medina.asocDev.Medina.Asociados.dto.EstadisticaDTO(t.estadoActual.nombreEstado, COUNT(t)) " +
+            "FROM Turno t " +
+            "WHERE t.clienteTurno.idUsuario = :idCliente " +
+            "AND t.estadoActual.nombreEstado IN :estados " +
+            "GROUP BY t.estadoActual.nombreEstado")
+    List<EstadisticaDTO> countTurnosByClienteAndEstados(@Param("idCliente") Long idCliente, @Param("estados") List<String> estados);
 }

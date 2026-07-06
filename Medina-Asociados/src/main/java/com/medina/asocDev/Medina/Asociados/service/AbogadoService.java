@@ -5,6 +5,8 @@ import com.medina.asocDev.Medina.Asociados.entity.*;
 import com.medina.asocDev.Medina.Asociados.repo.*;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -33,12 +35,12 @@ public class AbogadoService {
 		Usuario usuario = usuarioRepository.findById(idUsuario)
 				.orElseThrow(() -> new RuntimeException("Usuario no encontrado con id " + idUsuario));
 
-		// 2. Cambiar rol a ABOGADO (agregar a la lista)
-		Rol rol = rolRepository.findById(2L)
-				.orElseThrow(() -> new RuntimeException("Rol no encontrado con id " + 2));
+		// 2. Cambiar rol a ABOGADO
+		Rol rolAbogado = rolRepository.findByNombre("ABOGADO")
+				.orElseThrow(() -> new RuntimeException("Rol ABOGADO no encontrado"));
 
-		// 🔥 CAMBIO: Agregar a la lista en lugar de setRol()
-		usuario.getRolesUsuario().add(rol);
+		usuario.getRolesUsuario().removeIf(r -> r.getNombre().equals("CLIENTE"));
+		usuario.getRolesUsuario().add(rolAbogado);
 		usuarioRepository.save(usuario);
 
 		// 3. Resolver especialidades (el resto igual)
@@ -57,13 +59,9 @@ public class AbogadoService {
 		return Utils.mapAbogadoEntityToDTOxUsuarioSinTurno(guardado);
 	}
 
-	public List<AbogadoDTO> getAll() {
-		List<Abogado> abogados = abogadoRepository.findAll();
-		List<AbogadoDTO> dtos = new ArrayList<>();
-		for (Abogado ab : abogados) {
-			dtos.add(Utils.mapAbogadoEntityToDTOxUsuarioSinTurno(ab));
-		}
-		return dtos;
+	public Page<AbogadoDTO> getAll(Pageable pageable) {
+		return abogadoRepository.findAll(pageable)
+				.map(Utils::mapAbogadoEntityToDTOxUsuarioSinTurno);
 	}
 
 	public AbogadoDTO getAbogadoById(Long id) {
@@ -102,13 +100,9 @@ public class AbogadoService {
 		}).orElse(null);
 	}
 
-	public List<AbogadoDTO> getAbogadosByEspecialidad(Long idEspecialidad) {
-		List<Abogado> abogados = abogadoRepository.findByEspecialidadesAbogado_IdEspecialidad(idEspecialidad);
-		List<AbogadoDTO> dtos = new ArrayList<>();
-		for (Abogado ab : abogados) {
-			dtos.add(Utils.mapAbogadoEntityToDTOxUsuarioSinTurno(ab));
-		}
-		return dtos;
+	public Page<AbogadoDTO> getAbogadosByEspecialidad(Long idEspecialidad, Pageable pageable) {
+		return abogadoRepository.findByEspecialidadesAbogado_IdEspecialidad(idEspecialidad, pageable)
+				.map(Utils::mapAbogadoEntityToDTOxUsuarioSinTurno);
 	}
 
 	public boolean esFinDeSemana(LocalDate fecha) {
