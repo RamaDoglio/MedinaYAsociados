@@ -6,6 +6,9 @@ import com.medina.asocDev.Medina.Asociados.entity.Turno;
 import com.medina.asocDev.Medina.Asociados.service.TurnoService;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,10 +38,10 @@ public class TurnoController {
         return ResponseEntity.ok(initPoint);
     }
 
-    // ✅ Listar todos
+    // ✅ Listar todos (paginado, max 10 por pagina)
     @GetMapping
-    public ResponseEntity<List<Turno>> listarTurnos() {
-        return ResponseEntity.ok(turnoService.listarTurnos());
+    public ResponseEntity<Page<Turno>> listarTurnos(@PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(turnoService.listarTurnos(pageable));
     }
 
     // ✅ Obtener por ID
@@ -96,18 +99,22 @@ public class TurnoController {
         return ResponseEntity.ok(turnoService.finalizarTurno(id));
     }
 
-    // Listado de turnos de un cliente
+    // Listado de turnos de un cliente (paginado, max 10 por pagina)
     @GetMapping("/cliente/{idCliente}")
     @PreAuthorize("@securityService.canAccessClienteTurnos(authentication, #idCliente)")
-    public ResponseEntity<List<TurnoListadoDTO>> listarTurnosPorCliente(@PathVariable Long idCliente) {
-        return ResponseEntity.ok(turnoService.listarTurnosPorCliente(idCliente));
+    public ResponseEntity<Page<TurnoListadoDTO>> listarTurnosPorCliente(
+            @PathVariable Long idCliente,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(turnoService.listarTurnosPorCliente(idCliente, pageable));
     }
 
-    // Listado de turnos de un abogado
+    // Listado de turnos de un abogado (paginado, max 10 por pagina)
     @GetMapping("/abogado/{idAbogado}")
     @PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
-    public ResponseEntity<List<TurnoListadoDTO>> listarTurnosPorAbogado(@PathVariable Long idAbogado) {
-        return ResponseEntity.ok(turnoService.listarTurnosPorAbogado(idAbogado));
+    public ResponseEntity<Page<TurnoListadoDTO>> listarTurnosPorAbogado(
+            @PathVariable Long idAbogado,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(turnoService.listarTurnosPorAbogado(idAbogado, pageable));
     }
 
 
@@ -147,4 +154,11 @@ public class TurnoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    @PostMapping("/{id}/marcar-pagado")
+    @PreAuthorize("@securityService.canAccessClienteTurnos(authentication, #id)")
+    public ResponseEntity<TurnoDTO> marcarPagado(@PathVariable("id") Long id) {
+        TurnoDTO turnoDTO = turnoService.marcarPagado(id);
+        return ResponseEntity.ok(turnoDTO);
+    }
+
 }

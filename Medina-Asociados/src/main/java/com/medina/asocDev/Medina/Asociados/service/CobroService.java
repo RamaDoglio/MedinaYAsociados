@@ -11,6 +11,7 @@ import com.medina.asocDev.Medina.Asociados.repo.TurnoRepository;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,5 +113,27 @@ public class CobroService {
 
 		return Utils.mapCobroEntityToDTO(cobroActualizado);
 	}
+
+	@Transactional
+	public CobroDTO marcarComoPagadoEfectivoTransferencia(Cobro cobro) {
+		// Idempotencia: si ya está marcado, devolver sin cambios o lanzar excepción según prefieras
+		if (cobro.getEstadoCobro() != null &&
+				"PAGADO EFECTIVO/TRANSFERENCIA".equals(cobro.getEstadoCobro().getNombreEstado())) {
+			return Utils.mapCobroEntityToDTO(cobro);
+		}
+
+		Estado estadoPagadoEfectivo = estadoRepository
+				.findByNombreAndAmbito("PAGADO EFECTIVO/TRANSFERENCIA", "COBRO")
+				.orElseThrow(() -> new RuntimeException("Estado PAGADO EFECTIVO/TRANSFERENCIA no encontrado"));
+
+		cobro.setEstadoCobro(estadoPagadoEfectivo);
+		Cobro cobroActualizado = cobroRepository.save(cobro);
+
+		// Crear detalle de cobro. Reemplazá 3L por el id correcto para EFECTIVO/TRANSFERENCIA
+		detalleCobroService.crearDetalleCobro(cobroActualizado.getIdCobro(), 3L);
+
+		return Utils.mapCobroEntityToDTO(cobroActualizado);
+	}
+
 }
 

@@ -3,9 +3,11 @@ package com.medina.asocDev.Medina.Asociados.controller;
 import com.medina.asocDev.Medina.Asociados.dto.DetalleCobroDTO;
 import com.medina.asocDev.Medina.Asociados.service.DetalleCobroService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/detalle-cobros")
@@ -15,8 +17,10 @@ public class DetalleCobroController {
     private DetalleCobroService detalleCobroService;
 
     @GetMapping("/cobro/{cobroId}")
-    public ResponseEntity<List<DetalleCobroDTO>> getDetallesPorCobro(@PathVariable Long cobroId) {
-        return ResponseEntity.ok(detalleCobroService.getDetallesPorCobro(cobroId));
+    public ResponseEntity<Page<DetalleCobroDTO>> getDetallesPorCobro(
+            @PathVariable Long cobroId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(detalleCobroService.getDetallesPorCobro(cobroId, pageable));
     }
 
     @GetMapping("/{id}")

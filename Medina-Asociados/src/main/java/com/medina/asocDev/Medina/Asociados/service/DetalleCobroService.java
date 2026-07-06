@@ -9,6 +9,8 @@ import com.medina.asocDev.Medina.Asociados.repo.TipoCobroRepository;
 import com.medina.asocDev.Medina.Asociados.repo.CobroRepository;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -53,13 +55,9 @@ public class DetalleCobroService {
         return Utils.mapDetalleCobroEntityToDTO(detalle);
     }
 
-    public List<DetalleCobroDTO> getDetallesPorCobro(Long idCobro) {
-        List<DetalleCobro> detalles = detalleCobroRepository.findByCobro_IdCobro(idCobro);
-        List<DetalleCobroDTO> dtos = new ArrayList<>();
-        for (DetalleCobro d : detalles) {
-            dtos.add(Utils.mapDetalleCobroEntityToDTO(d));
-        }
-        return dtos;
+    public Page<DetalleCobroDTO> getDetallesPorCobro(Long idCobro, Pageable pageable) {
+        return detalleCobroRepository.findByCobro_IdCobro(idCobro, pageable)
+                .map(Utils::mapDetalleCobroEntityToDTO);
     }
 
     public DetalleCobroDTO getDetalleCobroById(Long id) {

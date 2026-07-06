@@ -1,5 +1,6 @@
 package com.medina.asocDev.Medina.Asociados.security;
 
+import com.medina.asocDev.Medina.Asociados.repo.TokenBlacklistedRepository;
 import com.medina.asocDev.Medina.Asociados.service.CustomUserDetailsService;
 import com.medina.asocDev.Medina.Asociados.utils.JWTUtils;
 import jakarta.servlet.FilterChain;
@@ -26,6 +27,9 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
+    @Autowired
+    private TokenBlacklistedRepository tokenBlacklistedRepository;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
@@ -40,6 +44,11 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
         jwtToken = authHeader.substring(7);
         userEmail = jwtUtils.extractUsername(jwtToken);
+
+        if (tokenBlacklistedRepository.findByToken(jwtToken).isPresent()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(userEmail);

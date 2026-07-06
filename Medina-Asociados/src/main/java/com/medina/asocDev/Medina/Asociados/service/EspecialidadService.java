@@ -6,6 +6,8 @@ import com.medina.asocDev.Medina.Asociados.repo.EspecialidadRepository;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,18 +36,16 @@ public class EspecialidadService {
         return result;
     }
 
-    // Obtener todas las especialidades
-    public List<EspecialidadDTO> getAllEspecialidades() {
-        List<Especialidad> especialidades = especialidadRepository.findAll();
-        return especialidades.stream()
+    // Obtener todas las especialidades (paginado, max 10 por pagina)
+    public Page<EspecialidadDTO> getAllEspecialidades(Pageable pageable) {
+        return especialidadRepository.findAll(pageable)
                 .map(especialidad -> {
                     EspecialidadDTO dto = new EspecialidadDTO();
                     dto.setIdEspecialidad(especialidad.getIdEspecialidad());
                     dto.setNombreEspecialidad(especialidad.getNombreEspecialidad());
                     dto.setDescripcionEspecialidad(especialidad.getDescripcionEspecialidad());
                     return dto;
-                })
-                .collect(Collectors.toList());
+                });
     }
 
     // Obtener especialidad por ID

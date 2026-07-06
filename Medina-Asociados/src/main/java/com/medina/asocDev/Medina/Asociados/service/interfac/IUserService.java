@@ -1,6 +1,7 @@
 package com.medina.asocDev.Medina.Asociados.service.interfac;
 
 import com.medina.asocDev.Medina.Asociados.dto.LogInRequest;
+import com.medina.asocDev.Medina.Asociados.dto.MensajeResponse;
 import com.medina.asocDev.Medina.Asociados.dto.Response;
 import com.medina.asocDev.Medina.Asociados.entity.Usuario;
 
@@ -19,5 +20,4 @@ public interface IUserService {
     Response getUserById(String userId);
 
     Response getMyInfo(String email);
-
 }
