@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +29,8 @@ public class DetalleCobroService {
     @Autowired
     private CobroRepository cobroRepository;
 
-    public DetalleCobroDTO crearDetalleCobro(Long idCobro,Long tipoDetalle) {
+    @Transactional
+	public DetalleCobroDTO crearDetalleCobro(Long idCobro,Long tipoDetalle) {
         Cobro cobro = cobroRepository.findById(idCobro)
                 .orElseThrow(() -> new RuntimeException("Cobro no encontrado"));
 
@@ -66,7 +68,8 @@ public class DetalleCobroService {
                 .orElse(null);
     }
 
-    public DetalleCobroDTO updateDetalleCobro(Long id, DetalleCobroDTO dto) {
+    @Transactional
+	public DetalleCobroDTO updateDetalleCobro(Long id, DetalleCobroDTO dto) {
         return detalleCobroRepository.findById(id).map(detalle -> {
             detalle.setFecha(dto.getFecha());
             detalle.setDescripcionCobro(dto.getDescripcionCobro());
@@ -87,7 +90,8 @@ public class DetalleCobroService {
         }).orElse(null);
     }
 
-    public boolean deleteDetalleCobro(Long id) {
+    @Transactional
+	public boolean deleteDetalleCobro(Long id) {
         if (detalleCobroRepository.existsById(id)) {
             detalleCobroRepository.deleteById(id);
             return true;

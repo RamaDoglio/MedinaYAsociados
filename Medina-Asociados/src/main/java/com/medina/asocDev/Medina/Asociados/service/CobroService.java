@@ -1,11 +1,14 @@
 package com.medina.asocDev.Medina.Asociados.service;
 
+import com.medina.asocDev.Medina.Asociados.dto.CobroConDetallesDTO;
 import com.medina.asocDev.Medina.Asociados.dto.CobroDTO;
 import com.medina.asocDev.Medina.Asociados.dto.EstadoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Cobro;
+import com.medina.asocDev.Medina.Asociados.entity.DetalleCobro;
 import com.medina.asocDev.Medina.Asociados.entity.Estado;
 import com.medina.asocDev.Medina.Asociados.entity.Turno;
 import com.medina.asocDev.Medina.Asociados.repo.CobroRepository;
+import com.medina.asocDev.Medina.Asociados.repo.DetalleCobroRepository;
 import com.medina.asocDev.Medina.Asociados.repo.EstadoRepository;
 import com.medina.asocDev.Medina.Asociados.repo.TurnoRepository;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
@@ -28,10 +31,13 @@ public class CobroService {
 	@Autowired
 	private DetalleCobroService detalleCobroService;
 	@Autowired
+	private DetalleCobroRepository detalleCobroRepository;
+	@Autowired
 	private TurnoRepository turnoRepository;
 	@Autowired
 	private HistorialTurnoService historialTurnoService;
 
+	@Transactional
 	public CobroDTO createCobro(CobroDTO cobroDTO) {
 		Cobro cobro = new Cobro();
 		cobro.setImporteTotal(cobroDTO.getImporteTotal());
@@ -57,6 +63,7 @@ public class CobroService {
 				.orElse(null);
 	}
 
+	@Transactional
 	public CobroDTO updateCobro(Long id, CobroDTO cobroDTO) {
 		return cobroRepository.findById(id).map(cobro -> {
 			cobro.setImporteTotal(cobroDTO.getImporteTotal());
@@ -69,6 +76,7 @@ public class CobroService {
 		}).orElse(null);
 	}
 
+	@Transactional
 	public boolean deleteCobro(Long id) {
 		if (cobroRepository.existsById(id)) {
 			cobroRepository.deleteById(id);
@@ -77,6 +85,7 @@ public class CobroService {
 		return false;
 	}
 
+	@Transactional
 	public CobroDTO reembolsar(Cobro cobro) {
 		Estado estadoReembolsado = estadoRepository.findByNombreAndAmbito("REEMBOLSADO", "COBRO")
 				.orElseThrow(() -> new RuntimeException("Estado REEMBOLSADO no encontrado"));
@@ -89,6 +98,7 @@ public class CobroService {
 		return Utils.mapCobroEntityToDTO(cobroActualizado);
 	}
 
+	@Transactional
 	public CobroDTO marcarComoPagado(Cobro cobro) {
 		// 1. Actualizar estado del cobro
 		Estado estadoPagado = estadoRepository.findByNombreAndAmbito("PAGADO", "COBRO")
@@ -133,6 +143,14 @@ public class CobroService {
 		detalleCobroService.crearDetalleCobro(cobroActualizado.getIdCobro(), 3L);
 
 		return Utils.mapCobroEntityToDTO(cobroActualizado);
+	}
+
+	public CobroConDetallesDTO getCobroConDetalles(Long idCobro) {
+		Cobro cobro = cobroRepository.findById(idCobro).orElse(null);
+		if (cobro == null) return null;
+
+		List<DetalleCobro> detalles = detalleCobroRepository.findByCobro_IdCobro(idCobro);
+		return Utils.mapCobroToConDetallesDTO(cobro, detalles);
 	}
 
 }
