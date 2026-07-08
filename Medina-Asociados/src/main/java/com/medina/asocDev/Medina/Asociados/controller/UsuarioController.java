@@ -27,12 +27,13 @@ public class UsuarioController {
 	}
 
 	@GetMapping
-	@PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
+	@PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN')")
 	public ResponseEntity<Page<UsuarioDTO>> getAllUsers(@PageableDefault(size = 10) Pageable pageable) {
 		return ResponseEntity.ok(usuarioService.getAllUsers(pageable));
 	}
 
 	@GetMapping("/{id}")
+	@PreAuthorize("@securityService.canAccessClienteDetalle(authentication, #id)")
 	public ResponseEntity<UsuarioDTO> getUserById(@PathVariable Long id) {
 		UsuarioDTO usuario = usuarioService.getUserByIdInternal(id);
 		if (usuario == null) {

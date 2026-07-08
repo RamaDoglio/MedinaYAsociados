@@ -434,6 +434,108 @@ public class Utils {
     }
 
 
+    //Cobro -> CobroConDetallesDTO
+    public static CobroConDetallesDTO mapCobroToConDetallesDTO(Cobro cobro, List<DetalleCobro> detalles) {
+        if (cobro == null) return null;
+        CobroConDetallesDTO dto = new CobroConDetallesDTO();
+
+        dto.setIdCobro(cobro.getIdCobro());
+        dto.setImporteTotal(cobro.getImporteTotal());
+
+        if (cobro.getTurno() != null) {
+            dto.setIdTurno(cobro.getTurno().getIdTurno());
+        }
+
+        if (cobro.getEstadoCobro() != null) {
+            dto.setIdEstado(cobro.getEstadoCobro().getIdEstado());
+            dto.setNombreEstado(cobro.getEstadoCobro().getNombreEstado());
+            dto.setAmbitoEstado(cobro.getEstadoCobro().getAmbito());
+        }
+
+        if (detalles != null) {
+            dto.setDetalles(detalles.stream()
+                    .map(Utils::mapDetalleCobroToConTipoDTO)
+                    .collect(Collectors.toList()));
+        }
+
+        return dto;
+    }
+
+    //DetalleCobro -> DetalleCobroConTipoDTO
+    public static DetalleCobroConTipoDTO mapDetalleCobroToConTipoDTO(DetalleCobro detalle) {
+        if (detalle == null) return null;
+        DetalleCobroConTipoDTO dto = new DetalleCobroConTipoDTO();
+
+        dto.setIdDetalleCobro(detalle.getIdDetalleCobro());
+        dto.setFecha(detalle.getFecha());
+        dto.setDescripcionCobro(detalle.getDescripcionCobro());
+        dto.setSubTotal(detalle.getSubTotal());
+
+        if (detalle.getTipoCobro() != null) {
+            dto.setTipoCobro(mapTipoCobroEntityToDTO(detalle.getTipoCobro()));
+        }
+
+        return dto;
+    }
+
+    //Turno -> TurnoConHistorialDTO
+    public static TurnoConHistorialDTO mapTurnoToConHistorialDTO(Turno turno) {
+        if (turno == null) return null;
+        TurnoConHistorialDTO dto = new TurnoConHistorialDTO();
+
+        dto.setIdTurno(turno.getIdTurno());
+
+        if (turno.getClienteTurno() != null) {
+            dto.setIdCliente(turno.getClienteTurno().getIdUsuario());
+            dto.setNombreCliente(turno.getClienteTurno().getNombre() + " " + turno.getClienteTurno().getApellido());
+        }
+
+        if (turno.getAbogadoTurno() != null) {
+            dto.setIdAbogado(turno.getAbogadoTurno().getIdUsuario());
+            dto.setNombreAbogado(turno.getAbogadoTurno().getNombre() + " " + turno.getAbogadoTurno().getApellido());
+        }
+
+        if (turno.getEspecialidad() != null) {
+            dto.setIdEspecialidad(turno.getEspecialidad().getIdEspecialidad());
+            dto.setNombreEspecialidad(turno.getEspecialidad().getNombreEspecialidad());
+        }
+
+        dto.setObservacionesCliente(turno.getObservacionesCliente());
+        dto.setObservacionesAbogado(turno.getObservacionesAbogado());
+        dto.setHorarioTurno(turno.getHorarioTurno());
+
+        if (turno.getEstadoActual() != null) {
+            dto.setIdEstado(turno.getEstadoActual().getIdEstado());
+            dto.setNombreEstado(turno.getEstadoActual().getNombreEstado());
+        }
+
+        if (turno.getHistorialTurno() != null) {
+            dto.setHistorial(turno.getHistorialTurno().stream()
+                    .map(Utils::mapHistorialToConEstadoDTO)
+                    .collect(Collectors.toList()));
+        }
+
+        return dto;
+    }
+
+    //HistorialTurno -> HistorialConEstadoDTO
+    public static HistorialConEstadoDTO mapHistorialToConEstadoDTO(HistorialTurno ht) {
+        if (ht == null) return null;
+        HistorialConEstadoDTO dto = new HistorialConEstadoDTO();
+
+        dto.setIdHistorial(ht.getIdHistorial());
+        dto.setFechaHoraInicio(ht.getFechaHoraInicio());
+        dto.setFechaHoraFin(ht.getFechaHoraFin());
+
+        if (ht.getEstadoHistorial() != null) {
+            dto.setIdEstado(ht.getEstadoHistorial().getIdEstado());
+            dto.setNombreEstado(ht.getEstadoHistorial().getNombreEstado());
+            dto.setAmbitoEstado(ht.getEstadoHistorial().getAmbito());
+        }
+
+        return dto;
+    }
+
     public static RegisterDTO mapUsuarioToRegisterDTO(Usuario usuario) {
         RegisterDTO dto = new RegisterDTO();
         dto.setNombre(usuario.getNombre());

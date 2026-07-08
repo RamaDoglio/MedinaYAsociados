@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ public class AbogadoController {
 
 	// Crear un abogado para un usuario existente
 	@PostMapping("/{idUsuario}")
+	@PreAuthorize("@securityService.isAdmin(authentication)")
 	public ResponseEntity<AbogadoDTO> createAbogado(@PathVariable Long idUsuario,
 													@RequestBody AbogadoDTO abogadoDTO) {
 		AbogadoDTO creado = abogadoService.createAbogado(idUsuario, abogadoDTO);
@@ -35,6 +37,7 @@ public class AbogadoController {
 
 	// Listar todos los abogados (paginado, max 10 por pagina)
 	@GetMapping
+	@PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN', 'CLIENTE')")
 	public ResponseEntity<Page<AbogadoDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
 		return ResponseEntity.ok(abogadoService.getAll(pageable));
 	}
@@ -49,6 +52,7 @@ public class AbogadoController {
 
 	// Actualizar un abogado
 	@PatchMapping("/{id}/matricula")
+	@PreAuthorize("@securityService.isAdmin(authentication)")
 	public ResponseEntity<AbogadoDTO> updateMatricula(
 			@PathVariable Long id,
 			@RequestBody AbogadoMatriculaDTO dto) {
@@ -58,6 +62,7 @@ public class AbogadoController {
 	}
 
 	@PutMapping("/{idAbogado}/especialidades")
+	@PreAuthorize("@securityService.isAdmin(authentication)")
 	public ResponseEntity<AbogadoDTO> updateEspecialidades(
 			@PathVariable Long idAbogado,
 			@RequestBody AbogadoEspecialidadesDTO dto) {
@@ -68,6 +73,7 @@ public class AbogadoController {
 
 	// Eliminar un abogado
 	@DeleteMapping("/{id}")
+	@PreAuthorize("@securityService.isAdmin(authentication)")
 	public ResponseEntity<Void> deleteAbogado(@PathVariable Long id) {
 		boolean borrado = abogadoService.deleteAbogado(id);
 		if (borrado) return ResponseEntity.noContent().build();
@@ -76,6 +82,7 @@ public class AbogadoController {
 
 	// Obtener abogados por id de especialidad (paginado, max 10 por pagina)
 	@GetMapping("/especialidad/{idEspecialidad}")
+	@PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN', 'CLIENTE')")
 	public ResponseEntity<Page<AbogadoDTO>> getAbogadosByEspecialidad(
 			@PathVariable Long idEspecialidad,
 			@PageableDefault(size = 10) Pageable pageable) {
@@ -83,6 +90,7 @@ public class AbogadoController {
 	}
 
 	@GetMapping("/{idAbogado}/horarios-disponibles")
+	@PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN', 'CLIENTE')")
 	public ResponseEntity<List<LocalTime>> obtenerHorariosDisponibles(
 			@PathVariable Long idAbogado,
 			@RequestParam("fecha")
@@ -93,6 +101,7 @@ public class AbogadoController {
 	}
 
 	@GetMapping("/{idAbogado}/disponibilidad")
+	@PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN', 'CLIENTE')")
 	public ResponseEntity<Boolean> verificarDisponibilidad(
 			@PathVariable Long idAbogado,
 			@RequestParam("fechaHora")

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ public class AbogadoService {
 	@Autowired
 	private TurnoRepository turnoRepository;
 
+	@Transactional
 	public AbogadoDTO createAbogado(Long idUsuario, AbogadoDTO abogadoDTO) {
 		// 1. Buscar usuario
 		Usuario usuario = usuarioRepository.findById(idUsuario)
@@ -70,6 +72,7 @@ public class AbogadoService {
 				.orElse(null);
 	}
 
+	@Transactional
 	public boolean deleteAbogado(Long id) {
 		if (abogadoRepository.existsById(id)) {
 			abogadoRepository.deleteById(id);
@@ -78,6 +81,7 @@ public class AbogadoService {
 		return false;
 	}
 
+	@Transactional
 	public AbogadoDTO updateMatricula(Long idAbogado, String nuevaMatricula) {
 		return abogadoRepository.findById(idAbogado).map(abogado -> {
 			abogado.setMatricula(nuevaMatricula);
@@ -86,6 +90,7 @@ public class AbogadoService {
 		}).orElse(null);
 	}
 
+	@Transactional
 	public AbogadoDTO updateEspecialidades(Long idAbogado, List<Long> especialidadesIds) {
 		return abogadoRepository.findById(idAbogado).map(abogado -> {
 			List<Especialidad> especialidades = new ArrayList<>();

@@ -161,6 +161,7 @@ public class TurnoService {
     }
 
     //Actualizar observaciones
+    @Transactional
     public Turno actualizarTurno(Long id, Turno datos) {
         Turno turno = obtenerPorId(id);
         turno.setObservacionesCliente(datos.getObservacionesCliente());
@@ -168,6 +169,7 @@ public class TurnoService {
     }
 
     //Eliminar turno
+    @Transactional
     public void eliminarTurno(Long id) {
         turnoRepository.deleteById(id);
     }
@@ -420,6 +422,11 @@ public class TurnoService {
 
 
         return Utils.mapTurnoEntityToDTO(guardado);
+    }
+
+    public TurnoConHistorialDTO getTurnoConHistorial(Long idTurno) {
+        Turno turno = obtenerPorId(idTurno);
+        return Utils.mapTurnoToConHistorialDTO(turno);
     }
 
 }

@@ -33,6 +33,8 @@ build/
 .vscode/
 
 ## Otros archivos ##
+AGENTS.md
+backend.md
 AGENTSmio.md
 .env
 ngrok.exe

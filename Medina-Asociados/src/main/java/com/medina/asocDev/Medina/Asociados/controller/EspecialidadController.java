@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,12 +22,14 @@ public class EspecialidadController {
 
     // Endpoint para obtener todas las especialidades (paginado, max 10 por pagina)
     @GetMapping
+    @PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN', 'CLIENTE')")
     public ResponseEntity<Page<EspecialidadDTO>> getAllEspecialidades(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(especialidadService.getAllEspecialidades(pageable));
     }
 
     // Endpoint para obtener una especialidad por ID
     @GetMapping("/{id}")
+    @PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN', 'CLIENTE')")
     public ResponseEntity<EspecialidadDTO> getEspecialidadById(@PathVariable Long id) {
         EspecialidadDTO especialidad = especialidadService.getEspecialidadById(id);
         if (especialidad != null) {
