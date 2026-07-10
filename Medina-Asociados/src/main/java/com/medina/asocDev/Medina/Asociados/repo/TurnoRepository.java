@@ -87,7 +87,6 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
     @Query("SELECT new com.medina.asocDev.Medina.Asociados.dto.EstadisticaDTO(t.estadoActual.nombreEstado, COUNT(t)) " +
             "FROM Turno t " +
             "WHERE t.clienteTurno.idUsuario = :idCliente " +
-            "AND t.estadoActual.nombreEstado IN :estados " +
             "GROUP BY t.estadoActual.nombreEstado")
-    List<EstadisticaDTO> countTurnosByClienteAndEstados(@Param("idCliente") Long idCliente, @Param("estados") List<String> estados);
+    List<EstadisticaDTO> countTurnosByClienteAndEstados(@Param("idCliente") Long idCliente);
 }

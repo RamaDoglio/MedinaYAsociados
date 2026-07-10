@@ -40,6 +40,8 @@ public class PagoWebhookController {
                 paymentId = data != null ? (String) data.get("id") : paymentId;
             }
 
+            System.out.println("Notificación recibida - tipo: " + tipo + ", paymentId: " + paymentId);
+
             if (!"payment".equals(tipo)) {
                 return ResponseEntity.ok("Tipo ignorado: " + tipo);
             }
@@ -50,26 +52,31 @@ public class PagoWebhookController {
             PaymentClient client = new PaymentClient();
             Payment payment = client.get(Long.valueOf(paymentId));
 
+            String extRef = payment.getExternalReference();
+            System.out.println("Payment obtenido - ID: " + payment.getId() + ", externalReference: " + extRef + ", status: " + payment.getStatus());
+
+            if (extRef == null) {
+                return ResponseEntity.badRequest().body("El payment no tiene externalReference");
+            }
+
             // externalReference = idCobro (String)
-            Long idCobro = Long.valueOf(payment.getExternalReference());
+            Long idCobro = Long.valueOf(extRef);
             Cobro cobro = cobroRepository.findById(idCobro)
                     .orElseThrow(() -> new RuntimeException("Cobro no encontrado: " + idCobro));
 
-            // Idempotencia: si ya guardamos paymentId y el cobro está PAGADO/REEMBOLSADO, no reprocesar
-            String estadoCobro = cobro.getEstadoCobro() != null ? cobro.getEstadoCobro().getNombreEstado() : null;
-            if (cobro.getPaymentId() != null &&
-                    ("PAGADO".equals(estadoCobro) || "REEMBOLSADO".equals(estadoCobro))) {
+            // Idempotencia: si ya tiene paymentId, el pago ya fue procesado
+            if (cobro.getPaymentId() != null) {
                 return ResponseEntity.ok("Evento duplicado ignorado");
             }
 
-            // Guardar el paymentId real (una vez)
+            // Guardar el paymentId real (una vez) y obtener entidad managed
             cobro.setPaymentId(payment.getId());
-            cobroRepository.save(cobro);
+            cobro = cobroRepository.save(cobro);
 
             String status = payment.getStatus(); // approved, refunded, in_process, rejected, cancelled, etc.
             switch (status) {
                 case "approved" -> {
-                    // Actualiza cobro y turno + historial
+                    System.out.println("Procesando pago aprobado para cobro ID: " + idCobro);
                     cobroService.marcarComoPagado(cobro);
                 }
                 case "refunded" -> {

@@ -50,13 +50,15 @@ public class HistorialTurnoService {
 
 
     public void registrarCambio(Turno turno, Estado estadoAnterior, Estado estadoNuevo) {
-        // 👉 Cerrar el historial anterior (si existe)
-        HistorialTurno ultimo = historialTurnoRepository
+        // 👉 Cerrar todos los historiales abiertos anteriores
+        List<HistorialTurno> abiertos = historialTurnoRepository
                 .findByTurno_IdTurnoAndFechaHoraFinIsNull(turno.getIdTurno());
 
-        if (ultimo != null && ultimo.getFechaHoraFin() == null) {
-            ultimo.setFechaHoraFin(LocalDateTime.now());
-            historialTurnoRepository.save(ultimo);
+        for (HistorialTurno h : abiertos) {
+            if (h.getFechaHoraFin() == null) {
+                h.setFechaHoraFin(LocalDateTime.now());
+                historialTurnoRepository.save(h);
+            }
         }
 
         // 👉 Crear el nuevo historial con fechaHoraFin = null

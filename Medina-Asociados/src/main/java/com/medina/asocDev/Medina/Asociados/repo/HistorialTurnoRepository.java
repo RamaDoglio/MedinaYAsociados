@@ -12,7 +12,7 @@ public interface HistorialTurnoRepository extends JpaRepository<HistorialTurno,L
 
     List<HistorialTurno> findByTurno_IdTurno(Long iDTurno);
 
-    HistorialTurno findByTurno_IdTurnoAndFechaHoraFinIsNull(Long iDTurno);
+    List<HistorialTurno> findByTurno_IdTurnoAndFechaHoraFinIsNull(Long iDTurno);
 
     List<HistorialTurno> findByEstadoHistorial_IdEstadoAndFechaHoraFinIsNull(Long idEstado);
 }

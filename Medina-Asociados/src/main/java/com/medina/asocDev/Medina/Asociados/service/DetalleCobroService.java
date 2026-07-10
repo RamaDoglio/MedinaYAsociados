@@ -34,25 +34,21 @@ public class DetalleCobroService {
         Cobro cobro = cobroRepository.findById(idCobro)
                 .orElseThrow(() -> new RuntimeException("Cobro no encontrado"));
 
+        String nombreTipo = tipoDetalle == 1L ? "PAGO" : "REEMBOLSO";
+        TipoCobro tipoCobro = tipoCobroRepository.findByNombreTipoCobro(nombreTipo);
+
+        // Idempotencia: si ya existe un detalle de este tipo para este cobro, no duplicar
+        boolean yaExiste = detalleCobroRepository.findByCobro_IdCobro(idCobro).stream()
+                .anyMatch(d -> d.getTipoCobro().getNombreTipoCobro().equals(nombreTipo));
+        if (yaExiste) return null;
+
         DetalleCobro detalle = new DetalleCobro();
         detalle.setCobro(cobro);
         detalle.setFecha(LocalDateTime.now());
         detalle.setSubTotal(cobro.getImporteTotal());
+        detalle.setTipoCobro(tipoCobro);
 
-        if (tipoDetalle==1L){
-            TipoCobro tipoPago = tipoCobroRepository.findByNombreTipoCobro("PAGO");
-
-            detalle.setTipoCobro(tipoPago);
-
-            detalleCobroRepository.save(detalle);
-        } else if (tipoDetalle==2L) {
-            TipoCobro tipoPago = tipoCobroRepository.findByNombreTipoCobro("REEMBOLSO");
-
-
-            detalle.setTipoCobro(tipoPago);
-
-            detalleCobroRepository.save(detalle);
-        }
+        detalleCobroRepository.save(detalle);
 
         return Utils.mapDetalleCobroEntityToDTO(detalle);
     }
