@@ -6,6 +6,8 @@ import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
 import com.mercadopago.client.preference.PreferenceClient;
 import com.mercadopago.client.preference.PreferenceItemRequest;
 import com.mercadopago.client.preference.PreferenceRequest;
+import com.mercadopago.exceptions.MPApiException;
+import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
 import com.medina.asocDev.Medina.Asociados.entity.Cobro;
@@ -71,8 +73,12 @@ public class MercadoPagoService {
         try {
             PaymentClient client = new PaymentClient();
             client.refund(paymentId);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al reembolsar en Mercado Pago", e);
+        } catch (MPApiException e) {
+            String responseBody = e.getApiResponse() != null ? e.getApiResponse().getContent() : "sin respuesta";
+            System.err.println("MP refund error - paymentId: " + paymentId + ", response: " + responseBody);
+            throw new RuntimeException("Error al reembolsar en Mercado Pago: " + responseBody, e);
+        } catch (MPException e) {
+            throw new RuntimeException("Error de conexión con Mercado Pago", e);
         }
     }
 

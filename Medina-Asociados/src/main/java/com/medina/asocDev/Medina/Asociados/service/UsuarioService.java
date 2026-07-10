@@ -410,9 +410,7 @@ public class UsuarioService implements IUserService {
 				}
 			}
 
-			List<String> estadosFinales = List.of("FINALIZADO", "NO_ASISTIO",
-					"CANCELADO_SIN_REEMBOLSO", "CANCELADO_CON_REEMBOLSO", "EXPIRO_PAGO");
-			List<EstadisticaDTO> turnosPorEstado = turnoRepository.countTurnosByClienteAndEstados(id, estadosFinales);
+			List<EstadisticaDTO> turnosPorEstado = turnoRepository.countTurnosByClienteAndEstados(id);
 			detalle.setTurnosPorEstado(turnosPorEstado);
 
 			response.setStatusCode(200);

@@ -1,9 +1,6 @@
 package com.medina.asocDev.Medina.Asociados.service;
 
-import com.medina.asocDev.Medina.Asociados.dto.TurnoCreateRequest;
-import com.medina.asocDev.Medina.Asociados.dto.TurnoDTO;
-import com.medina.asocDev.Medina.Asociados.dto.TurnoListadoDTO;
-import com.medina.asocDev.Medina.Asociados.dto.TurnoOfflineRequest;
+import com.medina.asocDev.Medina.Asociados.dto.*;
 import com.medina.asocDev.Medina.Asociados.entity.*;
 import com.medina.asocDev.Medina.Asociados.repo.*;
 import com.medina.asocDev.Medina.Asociados.utils.Utils;
@@ -91,6 +88,7 @@ public class TurnoService {
         turno.setAbogadoTurno(abogado);
         turno.setEspecialidad(especialidad);
         turno.setCobro(cobro);
+        cobro.setTurno(turno);
         turno.setHorarioTurno(request.getHorarioTurno());
         turno.setObservacionesCliente(request.getObservacionesCliente());
         turno.setEstadoActual(estadoReservado); // ⬅ ESTADO INICIAL
@@ -248,18 +246,13 @@ public class TurnoService {
 
                 // Evitar reembolsar dos veces si ya está marcado como REEMBOLSADO
                 if (!"REEMBOLSADO".equals(estadoCobro)) {
-                    // Actualizar estado del cobro en tu sistema
-                    cobroService.reembolsar(turno.getCobro());
-
-                    // Hacer refund real en Mercado Pago si existe paymentId
+                    // 1º Hacer refund en MP primero (si falla, la transacción se rollbackea sin tocar estado interno)
                     if (turno.getCobro().getPaymentId() != null) {
-                        try {
-                            mercadoPagoService.reembolsarPago(turno.getCobro().getPaymentId());
-                        } catch (Exception e) {
-                            // Podés loguear o manejar el error según tu necesidad
-                            throw new RuntimeException("Error al reembolsar en Mercado Pago", e);
-                        }
+                        mercadoPagoService.reembolsarPago(turno.getCobro().getPaymentId());
                     }
+
+                    // 2º Recién acá actualizar estado interno
+                    cobroService.reembolsar(turno.getCobro());
                 }
             }
         }

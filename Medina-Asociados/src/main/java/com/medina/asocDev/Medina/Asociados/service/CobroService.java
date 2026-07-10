@@ -100,6 +100,11 @@ public class CobroService {
 
 	@Transactional
 	public CobroDTO marcarComoPagado(Cobro cobro) {
+		// Idempotencia: si ya está PAGADO, no reprocesar
+		if (cobro.getEstadoCobro() != null && "PAGADO".equals(cobro.getEstadoCobro().getNombreEstado())) {
+			return Utils.mapCobroEntityToDTO(cobro);
+		}
+
 		// 1. Actualizar estado del cobro
 		Estado estadoPagado = estadoRepository.findByNombreAndAmbito("PAGADO", "COBRO")
 				.orElseThrow(() -> new RuntimeException("Estado PAGADO no encontrado"));
