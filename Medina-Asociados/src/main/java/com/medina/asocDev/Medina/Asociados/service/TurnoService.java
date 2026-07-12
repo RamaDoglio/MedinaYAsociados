@@ -46,6 +46,9 @@ public class TurnoService {
     private NotificacionTurnoService notificacionTurnoService;
 
     @Autowired
+    private EmailQueueService emailQueueService;
+
+    @Autowired
     private MercadoPagoService mercadoPagoService;
 
     @Autowired
@@ -204,7 +207,13 @@ public class TurnoService {
 
         // Notificación
         try {
-            notificacionTurnoService.enviarReprogramacion(actualizado);
+            emailQueueService.enviarConDelay(() -> {
+                try {
+                    notificacionTurnoService.enviarReprogramacion(actualizado);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
         } catch (Exception e) {
             // loguear error, no romper la transacción
             e.printStackTrace();
@@ -265,7 +274,13 @@ public class TurnoService {
 
         // Enviar notificación de cancelación
         try {
-            notificacionTurnoService.enviarCancelacion(actualizado);
+            emailQueueService.enviarConDelay(() -> {
+                try {
+                    notificacionTurnoService.enviarCancelacion(actualizado);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -362,8 +377,18 @@ public class TurnoService {
     }
 
     // Listar turnos de un abogado (paginado, max 10 por pagina)
-    public Page<TurnoListadoDTO> listarTurnosPorAbogado(Long idAbogado, Pageable pageable) {
-        return turnoRepository.findByAbogadoTurno_IdUsuario(idAbogado, pageable)
+    public Page<TurnoListadoDTO> listarTurnosPorAbogado(Long idAbogado,
+                                                        LocalDate fechaDesde,
+                                                        LocalDate fechaHasta,
+                                                        String estado,
+                                                        String cliente,
+                                                        Pageable pageable) {
+        LocalDateTime fechaDesdeDT = fechaDesde != null ? fechaDesde.atStartOfDay() : LocalDateTime.of(1900, 1, 1, 0, 0, 0);
+        LocalDateTime fechaHastaDT = fechaHasta != null ? fechaHasta.atTime(23, 59, 59) : LocalDateTime.of(9999, 12, 31, 23, 59, 59);
+        String estadoParam = estado != null ? estado : "";
+        String clienteParam = cliente != null ? cliente : "";
+        return turnoRepository.buscarTurnosAbogado(idAbogado, fechaDesdeDT, fechaHastaDT,
+                        estadoParam, clienteParam, pageable)
                 .map(Utils::mapTurnoToListadoDTOParaAbogado);
     }
 

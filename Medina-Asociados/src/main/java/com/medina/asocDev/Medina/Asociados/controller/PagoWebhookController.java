@@ -5,9 +5,13 @@ import com.mercadopago.resources.payment.Payment;
 import com.medina.asocDev.Medina.Asociados.entity.Cobro;
 import com.medina.asocDev.Medina.Asociados.repo.CobroRepository;
 import com.medina.asocDev.Medina.Asociados.service.CobroService;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 
 @RestController
@@ -16,10 +20,29 @@ public class PagoWebhookController {
 
     private final CobroRepository cobroRepository;
     private final CobroService cobroService;
+    private final String frontendUrl;
 
-    public PagoWebhookController(CobroRepository cobroRepository, CobroService cobroService) {
+    public PagoWebhookController(CobroRepository cobroRepository, CobroService cobroService,
+                                 @Value("${mp.frontend-url}") String frontendUrl) {
         this.cobroRepository = cobroRepository;
         this.cobroService = cobroService;
+        this.frontendUrl = frontendUrl;
+    }
+
+    @GetMapping("/redirect")
+    public void redirectPago(
+            @RequestParam Long turnoId,
+            @RequestParam String result,
+            HttpServletResponse response) throws IOException {
+        String redirectUrl = frontendUrl + "/payment/" + turnoId + "/result?status=" + result;
+        response.setContentType("text/html");
+        PrintWriter writer = response.getWriter();
+        writer.write("<html><body>" +
+                "<p>Pago exitoso. Redirigiendo...</p>" +
+                "<script>window.location.href='" + redirectUrl + "';</script>" +
+                "<a href='" + redirectUrl + "'>Haga clic aquí si no es redirigido automáticamente</a>" +
+                "</body></html>");
+        writer.flush();
     }
 
     // Soporte para notificaciones con query params (GET/POST)

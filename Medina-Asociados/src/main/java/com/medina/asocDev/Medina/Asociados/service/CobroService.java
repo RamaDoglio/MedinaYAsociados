@@ -36,6 +36,10 @@ public class CobroService {
 	private TurnoRepository turnoRepository;
 	@Autowired
 	private HistorialTurnoService historialTurnoService;
+	@Autowired
+	private NotificacionTurnoService notificacionTurnoService;
+	@Autowired
+	private EmailQueueService emailQueueService;
 
 	@Transactional
 	public CobroDTO createCobro(CobroDTO cobroDTO) {
@@ -52,7 +56,7 @@ public class CobroService {
 	}
 
 	public CobroDTO getCobroPorTurno(Long turnoId) {
-		Cobro cobro = (Cobro) cobroRepository.findByTurno_IdTurno(turnoId);
+		Cobro cobro = cobroRepository.findByTurno_IdTurno(turnoId).stream().findFirst().orElse(null);
 		return Utils.mapCobroEntityToDTO(cobro);
 	}
 
@@ -124,6 +128,17 @@ public class CobroService {
 
 			historialTurnoService.registrarCambio(turno, anterior, estadoTurnoPagado);
 			turnoRepository.save(turno);
+			try {
+				emailQueueService.enviarConDelay(() -> {
+			    try {
+			        notificacionTurnoService.enviarConfirmacionReserva(turno);
+			    } catch (Exception ex) {
+			        ex.printStackTrace();
+			    }
+			});
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		return Utils.mapCobroEntityToDTO(cobroActualizado);

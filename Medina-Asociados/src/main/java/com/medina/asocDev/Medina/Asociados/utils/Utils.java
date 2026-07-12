@@ -214,6 +214,11 @@ public class Utils {
         abogadoDTO.setIdAbogado(abogado.getIdAbogado());
         abogadoDTO.setMatricula(abogado.getMatricula());
 
+        if (abogado.getUsuario() != null) {
+            abogadoDTO.setNombre(abogado.getUsuario().getNombre());
+            abogadoDTO.setApellido(abogado.getUsuario().getApellido());
+        }
+
         if (abogado.getEspecialidadesAbogado() != null) {
             List<Long> especialidadesIds = abogado.getEspecialidadesAbogado()
                     .stream()

@@ -62,7 +62,7 @@ public class NotificacionTurnoService {
     // =========================
 
     public void enviarConfirmacionReserva(Turno turno) throws MessagingException {
-        enviarCorreo(turno, "confirmacion", "✅ Confirmación de turno reservado");
+        enviarCorreo(turno, "confirmacion", "✅ Pago confirmado - Turno reservado");
     }
 
     public void enviarCancelacion(Turno turno) throws MessagingException {
