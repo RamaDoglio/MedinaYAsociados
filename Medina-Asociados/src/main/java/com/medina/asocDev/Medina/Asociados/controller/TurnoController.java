@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @RestController
@@ -120,8 +121,13 @@ public class TurnoController {
     @PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
     public ResponseEntity<Page<TurnoListadoDTO>> listarTurnosPorAbogado(
             @PathVariable Long idAbogado,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String cliente,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(turnoService.listarTurnosPorAbogado(idAbogado, pageable));
+        return ResponseEntity.ok(turnoService.listarTurnosPorAbogado(
+                idAbogado, fechaDesde, fechaHasta, estado, cliente, pageable));
     }
 
 

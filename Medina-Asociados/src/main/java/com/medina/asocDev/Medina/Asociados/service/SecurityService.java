@@ -81,4 +81,5 @@ public class SecurityService {
 
         return userId.equals(clienteId) || userId.equals(abogadoId);
     }
+    
 }

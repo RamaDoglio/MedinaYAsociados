@@ -7,7 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/config")
+@RequestMapping("/api/config")
 public class ConfigController {
 
     @Autowired
@@ -18,7 +18,7 @@ public class ConfigController {
     }
 
     @GetMapping("/precio-turno")
-    @PreAuthorize("@securityService.isAdmin(authentication)")
+    @PreAuthorize("@securityService.hasAnyRole(authentication, 'ADMIN', 'ABOGADO', 'CLIENTE')")
     public ResponseEntity<Double> getPrecioTurno() {
         Double precio = Double.valueOf(parametroService.getValor("PRECIO_TURNO"));
         return ResponseEntity.ok(precio);

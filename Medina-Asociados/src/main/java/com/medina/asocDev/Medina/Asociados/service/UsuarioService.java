@@ -193,6 +193,12 @@ public class UsuarioService implements IUserService {
 			response.setExpirationTime("7 Days");
 			response.setMessage("successful");
 
+			UsuarioDTO userDTO = new UsuarioDTO();
+			userDTO.setIdUsuario(usuario.getIdUsuario());
+			userDTO.setNombre(usuario.getNombre());
+			userDTO.setApellido(usuario.getApellido());
+			response.setUser(userDTO);
+
 		} catch (OurException e) {
 			response.setStatusCode(404);
 			response.setMessage(e.getMessage());

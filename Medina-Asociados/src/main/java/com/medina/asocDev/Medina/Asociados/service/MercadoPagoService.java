@@ -28,14 +28,8 @@ public class MercadoPagoService {
     @Value("${mp.notification-url}")
     private String notificationUrl;
 
-    @Value("${mp.back-url.success}")
-    private String backUrlSuccess;
-
-    @Value("${mp.back-url.failure}")
-    private String backUrlFailure;
-
-    @Value("${mp.back-url.pending}")
-    private String backUrlPending;
+    @Value("${mp.frontend-url}")
+    private String frontendUrl;
 
     @PostConstruct
     public void init() {
@@ -50,10 +44,15 @@ public class MercadoPagoService {
                 .currencyId("ARS")
                 .build();
 
+        String baseUrl = notificationUrl.replace("/api/pagos/notificacion", "");
+        String successUrl = baseUrl + "/api/pagos/redirect?turnoId=" + turno.getIdTurno() + "&result=success";
+        String failureUrl = baseUrl + "/api/pagos/redirect?turnoId=" + turno.getIdTurno() + "&result=failure";
+        String pendingUrl = baseUrl + "/api/pagos/redirect?turnoId=" + turno.getIdTurno() + "&result=pending";
+
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success(backUrlSuccess)
-                .failure(backUrlFailure)
-                .pending(backUrlPending)
+                .success(successUrl)
+                .failure(failureUrl)
+                .pending(pendingUrl)
                 .build();
 
         PreferenceRequest request = PreferenceRequest.builder()
@@ -65,8 +64,14 @@ public class MercadoPagoService {
                 .build();
 
         PreferenceClient client = new PreferenceClient();
-        Preference preference = client.create(request);
-        return preference.getInitPoint();
+        try {
+            Preference preference = client.create(request);
+            return preference.getInitPoint();
+        } catch (MPApiException e) {
+            String responseBody = e.getApiResponse() != null ? e.getApiResponse().getContent() : "sin respuesta";
+            System.err.println("MP create preference error - response: " + responseBody);
+            throw new RuntimeException("Error al crear preferencia en Mercado Pago: " + responseBody, e);
+        }
     }
 
     public void reembolsarPago(Long paymentId) {

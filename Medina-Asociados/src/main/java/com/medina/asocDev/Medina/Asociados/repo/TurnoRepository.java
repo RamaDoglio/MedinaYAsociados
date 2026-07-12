@@ -65,6 +65,19 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
     // Busca turnos cuya fecha/hora esté entre dos valores
     List<Turno> findByHorarioTurnoBetween(LocalDateTime desde, LocalDateTime hasta);
 
+    @Query("SELECT t FROM Turno t WHERE t.abogadoTurno.idUsuario = :idAbogado " +
+            "AND t.horarioTurno >= :fechaDesde " +
+            "AND t.horarioTurno <= :fechaHasta " +
+            "AND (:estado = '' OR t.estadoActual.nombreEstado = :estado) " +
+            "AND (:cliente = '' OR CAST(t.clienteTurno.nombre AS text) LIKE CONCAT('%', :cliente, '%') " +
+            "     OR CAST(t.clienteTurno.apellido AS text) LIKE CONCAT('%', :cliente, '%'))")
+    Page<Turno> buscarTurnosAbogado(@Param("idAbogado") Long idAbogado,
+                                    @Param("fechaDesde") LocalDateTime fechaDesde,
+                                    @Param("fechaHasta") LocalDateTime fechaHasta,
+                                    @Param("estado") String estado,
+                                    @Param("cliente") String cliente,
+                                    Pageable pageable);
+
     @Query("SELECT new com.medina.asocDev.Medina.Asociados.dto.EstadisticaDTO(" +
             "CASE " +
             "WHEN t.estadoActual.nombreEstado = 'FINALIZADO' THEN 'COMPLETADOS' " +
