@@ -43,20 +43,11 @@ class Usuario{
 }
 
 Usuario -->"1" Direccion
-Usuario -->"1" Rol
+Usuario -->"1..*" Rol
 Usuario -->"1..*" Turno
 Usuario o--"0..1" Abogado
 
 class Rol{
-    - nombre
-    - descripcion
-    + crear()
-    + mostrar()
-}
-
-Rol--> "1..*" Permisos
-
-class Permisos {
     - nombre
     - descripcion
     + crear()
