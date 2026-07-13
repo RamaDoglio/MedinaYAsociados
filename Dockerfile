@@ -1,7 +1,7 @@
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src
+COPY Medina-Asociados/pom.xml .
+COPY Medina-Asociados/src ./src
 RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre
