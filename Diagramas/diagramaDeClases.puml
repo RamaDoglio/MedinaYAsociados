@@ -1,40 +1,145 @@
 @startuml Diagrama de Clases
 class Turno {
-    - nroTurno
+    - idTurno
+    - estadoActual:Estado
+    - ultimoHistorialTurno:HistorialTurno
+    - especialidad: Especialidad
+    - cobro:Cobro
+    - horarioTurno
+    - abogadoTurno: Usuario
+    - clienteTurno: Usuario
+    - observacionesCliente
+    - observacionesAbogado
+    + crear()
+    + modificar()
+    + reprogramarTurno()
+    + cancelarTurno()
+}
+Turno --> "1"Cobro
+Turno -> "1" Estado
+Turno -->"1..*" HistorialTurno
+Turno --> "1" Especialidad
+Turno ..> "1..*"Usuario
+
+class Especialidad {
+    - nombre
+    - descripcion
+    + crear()
+    + mostrar()
+}
+
+class Usuario{
+    - nombre
+    - apellido
+    - dni
+    - direccion:Direccion
+    - telefono
+    - email
+    - rol: Rol
+    - turnos: Turno
+    - abogado: Abogado
+    + crear()
+    + mostrar()
+}
+
+Usuario -->"1" Direccion
+Usuario -->"1..*" Rol
+Usuario -->"1..*" Turno
+Usuario o--"0..1" Abogado
+
+class Rol{
+    - nombre
+    - descripcion
+    + crear()
+    + mostrar()
+}
+
+class Abogado {
+    - matricula
+    - especialidadesAbogado: Especialidad
+    - usuario: Usuario
+    + crear()
+    + mostrar()
+    + updateEspecialidades()
+    + obtenerHorariosDisponibles()
+    + verificarDisponibilidad()
+}
+
+Abogado -->"1..*" Especialidad
+
+class HistorialTurno{
     - fechaHoraInicio
     - fechaHoraFin
-    - estadoActual:Estado
-    - cliente:Cliente
-    - abogado:Abogado
-    - ultimoCambioEstado:CambioEstado
-    - motivoTurno
-    - observaciones
+    - turno: Turno
+    - estado: Estado
+    + crear()
+    + mostrar()
 }
-class Cliente {
-    - 
-}
-class Abogado {
-    -
-}
-class CambioEstado{
-    -
-}
+
+HistorialTurno -->"1" Estado
+
 class Cobro {
-    -
+    - importeTotal
+    - estado:Estado
+    - turno: Turno
+    + crear()
+    + mostrar()
+    + reembolsar()
 }
+
+Cobro o--"1..*" DetalleCobro
+Cobro -->"1" Estado
+
+class DetalleCobro {
+    - fecha
+    - descripcion
+    - subTotal
+    - tipoCobro: TipoCobro
+    - cobro: Cobro
+    + crear()
+    + mostrar()
+}
+
+DetalleCobro --> "1" TipoCobro
+
+class TipoCobro {
+    - nombre
+    - descripcion
+    + crear()
+    + mostrar()
+}
+
 class Estado{
-    -
+    - ambito
+    - nombre
+    + crear()
+    + mostrar()
+    + setnombre(nombre)
+    + setAmbito(ambito)
+    + getnombre()
+    + getAmbito()
 }
+
+note bottom of Estado : Los metodos de seteo \nse encuentran en esta clase \ny son extensibles a las demas clases
+
 class Direccion{
-
+    - calle
+    - numero
+    - piso
+    - dpto
+    - localidad:Localidad
+    - provincia
+    + crear()
+    + mostrar()
 }
+
+Direccion -->"1" Localidad
+
 class Localidad{
-
+    - nombre
+    - codigoPostal
+    + crear()
+    + mostrar()
 }
-class Provincia{
 
-}
-class TipoDNI{
-
-}
 @enduml

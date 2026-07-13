@@ -1,0 +1,148 @@
+@startuml derMedinaYAsociados
+hide circle
+hide empty method
+
+entity Turno {
+    -idTurno <<PK>>: SERIAL
+    -observacionesCliente: VARCHAR
+    -observacionesAbogado: VARCHAR
+    -importeTotal: INTEGER
+    -horarioTurno: DATETIME
+    -HistorialTurno <<FK>>: INTEGER
+    -especialidad <<FK>>: INTEGER
+    -cobro <<FK>>: INTEGER
+    -estadoActual <<FK>>: INTEGER
+    -clienteTurno <<FK>>: INTEGER
+    -abogadoTurno <<FK>>: INTEGER
+}
+
+entity Abogado {
+    -idAbogado <<PK>>: SERIAL
+    -idUsuario <<FK>>: INTEGER
+    -matricula: VARCHAR
+}
+
+
+entity Cobro {
+    -idCobro <<PK>>: SERIAL
+    -turno <<FK>>: INTEGER
+    -importeTotal: FLOAT
+    -estadoCobro <<FK>>: INTEGER
+}
+
+entity Especialidad {
+    -idEspecilidad <<PK>>: SERIAL
+    -nombre: VARCHAR
+    -descripcion: VARCHAR
+}
+
+entity TipoCobro {
+    -idTipoCobro <<PK>>: SERIAL
+    -nombre: VARCHAR
+    -descripcion: VARCHAR
+}
+
+entity Estado {
+    -idEstado <<PK>>: SERIAL
+    -nombre: VARCHAR
+    -ambito: VARCHAR
+}
+
+entity DetalleCobro {
+    - idDetalleCobro <<PK>> : SERIAL
+    - idCobro <<FK>> : INTEGER
+    - idTipoCobro <<FK>> : INTEGER
+    - fecha : DATE
+    - descripcion : VARCHAR
+    - monto : DECIMAL
+}
+
+entity Direccion {
+    -idDireccion <<PK>>: SERIAL
+    -calle: VARCHAR
+    -numero: INTEGER
+    -piso: INTEGER
+    -dpto: VARCHAR
+    -localidad <<FK>>: INTEGER
+    -provincia: "Cordoba"
+}
+
+entity Localidad {
+    -idLocalidad <<PK>>: SERIAL
+    -nombre: VARCHAR
+    -codigoPostal: INTEGER
+}
+
+entity HistorialTurno {
+    -idHistorialTurno <<PK>>: SERIAL
+    -idTurno <<FK>>: INTEGER
+    -fechaHoraInicio: DATE
+    -fechaHoraFin: DATE
+    -estadoHistorial <<FK>>: INTEGER
+}
+
+entity AbogadoXEspecialidad{
+    -idAbogadoXEspecialidad <<PK>>: SERIAL
+    -idAbogado <<FK>>: INTEGER
+    -idEspecialidad <<FK>>: INTEGER
+}
+
+entity Usuario{
+    -idUsuario <<PK>>: SERIAL
+    -nombre: VARCHAR
+    -apellido: VARCHAR
+    -dni: INTEGER
+    -direccion: VARCHAR
+    -telefono: INTEGER
+    -email: VARCHAR
+    -direccion <<FK>>: INTEGER
+}
+
+entity Rol {
+    -idRol <<PK>>: SERIAL
+    -nombre
+    -descripcion
+}
+
+entity UsuarioXRol{
+    -idUsuario <<FK>>: INTEGER
+    -idRol <<FK>>: INTEGER
+}
+
+entity Parametros{
+    -id <<PK>>: SERIAL
+    -clave: VARCHAR
+    -valor: VARCHAR
+}
+
+entity TokenBlacklist{
+    -id <<PK>>: SERIAL
+    -fechaExpiracion: DATETIME
+    -token: VARCHAR
+}
+
+Turno ||--|| Cobro 
+Turno }o--|| Estado : "estadoActual"
+Turno ||--|{ HistorialTurno
+Turno ||--|| Especialidad
+
+Cobro ||--o{ DetalleCobro
+Cobro }o--|| Estado
+
+DetalleCobro }o--|| TipoCobro
+
+HistorialTurno }o--||Estado
+
+
+AbogadoXEspecialidad }o-up-|| Especialidad
+AbogadoXEspecialidad }o-up-|| Abogado
+
+Direccion }o--|| Localidad
+
+Usuario ||--|| Direccion
+Usuario ||--|{ Turno
+Usuario ||--|| Abogado
+
+UsuarioXRol }|--|| Rol
+UsuarioXRol }|--|| Usuario
+@enduml
