@@ -40,3 +40,4 @@ AGENTSmio.md
 ngrok.exe
 out/
 .ngrok.exe.old
+.envDespliegue
