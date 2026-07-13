@@ -95,7 +95,6 @@ entity Usuario{
     -direccion: VARCHAR
     -telefono: INTEGER
     -email: VARCHAR
-    -rol <<FK>>: INTEGER
     -direccion <<FK>>: INTEGER
 }
 
@@ -105,15 +104,21 @@ entity Rol {
     -descripcion
 }
 
-entity Permiso{
-    -idPermiso <<PK>>: SERIAL
-    -nombre: VARCHAR
-    -descripcion: VARCHAR
+entity UsuarioXRol{
+    -idUsuario <<FK>>: INTEGER
+    -idRol <<FK>>: INTEGER
 }
 
-entity RolxPermiso{
-    -idRol <<FK>>: INTEGER
-    -idPermiso <<FK>>: INTEGER
+entity Parametros{
+    -id <<PK>>: SERIAL
+    -clave: VARCHAR
+    -valor: VARCHAR
+}
+
+entity TokenBlacklist{
+    -id <<PK>>: SERIAL
+    -fechaExpiracion: DATETIME
+    -token: VARCHAR
 }
 
 Turno ||--|| Cobro 
@@ -138,7 +143,6 @@ Usuario ||--|| Direccion
 Usuario ||--|{ Turno
 Usuario ||--|| Abogado
 
-Usuario }|--|| Rol
-RolxPermiso }|--|| Permiso
-RolxPermiso }|--|| Rol
+UsuarioXRol }|--|| Rol
+UsuarioXRol }|--|| Usuario
 @enduml

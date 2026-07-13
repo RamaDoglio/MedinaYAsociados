@@ -414,7 +414,7 @@ public class TurnoService {
         // Evitar doble marcado
         if (turno.getCobro() != null && turno.getCobro().getEstadoCobro() != null
                 && ("PAGADO".equals(turno.getCobro().getEstadoCobro().getNombreEstado())
-                || "PAGADO EFECTIVO/TRANSFERENCIA".equals(turno.getCobro().getEstadoCobro().getNombreEstado()))) {
+                || "PAGADO_EFECTIVO/TRANSFERENCIA".equals(turno.getCobro().getEstadoCobro().getNombreEstado()))) {
             throw new IllegalStateException("El cobro ya está marcado como pagado");
         }
 

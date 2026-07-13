@@ -2,9 +2,13 @@
 hide empty description
 
 [*] --> Reservado : Crear turno
-
-Reservado --> [*]: El cliente no paga el turno
+Reservado --> ExpiroPago
+ExpiroPago --> [*]: El cliente no paga el turno
+Reservado --> PendienteDeCobro
 Reservado --> Pagado
+
+PendienteDeCobro --> Pagado
+PendienteDeCobro --> NoAsistio
 
 Pagado --> EnCurso : Llega la hora del turno
 Pagado --> CanceladoConReembolso : Cliente/abogado cancela con >24h
