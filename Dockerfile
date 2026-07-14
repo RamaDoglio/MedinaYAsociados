@@ -8,4 +8,4 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/Medina-Asociados-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-CMD ["java", "-Djava.net.preferIPv4Stack=true", "-jar", "app.jar"]
+CMD CMD ["java", "-jar", "app.jar"]
