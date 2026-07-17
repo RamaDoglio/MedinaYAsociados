@@ -31,7 +31,7 @@ public class DetalleCobroService {
 
     @Transactional
 	public DetalleCobroDTO crearDetalleCobro(Long idCobro,Long tipoDetalle) {
-        Cobro cobro = cobroRepository.findById(idCobro)
+        Cobro cobro = cobroRepository.findByIdWithLock(idCobro)
                 .orElseThrow(() -> new RuntimeException("Cobro no encontrado"));
 
         String nombreTipo = tipoDetalle == 1L ? "PAGO" : "REEMBOLSO";

@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AbogadoConTurnosDTO extends AbogadoDTO {
-    private UsuarioDTO usuario; // este sí incluye los turnos
+    private UsuarioDTO usuario;
 }

@@ -18,22 +18,22 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
     @Query("SELECT t FROM Turno t JOIN FETCH t.historialTurno WHERE t.idTurno = :idTurno")
     Optional<Turno> findTurnoConHistorial(@Param("idTurno") Long idTurno);
 
-    // Turnos de un cliente
+
     List<Turno> findByClienteTurno_IdUsuario(Long idCliente);
     Page<Turno> findByClienteTurno_IdUsuario(Long idCliente, Pageable pageable);
 
-    // Turnos de un abogado
+
     List<Turno> findByAbogadoTurno_IdUsuario(Long idAbogado);
     Page<Turno> findByAbogadoTurno_IdUsuario(Long idAbogado, Pageable pageable);
 
-    // Turnos futuros de un abogado (a partir de una fecha)
+
     List<Turno> findByAbogadoTurno_IdUsuarioAndHorarioTurnoAfter(Long idAbogado, LocalDateTime fecha);
 
-    // Turnos por estado (ej: Reservado, Cancelado, Terminado)
+
     @Query("SELECT t FROM Turno t WHERE t.estadoActual.nombreEstado = :nombre")
     List<Turno> findByEstadoActualNombre(@Param("nombre") String nombreEstado);
 
-    // Turnos de un abogado en una fecha específica
+
     @Query("SELECT t FROM Turno t " +
             "WHERE t.abogadoTurno.idUsuario = :idAbogado " +
             "AND DATE(t.horarioTurno) = DATE(:fecha)")
@@ -41,13 +41,13 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
             @Param("idAbogado") Long idAbogado,
             @Param("fecha") LocalDateTime fecha);
 
-    // Buscar por especialidad
+
     List<Turno> findByEspecialidad_NombreEspecialidad(String nombreEspecialidad);
 
-    // Buscar por ID
+
     Optional<Turno> findByIdTurno(Long idTurno);
 
-    // Turnos ocupados por abogado en fecha (excepto cancelados)
+
     @Query("SELECT t FROM Turno t " +
             "WHERE t.abogadoTurno.idUsuario = :idAbogado " +
             "AND DATE(t.horarioTurno) = :fecha " +
@@ -56,13 +56,13 @@ public interface TurnoRepository extends JpaRepository<Turno, Long> {
             @Param("idAbogado") Long idAbogado,
             @Param("fecha") LocalDate fecha);
 
-    // Buscar turnos cuyo estado actual esté en una lista de nombres
+
     List<Turno> findByEstadoActualNombreEstadoIn(List<String> nombres);
 
-    // Si preferís por un solo nombre
+
     List<Turno> findByEstadoActualNombreEstado(String nombre);
 
-    // Busca turnos cuya fecha/hora esté entre dos valores
+
     List<Turno> findByHorarioTurnoBetween(LocalDateTime desde, LocalDateTime hasta);
 
     @Query("SELECT t FROM Turno t WHERE t.abogadoTurno.idUsuario = :idAbogado " +

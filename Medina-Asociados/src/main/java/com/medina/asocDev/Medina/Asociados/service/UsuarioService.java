@@ -20,6 +20,7 @@ import com.medina.asocDev.Medina.Asociados.utils.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -61,26 +62,21 @@ public class UsuarioService implements IUserService {
 
 
 	public MensajeResponse createUsuario(RegisterDTO registerDTO) {
-		// Rol por defecto (ej: cliente)
 		Rol rol = rolRepository.findByNombre("CLIENTE")
 				.orElseThrow(() -> new RuntimeException(
 						"Rol no encontrado el rol"));
 
-		// Dirección: si viene en el DTO, la mapeamos con Utils
 		Direccion direccion = null;
 		if (registerDTO.getDireccion() != null) {
 			DireccionDTO direccionDTO = registerDTO.getDireccion();
 
-			// Caso 1: la dirección ya existe (viene con id)
 			if (direccionDTO.getIdDireccion() != null) {
 				direccion = direccionRepository.findById(direccionDTO.getIdDireccion())
 						.orElseThrow(() -> new EntityNotFoundException("Dirección no encontrada"));
 			}
-			// Caso 2: dirección nueva
 			else {
 				direccion = Utils.mapDireccionDTOToEntity(direccionDTO);
 
-				// Localidad: solo seteamos el id si viene
 				if (direccionDTO.getLocalidad() != null) {
 					Localidad localidad = new Localidad();
 					localidad.setIdLocalidad(direccionDTO.getLocalidad());
@@ -93,18 +89,15 @@ public class UsuarioService implements IUserService {
 
 		registerDTO.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
 
-		// Usuario: delegamos al mapper
 		Usuario usuario = Utils.mapRegistroDTOToEntity(registerDTO, rol, direccion);
 
 		Usuario usuarioGuardado = usuarioRepository.save(usuario);
 
-		// Retornamos DTO completo
 		return new MensajeResponse("Registro completado, redirigiendo al inicio de sesión");
 	}
 
 	@Transactional
 	public Usuario getOrCreateUsuario(ClienteOfflineRequest clienteRequest) {
-		// Buscar por email o teléfono (únicos)
 		Usuario usuarioExistente = usuarioRepository.findByEmail(clienteRequest.getEmail())
 				.orElse(usuarioRepository.findByTelefono(clienteRequest.getTelefono()).orElse(null));
 
@@ -112,7 +105,6 @@ public class UsuarioService implements IUserService {
 			return usuarioExistente;
 		}
 
-		// Crear nuevo usuario
 		Usuario nuevoUsuario = new Usuario();
 		nuevoUsuario.setNombre(clienteRequest.getNombre());
 		nuevoUsuario.setApellido(clienteRequest.getApellido());
@@ -120,7 +112,6 @@ public class UsuarioService implements IUserService {
 		nuevoUsuario.setTelefono(clienteRequest.getTelefono());
 		nuevoUsuario.setEmail(clienteRequest.getEmail());
 
-		// Manejo de dirección
 		Direccion direccion = null;
 		if (clienteRequest.getDireccion() != null) {
 			DireccionDTO direccionDTO = clienteRequest.getDireccion();
@@ -142,11 +133,9 @@ public class UsuarioService implements IUserService {
 		}
 		nuevoUsuario.setDireccion(direccion);
 
-		// Generar contraseña automática
 		String passwordPlana = clienteRequest.getTelefono() + clienteRequest.getNombre().toLowerCase();
 		nuevoUsuario.setPassword(passwordEncoder.encode(passwordPlana));
 
-		// 🔥 CAMBIO: Asignar rol CLIENTE a la lista
 		Rol rolCliente = rolRepository.findByNombre("CLIENTE")
 				.orElseThrow(() -> new RuntimeException("Rol CLIENTE no encontrado"));
 		nuevoUsuario.getRolesUsuario().add(rolCliente);
@@ -158,7 +147,6 @@ public class UsuarioService implements IUserService {
 		Response response = new Response();
 
 		try {
-			// 1. Autenticar
 			authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(
 							loginRequest.getEmail(),
@@ -166,27 +154,22 @@ public class UsuarioService implements IUserService {
 					)
 			);
 
-			// 2. Buscar usuario
 			var usuario = usuarioRepository.findByEmail(loginRequest.getEmail())
 					.orElseThrow(() -> new OurException("user Not found"));
 
-			// 3. Obtener todos los roles del usuario
 			List<String> roles = usuario.getRolesUsuario()
 					.stream()
 					.map(Rol::getNombre)
 					.collect(Collectors.toList());
 
-			// 4. Crear UserDetails con todos los roles
 			UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
 					.username(usuario.getEmail())
 					.password(usuario.getPassword())
 					.authorities(roles.toArray(new String[0]))
 					.build();
 
-			// 5. Generar JWT
 			var token = jwtUtils.generateToken(userDetails);
 
-			// 6. Armar respuesta
 			response.setStatusCode(200);
 			response.setToken(token);
 			response.setRoles(roles);
@@ -222,7 +205,7 @@ public class UsuarioService implements IUserService {
 
 			UsuarioDTO userDTO = Utils.mapUserEntityToUserDTO(user);
 			response.setStatusCode(200);
-			response.setData(userDTO);  // ← Usa DTO, no Entity
+			response.setData(userDTO);
 			response.setMessage("Información del usuario");
 		} catch (OurException | EntityNotFoundException e) {
 			response.setStatusCode(404);
@@ -240,7 +223,7 @@ public class UsuarioService implements IUserService {
 		try {
 			Long id = Long.parseLong(userId);
 			response.setStatusCode(200);
-			response.setData(new ArrayList<>()); // Lista vacía por ahora
+			response.setData(new ArrayList<>());
 			response.setMessage("Historial de turnos del usuario");
 		} catch (NumberFormatException e) {
 			response.setStatusCode(400);
@@ -262,7 +245,7 @@ public class UsuarioService implements IUserService {
 					.collect(Collectors.toList());
 
 			response.setStatusCode(200);
-			response.setData((UsuarioDTO) usuariosDTO);  // ← La lista va en "data"
+			response.setData((UsuarioDTO) usuariosDTO);
 			response.setMessage("Usuarios obtenidos correctamente");
 			return response;
 		} catch (Exception e) {
@@ -279,8 +262,7 @@ public class UsuarioService implements IUserService {
 
 	@Override
 	public Response register(Usuario user) {
-		// Convierte Usuario a RegisterDTO o adapta la lógica
-		RegisterDTO dto = Utils.mapUsuarioToRegisterDTO(user); // Implementa este mapper si no existe
+		RegisterDTO dto = Utils.mapUsuarioToRegisterDTO(user);
 		MensajeResponse mensaje = createUsuario(dto);
 		Response response = new Response();
 		response.setStatusCode(200);
@@ -316,6 +298,7 @@ public class UsuarioService implements IUserService {
 	}
 
 	@Override
+	@CacheEvict(value = "users", allEntries = true)
 	public Response deleteUser(String userId) {
 		Response response = new Response();
 		try {
@@ -338,7 +321,8 @@ public class UsuarioService implements IUserService {
 		return response;
 	}
 
-	public UsuarioDTO updateUser(Long id, UsuarioDTO usuarioDTO) {
+    @CacheEvict(value = "users", allEntries = true)
+    public UsuarioDTO updateUser(Long id, UsuarioDTO usuarioDTO) {
 		return usuarioRepository.findById(id).map(usuario -> {
 			usuario.setNombre(usuarioDTO.getNombre());
 			usuario.setApellido(usuarioDTO.getApellido());
@@ -350,8 +334,9 @@ public class UsuarioService implements IUserService {
 		}).orElse(null);
 	}
 
-	public boolean deleteUserInternal(Long id) {
-		if (usuarioRepository.existsById(id)) {
+    @CacheEvict(value = "users", allEntries = true)
+    public boolean deleteUserInternal(Long id) {
+        if (usuarioRepository.existsById(id)) {
 			usuarioRepository.deleteById(id);
 			return true;
 		}

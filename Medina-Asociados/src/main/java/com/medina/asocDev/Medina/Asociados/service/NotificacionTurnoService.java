@@ -30,10 +30,6 @@ public class NotificacionTurnoService {
 
     private static final String DIRECCION_ESTUDIO = "1256 América, Villa María, Córdoba";
 
-    // =========================
-    // MÉTODOS PRIVADOS DE APOYO
-    // =========================
-
     private String formatearFecha(LocalDateTime fechaHora) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
                 "EEEE d 'de' MMMM 'de' yyyy, HH:mm 'hs'", new Locale("es", "AR"));
@@ -57,9 +53,6 @@ public class NotificacionTurnoService {
         emailService.enviarNotificacionHtml(turno.getClienteTurno().getEmail(), asunto, cuerpoHtml);
     }
 
-    // =========================
-    // NOTIFICACIONES PUNTUALES
-    // =========================
 
     public void enviarConfirmacionReserva(Turno turno) throws MessagingException {
         enviarCorreo(turno, "confirmacion", "✅ Pago confirmado - Turno reservado");
@@ -73,15 +66,12 @@ public class NotificacionTurnoService {
         enviarCorreo(turno, "reprogramacion", "🔄 Reprogramación de turno");
     }
 
-    // =========================
-    // RECORDATORIOS AUTOMÁTICOS
-    // =========================
 
-    @Scheduled(cron = "0 0,45 12 * * *") // Ejecutar a 12:00 y 12:45
-    @Scheduled(cron = "0 30 13 * * *") // Ejecutar a 13:30
-    @Scheduled(cron = "0 15 14 * * *") // Ejecutar a 14:15
-    @Scheduled(cron = "0 0,45 15 * * *")// Ejecutar a 15:00 y 15:45
-    @Scheduled(cron = "0 30 16 * * *")// Ejecutar a 16:30
+    @Scheduled(cron = "0 0,45 12 * * *")
+    @Scheduled(cron = "0 30 13 * * *")
+    @Scheduled(cron = "0 15 14 * * *")
+    @Scheduled(cron = "0 0,45 15 * * *")
+    @Scheduled(cron = "0 30 16 * * *")
     public void enviarRecordatorios() throws MessagingException {
         LocalDateTime ahora = LocalDateTime.now();
         LocalDateTime dentroDe24h = ahora.plusHours(24);

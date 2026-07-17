@@ -13,7 +13,7 @@ public class TurnoDetalleDTO {
     private String dni;
     private String direccion;
     private String telefono;
-    private String especialidad;  // opcional, útil si se quiere mostrar
+    private String especialidad;
     private LocalDateTime fechaHora;
     private String observacionesCliente;
     private String observacionesAbogado;

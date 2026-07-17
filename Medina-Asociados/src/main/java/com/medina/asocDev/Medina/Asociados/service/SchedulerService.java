@@ -38,7 +38,7 @@ public class SchedulerService {
     @Autowired
     private TokenBlacklistedRepository tokenBlacklistedRepository;
 
-    // Expirar turnos reservados que no se pagaron en 15 minutos
+
     @Scheduled(fixedDelay = 60000) // espera 1 minuto después de terminar
     @Transactional
     public void expirarTurnosReservados() {
@@ -64,11 +64,11 @@ public class SchedulerService {
     }
 
 
-    @Scheduled(cron = "0 0,45 12 * * *") // Ejecutar a 12:00 y 12:45
-    @Scheduled(cron = "0 30 13 * * *") // Ejecutar a 13:30
-    @Scheduled(cron = "0 15 14 * * *") // Ejecutar a 14:15
-    @Scheduled(cron = "0 0,45 15 * * *")// Ejecutar a 15:00 y 15:45
-    @Scheduled(cron = "0 30 16 * * *")// Ejecutar a 16:30
+    @Scheduled(cron = "0 0,45 12 * * *")
+    @Scheduled(cron = "0 30 13 * * *")
+    @Scheduled(cron = "0 15 14 * * *")
+    @Scheduled(cron = "0 0,45 15 * * *")
+    @Scheduled(cron = "0 30 16 * * *")
     @Transactional
     public void iniciarTurnosAutomaticamente() {
         LocalDateTime ahora = LocalDateTime.now();
@@ -86,7 +86,6 @@ public class SchedulerService {
         }
     }
 
-    // Limpiar tokens expirados de la blacklist (todos los días a las 3 AM)
     @Scheduled(cron = "0 0 3 * * ?")
     @Transactional
     public void limpiarTokenBlacklist() {

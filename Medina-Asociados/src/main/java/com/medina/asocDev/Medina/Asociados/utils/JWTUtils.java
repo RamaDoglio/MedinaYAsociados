@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Service
 public class JWTUtils {
 
-    private static final long EXPIRATION_TIME=3*3600000; //Token para 3 horas (esta expersado en milisegundos)
+    private static final long EXPIRATION_TIME=3*3600000;
 
     private final SecretKey Key;
 

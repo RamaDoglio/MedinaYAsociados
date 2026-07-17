@@ -31,7 +31,7 @@ public class Utils {
             throw new RuntimeException("No se pueden reservar turnos los fines de semana");
         }
     }
-    //Usuario(Sin turnos) -> UsuarioDTO
+
     public static UsuarioDTO mapUserEntityToUserDTO(Usuario usuario) {
         if (usuario == null) return null;
 
@@ -44,7 +44,6 @@ public class Utils {
         usuarioDTO.setEmail(usuario.getEmail());
         usuarioDTO.setPassword(usuario.getPassword());
 
-        // 🔥 CAMBIO: Obtener rol de la lista (primer rol o null)
         if (usuario.getRolesUsuario() != null && !usuario.getRolesUsuario().isEmpty()) {
             usuarioDTO.setIdRol(usuario.getRolesUsuario().get(0).getIdRol());
         }
@@ -56,7 +55,6 @@ public class Utils {
         return usuarioDTO;
     }
 
-    //Rol -> RolDTO
     public static RolDTO mapRolEntityToRolDTO(Rol rol) {
         if (rol == null) {
             return null;
@@ -68,7 +66,6 @@ public class Utils {
         return rolDTO;
     }
 
-    //Direccion -> DireccionDTO
     public static DireccionDTO mapDireccionEntityToDTO(Direccion direccion) {
         if (direccion == null) {
             return null;
@@ -82,7 +79,6 @@ public class Utils {
         return direccionDTO;
     }
 
-    //Localidad -> LocalidadDTO
     public static LocalidadDTO mapLocalidadEntityToDTO(Localidad localidad){
         if (localidad == null){
             return null;
@@ -96,7 +92,6 @@ public class Utils {
         return localidadDTO;
     }
 
-    //Turno -> TurnoDTO
     public static TurnoDTO mapTurnoEntityToDTO(Turno turno){
         if (turno == null) return null;
         TurnoDTO turnoDTO = new TurnoDTO();
@@ -119,14 +114,12 @@ public class Utils {
         return turnoDTO;
     }
 
-    //Usuario con Turno
     public static UsuarioDTO mapUsuarioEntityToDTOxTurnos(Usuario usuario) {
         if (usuario == null) return null;
         UsuarioDTO userDTO;
 
-        userDTO = mapUserEntityToUserDTO(usuario); // Ya incluye el cambio anterior
+        userDTO = mapUserEntityToUserDTO(usuario);
 
-        // 🔥 CAMBIO: Obtener rol de la lista (el resto igual)
         if (usuario.getRolesUsuario() != null && !usuario.getRolesUsuario().isEmpty()) {
             userDTO.setIdRol(usuario.getRolesUsuario().get(0).getIdRol());
         }
@@ -144,7 +137,6 @@ public class Utils {
         return userDTO;
     }
 
-    //Estado -> Estado
     public static EstadoDTO mapEstadoEntityToDTO(Estado estado){
         if (estado == null) return null;
         EstadoDTO estadoDTO = new EstadoDTO();
@@ -156,7 +148,6 @@ public class Utils {
         return estadoDTO;
     }
 
-    //TipoCobro -> TipoCobroDTO
     public static TipoCobroDTO mapTipoCobroEntityToDTO(TipoCobro tipoCobro){
         if (tipoCobro == null) return null;
         TipoCobroDTO tipoCobroDTO = new TipoCobroDTO();
@@ -168,7 +159,6 @@ public class Utils {
         return tipoCobroDTO;
     }
 
-    //Especialidad -> EspecialidadDTO
     public static EspecialidadDTO mapEspecialidadEntityToDTO(Especialidad especialidad){
         if (especialidad == null) return null;
         EspecialidadDTO especialidadDTO = new EspecialidadDTO();
@@ -180,7 +170,6 @@ public class Utils {
         return especialidadDTO;
     }
 
-    //HistorialTurno -> HistorialTurnoDTO
     public static HistorialTurnoDTO mapHistorialTurnoEntityToDTO(HistorialTurno historialTurno){
         if (historialTurno == null) return null;
         HistorialTurnoDTO historialTurnoDTO = new HistorialTurnoDTO();
@@ -205,7 +194,6 @@ public class Utils {
                 .collect(Collectors.toList());
     }
 
-    //Abogado con Usuario Sin Turnos
     public static AbogadoDTO mapAbogadoEntityToDTOxUsuarioSinTurno(Abogado abogado){
         if (abogado == null) return null;
         AbogadoDTO abogadoDTO = new AbogadoDTO();
@@ -222,7 +210,7 @@ public class Utils {
         if (abogado.getEspecialidadesAbogado() != null) {
             List<Long> especialidadesIds = abogado.getEspecialidadesAbogado()
                     .stream()
-                    .map(Especialidad::getIdEspecialidad) // ✅ solo el ID
+                    .map(Especialidad::getIdEspecialidad)
                     .toList();
             abogadoDTO.setEspecialidadesAbogado(especialidadesIds);
         }
@@ -230,7 +218,6 @@ public class Utils {
         return abogadoDTO;
     }
 
-    //Abogado con Usuario Con Turnos
     public static AbogadoConTurnosDTO mapAbogadoEntityToDTOConTurnos(Abogado abogado) {
         if (abogado == null) return null;
 
@@ -239,14 +226,13 @@ public class Utils {
         dto.setMatricula(abogado.getMatricula());
 
         if (abogado.getUsuario() != null) {
-            dto.setUsuario(mapUsuarioEntityToDTOxTurnos(abogado.getUsuario())); // ✅ con turnos
+            dto.setUsuario(mapUsuarioEntityToDTOxTurnos(abogado.getUsuario()));
         }
 
         return dto;
     }
 
 
-    //Cobro -> CobroDTO
     public static CobroDTO mapCobroEntityToDTO(Cobro cobro) {
         if (cobro == null) {
             return null;
@@ -256,16 +242,14 @@ public class Utils {
         cobroDTO.setIdCobro(cobro.getIdCobro());
         cobroDTO.setImporteTotal(cobro.getImporteTotal());
 
-        // Evitar recursión: solo setear idTurno
         if (cobro.getTurno() != null) {
-            cobroDTO.setIdTurno(cobro.getTurno().getIdTurno()); // ✅ solo el id
+            cobroDTO.setIdTurno(cobro.getTurno().getIdTurno());
         }
 
         return cobroDTO;
     }
 
 
-    //DetalleCobro ->DetalleCobroDTO
     public static DetalleCobroDTO mapDetalleCobroEntityToDTO(DetalleCobro detalleCobro){
         if (detalleCobro == null) return null;
         DetalleCobroDTO detalleCobroDTO = new DetalleCobroDTO();
@@ -289,7 +273,6 @@ public class Utils {
         usuario.setTelefono(registerDTO.getTelefono());
         usuario.setPassword(registerDTO.getPassword());
 
-        // 🔥 CAMBIO: Agregar rol a la lista
         if (rol != null) {
             usuario.getRolesUsuario().add(rol);
         }
@@ -308,7 +291,7 @@ public class Utils {
 
         if (direccionDTO.getLocalidad() != null) {
             Localidad localidad = new Localidad();
-            localidad.setIdLocalidad(direccionDTO.getLocalidad()); // ✅ solo id
+            localidad.setIdLocalidad(direccionDTO.getLocalidad());
             direccion.setLocalidad(localidad);
         }
 
@@ -335,7 +318,6 @@ public class Utils {
         usuario.setTelefono(usuarioDTO.getTelefono());
         usuario.setPassword(usuarioDTO.getPassword());
 
-        // 🔥 CAMBIO: Agregar rol a la lista
         if (rol != null) {
             usuario.getRolesUsuario().add(rol);
         }
@@ -370,7 +352,6 @@ public class Utils {
         return cobro;
     }
 
-    // Para listado de turnos de un cliente (mostrar abogado)
     public static TurnoListadoDTO mapTurnoToListadoDTOParaCliente(Turno turno) {
         if (turno == null) return null;
         TurnoListadoDTO dto = new TurnoListadoDTO();
@@ -381,7 +362,6 @@ public class Utils {
         return dto;
     }
 
-    // Para listado de turnos de un abogado (mostrar cliente)
     public static TurnoListadoDTO mapTurnoToListadoDTOParaAbogado(Turno turno) {
         if (turno == null) return null;
         TurnoListadoDTO dto = new TurnoListadoDTO();
@@ -392,7 +372,6 @@ public class Utils {
         return dto;
     }
 
-    // Vista para el CLIENTE (mostrar datos del abogado)
     public static TurnoDetalleDTO mapTurnoToDetalleDTOParaCliente(Turno turno) {
         if (turno == null) return null;
         TurnoDetalleDTO dto = new TurnoDetalleDTO();
@@ -415,7 +394,6 @@ public class Utils {
         return dto;
     }
 
-    // Vista para el ABOGADO (mostrar datos del cliente)
     public static TurnoDetalleDTO mapTurnoToDetalleDTOParaAbogado(Turno turno) {
         if (turno == null) return null;
         TurnoDetalleDTO dto = new TurnoDetalleDTO();
@@ -439,7 +417,6 @@ public class Utils {
     }
 
 
-    //Cobro -> CobroConDetallesDTO
     public static CobroConDetallesDTO mapCobroToConDetallesDTO(Cobro cobro, List<DetalleCobro> detalles) {
         if (cobro == null) return null;
         CobroConDetallesDTO dto = new CobroConDetallesDTO();
@@ -466,7 +443,6 @@ public class Utils {
         return dto;
     }
 
-    //DetalleCobro -> DetalleCobroConTipoDTO
     public static DetalleCobroConTipoDTO mapDetalleCobroToConTipoDTO(DetalleCobro detalle) {
         if (detalle == null) return null;
         DetalleCobroConTipoDTO dto = new DetalleCobroConTipoDTO();
@@ -483,7 +459,6 @@ public class Utils {
         return dto;
     }
 
-    //Turno -> TurnoConHistorialDTO
     public static TurnoConHistorialDTO mapTurnoToConHistorialDTO(Turno turno) {
         if (turno == null) return null;
         TurnoConHistorialDTO dto = new TurnoConHistorialDTO();
@@ -523,7 +498,6 @@ public class Utils {
         return dto;
     }
 
-    //HistorialTurno -> HistorialConEstadoDTO
     public static HistorialConEstadoDTO mapHistorialToConEstadoDTO(HistorialTurno ht) {
         if (ht == null) return null;
         HistorialConEstadoDTO dto = new HistorialConEstadoDTO();
@@ -548,15 +522,13 @@ public class Utils {
         dto.setEmail(usuario.getEmail());
         dto.setTelefono(usuario.getTelefono());
         dto.setDni(usuario.getDni());
-        dto.setPassword(""); // No mapeamos password por seguridad
+        dto.setPassword("");
 
-        // Dirección si existe
         if (usuario.getDireccion() != null) {
             DireccionDTO direccionDTO = mapDireccionEntityToDTO(usuario.getDireccion());
             dto.setDireccion(direccionDTO);
         }
 
-        // 🔥 CAMBIO: Obtener rol de la lista
         if (usuario.getRolesUsuario() != null && !usuario.getRolesUsuario().isEmpty()) {
             dto.setIdRol(usuario.getRolesUsuario().get(0).getIdRol());
         }

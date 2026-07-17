@@ -12,7 +12,7 @@ public interface LocalidadRepository extends JpaRepository<Localidad, Long> {
     @Query("SELECT l FROM Localidad l ORDER BY l.nombreLocalidad ASC")
     List<Localidad> findAllLocalidades();
 
-    // Filtrado dinámico por nombre
+
     @Query("SELECT l FROM Localidad l WHERE LOWER(l.nombreLocalidad) LIKE LOWER(CONCAT('%', :nombre, '%')) ORDER BY l.nombreLocalidad ASC")
     List<Localidad> findByNombreContainingIgnoreCase(@Param("nombre") String nombre);
 

@@ -7,6 +7,8 @@ import com.medina.asocDev.Medina.Asociados.repo.RolRepository;
 import com.medina.asocDev.Medina.Asociados.repo.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +25,7 @@ public class RolService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // 🔥 NUEVO: Asignar rol a usuario
+    @CacheEvict(value = "users", allEntries = true)
     @Transactional
     public void asignarRol(Long userId, Long rolId) {
         Usuario usuario = usuarioRepository.findById(userId)
@@ -38,7 +40,7 @@ public class RolService {
         }
     }
 
-    // 🔥 NUEVO: Remover rol de usuario
+    @CacheEvict(value = "users", allEntries = true)
     @Transactional
     public void removerRol(Long userId, Long rolId) {
         Usuario usuario = usuarioRepository.findById(userId)
@@ -53,7 +55,7 @@ public class RolService {
         }
     }
 
-    // 🔥 NUEVO: Obtener roles de usuario
+
     public List<String> getRolesByUserId(Long userId) {
         Usuario usuario = usuarioRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + userId));
@@ -63,7 +65,7 @@ public class RolService {
                 .collect(Collectors.toList());
     }
 
-    // Crear nuevo rol
+    @CacheEvict(value = "catalogos", allEntries = true)
     public RolDTO createRol(RolDTO rolDTO) {
         Rol rol = new Rol();
         rol.setNombre(rolDTO.getNombre());
@@ -79,7 +81,7 @@ public class RolService {
         return result;
     }
 
-    // Obtener todos los roles
+    @Cacheable("catalogos")
     public List<RolDTO> getAllRoles() {
         return rolRepository.findAll().stream()
                 .map(rol -> {
@@ -92,7 +94,7 @@ public class RolService {
                 .collect(Collectors.toList());
     }
 
-    // Obtener rol por ID
+    @Cacheable(value = "catalogos", key = "'rol-' + #id")
     public RolDTO getRolById(Long id) {
         Optional<Rol> rol = rolRepository.findById(id);
         return rol.map(r -> {
@@ -104,7 +106,7 @@ public class RolService {
         }).orElse(null);
     }
 
-    // Obtener rol por nombre
+    @Cacheable(value = "catalogos", key = "'rol-nombre-' + #nombre")
     public RolDTO getRolByNombre(String nombre) {
         Optional<Rol> rol = rolRepository.findByNombre(nombre);
         return rol.map(r -> {
@@ -116,7 +118,7 @@ public class RolService {
         }).orElse(null);
     }
 
-    // Actualizar rol
+    @CacheEvict(value = "catalogos", allEntries = true)
     public RolDTO updateRol(Long id, RolDTO rolDTO) {
         Optional<Rol> rolExistente = rolRepository.findById(id);
         if (rolExistente.isPresent()) {
@@ -135,7 +137,7 @@ public class RolService {
         return null;
     }
 
-    // Eliminar rol
+    @CacheEvict(value = "catalogos", allEntries = true)
     public boolean deleteRol(Long id) {
         if (rolRepository.existsById(id)) {
             rolRepository.deleteById(id);
