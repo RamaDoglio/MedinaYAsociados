@@ -8,6 +8,7 @@ import com.medina.asocDev.Medina.Asociados.service.CobroService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class PagoWebhookController {
     }
 
     // Soporte para notificaciones con query params (GET/POST)
+    @Transactional
     @RequestMapping(value = "/notificacion", method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseEntity<String> recibirNotificacion(
             @RequestParam(required = false) String id,
@@ -76,7 +78,7 @@ public class PagoWebhookController {
 
             // externalReference = idCobro (String)
             Long idCobro = Long.valueOf(extRef);
-            Cobro cobro = cobroRepository.findById(idCobro)
+            Cobro cobro = cobroRepository.findByIdWithLock(idCobro)
                     .orElseThrow(() -> new RuntimeException("Cobro no encontrado: " + idCobro));
 
             // Idempotencia: si ya tiene paymentId, el pago ya fue procesado

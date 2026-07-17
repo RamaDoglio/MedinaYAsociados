@@ -54,6 +54,11 @@ public class HistorialTurnoService {
         List<HistorialTurno> abiertos = historialTurnoRepository
                 .findByTurno_IdTurnoAndFechaHoraFinIsNull(turno.getIdTurno());
 
+        // Idempotencia: si el historial abierto ya tiene este estado, no duplicar
+        boolean yaRegistrado = abiertos.stream()
+                .anyMatch(h -> h.getEstadoHistorial().getIdEstado().equals(estadoNuevo.getIdEstado()));
+        if (yaRegistrado) return;
+
         for (HistorialTurno h : abiertos) {
             if (h.getFechaHoraFin() == null) {
                 h.setFechaHoraFin(LocalDateTime.now());
