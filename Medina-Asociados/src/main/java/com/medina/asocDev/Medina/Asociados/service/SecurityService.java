@@ -41,22 +41,22 @@ public class SecurityService {
                 .anyMatch(a -> a.getAuthority().equals("ABOGADO"));
     }
 
-    // 🔥 NUEVO: Cliente puede ver sus propios turnos
+
     public boolean canAccessClienteTurnos(Authentication authentication, Long idCliente) {
         return isOwner(authentication, idCliente) || isAdmin(authentication);
     }
 
-    // 🔥 NUEVO: Abogado puede ver sus propios turnos
+
     public boolean canAccessAbogadoTurnos(Authentication authentication, Long idAbogado) {
         return isOwner(authentication, idAbogado) || isAdmin(authentication) || isAbogado(authentication);
     }
 
-    // Cliente puede ver su propio detalle; abogados y admins pueden ver cualquier detalle
+
     public boolean canAccessClienteDetalle(Authentication authentication, Long idCliente) {
         return isAdmin(authentication) || isAbogado(authentication) || isOwner(authentication, idCliente);
     }
 
-    // 🔥 UTIL: Verificar múltiples roles
+
     public boolean hasAnyRole(Authentication authentication, String... roles) {
         return Arrays.stream(roles).anyMatch(role ->
                 authentication.getAuthorities().stream()

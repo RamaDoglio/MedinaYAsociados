@@ -4,6 +4,8 @@ import com.medina.asocDev.Medina.Asociados.dto.EstadoDTO;
 import com.medina.asocDev.Medina.Asociados.entity.Estado;
 import com.medina.asocDev.Medina.Asociados.repo.EstadoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +18,7 @@ public class EstadoService {
     @Autowired
     private EstadoRepository estadoRepository;
 
-    // Crear nuevo estado
+    @CacheEvict(value = "catalogos", allEntries = true)
     public EstadoDTO createEstado(EstadoDTO estadoDTO) {
         Estado estado = new Estado();
         estado.setAmbito(estadoDTO.getAmbito());
@@ -32,7 +34,7 @@ public class EstadoService {
         return result;
     }
 
-    // Obtener todos los estados
+    @Cacheable("catalogos")
     public List<EstadoDTO> getAllEstados() {
         List<Estado> estados = estadoRepository.findAll();
         return estados.stream()
@@ -46,7 +48,7 @@ public class EstadoService {
                 .collect(Collectors.toList());
     }
 
-    // Obtener estado por ID
+    @Cacheable(value = "catalogos", key = "'estado-' + #id")
     public EstadoDTO getEstadoById(Long id) {
         Optional<Estado> estado = estadoRepository.findById(id);
         if (estado.isPresent()) {
@@ -65,7 +67,7 @@ public class EstadoService {
     //    return estadoRepository.findIdByNombreAndAmbito(nombreEstado, ambito);
     //}
 
-    // Actualizar estado
+    @CacheEvict(value = "catalogos", allEntries = true)
     public EstadoDTO updateEstado(Long id, EstadoDTO estadoDTO) {
         Optional<Estado> estadoExistente = estadoRepository.findById(id);
         if (estadoExistente.isPresent()) {
@@ -84,7 +86,7 @@ public class EstadoService {
         return null;
     }
 
-    // Eliminar estado
+    @CacheEvict(value = "catalogos", allEntries = true)
     public boolean deleteEstado(Long id) {
         if (estadoRepository.existsById(id)) {
             estadoRepository.deleteById(id);

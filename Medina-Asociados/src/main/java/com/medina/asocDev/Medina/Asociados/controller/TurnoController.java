@@ -25,7 +25,6 @@ public class TurnoController {
     @Autowired
     private TurnoService turnoService;
 
-    // ✅ Crear turno (reserva)
     @PostMapping
     @PreAuthorize("@securityService.isCliente(authentication)")
     public ResponseEntity<TurnoDTO> crearTurno(@RequestBody TurnoCreateRequest turnoDTO) {
@@ -39,28 +38,25 @@ public class TurnoController {
         return ResponseEntity.ok(initPoint);
     }
 
-    // ✅ Listar todos (paginado, max 10 por pagina)
     @GetMapping
     @PreAuthorize("@securityService.isAdmin(authentication)")
     public ResponseEntity<Page<Turno>> listarTurnos(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(turnoService.listarTurnos(pageable));
     }
 
-    // ✅ Obtener por ID
     @GetMapping("/{id}")
     @PreAuthorize("@securityService.isAdmin(authentication)")
     public ResponseEntity<Turno> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(turnoService.obtenerPorId(id));
     }
 
-    // ✅ Actualizar observaciones
+
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #id)")
     public ResponseEntity<TurnoDTO> actualizarTurno(@PathVariable Long id, @RequestBody Turno datos) {
         return ResponseEntity.ok(Utils.mapTurnoEntityToDTO(turnoService.actualizarTurno(id, datos)));
     }
 
-    // ✅ Eliminar
     @DeleteMapping("/{id}")
     @PreAuthorize("@securityService.isAdmin(authentication)")
     public ResponseEntity<Void> eliminarTurno(@PathVariable Long id) {
@@ -68,7 +64,6 @@ public class TurnoController {
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ Reprogramar turno
     @PutMapping("/{id}/reprogramar")
     @PreAuthorize("@securityService.canAccessTurno(authentication, #id)")
     public ResponseEntity<TurnoDTO> reprogramarTurno(
@@ -80,14 +75,13 @@ public class TurnoController {
         return ResponseEntity.ok(turnoService.reprogramarTurno(id, fecha));
     }
 
-    // ✅ Cancelar turno
     @PostMapping("/{id}/cancelar")
     @PreAuthorize("@securityService.canAccessTurno(authentication, #id)")
     public ResponseEntity<TurnoDTO> cancelarTurno(@PathVariable Long id) {
         return ResponseEntity.ok(turnoService.cancelarTurno(id));
     }
 
-    // 🔥 Marcar no asistió
+
     @PostMapping("/{id}/noAsistio")
     @PreAuthorize("@securityService.canAccessTurno(authentication, #id)")
     public ResponseEntity<TurnoDTO> marcarNoAsistio(@PathVariable Long id) {
@@ -100,14 +94,14 @@ public class TurnoController {
         return ResponseEntity.ok(turnoService.marcarEnCurso(id));
     }
 
-    // 🔥 Finalizar turno
+
     @PostMapping("/{id}/finalizar")
     @PreAuthorize("@securityService.canAccessTurno(authentication, #id)")
     public ResponseEntity<TurnoDTO> finalizarTurno(@PathVariable Long id) {
         return ResponseEntity.ok(turnoService.finalizarTurno(id));
     }
 
-    // Listado de turnos de un cliente (paginado, max 10 por pagina)
+
     @GetMapping("/cliente/{idCliente}")
     @PreAuthorize("@securityService.canAccessClienteTurnos(authentication, #idCliente)")
     public ResponseEntity<Page<TurnoListadoDTO>> listarTurnosPorCliente(
@@ -116,7 +110,7 @@ public class TurnoController {
         return ResponseEntity.ok(turnoService.listarTurnosPorCliente(idCliente, pageable));
     }
 
-    // Listado de turnos de un abogado (paginado, max 10 por pagina)
+
     @GetMapping("/abogado/{idAbogado}")
     @PreAuthorize("@securityService.canAccessAbogadoTurnos(authentication, #idAbogado)")
     public ResponseEntity<Page<TurnoListadoDTO>> listarTurnosPorAbogado(
@@ -131,7 +125,7 @@ public class TurnoController {
     }
 
 
-    // Detalle para cliente
+
     @GetMapping("/{id}/detalle-cliente")
     @PreAuthorize("@securityService.canAccessTurno(authentication, #id)")
     public ResponseEntity<TurnoDetalleDTO> obtenerDetalleTurnoCliente(@PathVariable Long id) {
@@ -139,7 +133,7 @@ public class TurnoController {
         return ResponseEntity.ok(Utils.mapTurnoToDetalleDTOParaCliente(turno));
     }
 
-    // Detalle para abogado
+
     @GetMapping("/{id}/detalle-abogado")
     @PreAuthorize("@securityService.canAccessTurno(authentication, #id)")
     public ResponseEntity<TurnoDetalleDTO> obtenerDetalleTurnoAbogado(@PathVariable Long id) {

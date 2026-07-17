@@ -20,14 +20,12 @@ public class EspecialidadController {
     @Autowired
     private EspecialidadService especialidadService;
 
-    // Endpoint para obtener todas las especialidades (paginado, max 10 por pagina)
     @GetMapping
     @PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN', 'CLIENTE')")
     public ResponseEntity<Page<EspecialidadDTO>> getAllEspecialidades(@PageableDefault(size = 10) Pageable pageable) {
         return ResponseEntity.ok(especialidadService.getAllEspecialidades(pageable));
     }
 
-    // Endpoint para obtener una especialidad por ID
     @GetMapping("/{id}")
     @PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN', 'CLIENTE')")
     public ResponseEntity<EspecialidadDTO> getEspecialidadById(@PathVariable Long id) {

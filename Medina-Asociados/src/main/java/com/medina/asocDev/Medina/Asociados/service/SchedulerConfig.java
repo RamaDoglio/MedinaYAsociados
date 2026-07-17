@@ -12,7 +12,7 @@ public class SchedulerConfig {
     @Bean
     public TaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(5); // cantidad de hilos en paralelo
+        scheduler.setPoolSize(5);
         scheduler.setThreadNamePrefix("Scheduler-");
         scheduler.initialize();
         return scheduler;

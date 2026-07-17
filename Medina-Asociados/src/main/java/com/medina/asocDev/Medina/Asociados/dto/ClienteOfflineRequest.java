@@ -11,5 +11,5 @@ public class ClienteOfflineRequest {
     private String dni;
     private String telefono;
     private String email;
-    private DireccionDTO direccion;  // O DireccionRequest, si es diferente
+    private DireccionDTO direccion;
 }

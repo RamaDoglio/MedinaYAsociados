@@ -25,7 +25,6 @@ public class AbogadoController {
 	@Autowired
 	private AbogadoService abogadoService;
 
-	// Crear un abogado para un usuario existente
 	@PostMapping("/{idUsuario}")
 	@PreAuthorize("@securityService.isAdmin(authentication)")
 	public ResponseEntity<AbogadoDTO> createAbogado(@PathVariable Long idUsuario,
@@ -35,7 +34,6 @@ public class AbogadoController {
 		return ResponseEntity.ok(creado);
 	}
 
-	// Listar todos los abogados (paginado, max 10 por pagina)
 	@GetMapping
 	@PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN', 'CLIENTE')")
 	public ResponseEntity<Page<AbogadoDTO>> getAll(@PageableDefault(size = 10) Pageable pageable) {
@@ -50,7 +48,7 @@ public class AbogadoController {
 		return ResponseEntity.ok(abogado);
 	}
 
-	// Actualizar un abogado
+
 	@PatchMapping("/{id}/matricula")
 	@PreAuthorize("@securityService.isAdmin(authentication)")
 	public ResponseEntity<AbogadoDTO> updateMatricula(
@@ -71,7 +69,7 @@ public class AbogadoController {
 		return ResponseEntity.ok(actualizado);
 	}
 
-	// Eliminar un abogado
+
 	@DeleteMapping("/{id}")
 	@PreAuthorize("@securityService.isAdmin(authentication)")
 	public ResponseEntity<Void> deleteAbogado(@PathVariable Long id) {
@@ -80,7 +78,7 @@ public class AbogadoController {
 		else return ResponseEntity.notFound().build();
 	}
 
-	// Obtener abogados por id de especialidad (paginado, max 10 por pagina)
+
 	@GetMapping("/especialidad/{idEspecialidad}")
 	@PreAuthorize("@securityService.hasAnyRole(authentication, 'ABOGADO', 'ADMIN', 'CLIENTE')")
 	public ResponseEntity<Page<AbogadoDTO>> getAbogadosByEspecialidad(

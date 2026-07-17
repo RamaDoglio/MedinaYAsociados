@@ -12,5 +12,5 @@ public class TurnoOfflineRequest {
     private Long idEspecialidad;
     private LocalDateTime horarioTurno;
     private String observacionesCliente;
-    private ClienteOfflineRequest cliente;  // Nuevo: datos del cliente
+    private ClienteOfflineRequest cliente;
 }
