@@ -168,7 +168,8 @@ class TurnoServiceTest {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(usuarioRepository.findById(2L)).thenReturn(Optional.of(abogado));
         when(especialidadRepository.findById(1L)).thenReturn(Optional.of(especialidad));
-        when(estadoRepository.findById(4L)).thenReturn(Optional.of(estadoReservado));
+        when(estadoRepository.findByNombreAndAmbito("RESERVADO", "TURNO"))
+                .thenReturn(Optional.of(estadoReservado));
         when(abogadoService.esFinDeSemana(any(LocalDate.class))).thenReturn(false);
         when(parametroService.getValor("PRECIO_TURNO")).thenReturn("5000");
         when(estadoRepository.findByNombreAndAmbito("PENDIENTE", "COBRO"))
@@ -232,7 +233,8 @@ class TurnoServiceTest {
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(usuarioRepository.findById(2L)).thenReturn(Optional.of(abogado));
         when(especialidadRepository.findById(1L)).thenReturn(Optional.of(especialidad));
-        when(estadoRepository.findById(4L)).thenReturn(Optional.of(estadoReservado));
+        when(estadoRepository.findByNombreAndAmbito("RESERVADO", "TURNO"))
+                .thenReturn(Optional.of(estadoReservado));
         when(abogadoService.esFinDeSemana(any(LocalDate.class))).thenReturn(true);
 
         assertThrows(RuntimeException.class, () -> turnoService.crearTurno(request));
