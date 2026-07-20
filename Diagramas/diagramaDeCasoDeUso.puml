@@ -3,48 +3,41 @@
 left to right direction
 actor Cliente
 actor Abogado
+actor "Usuario Turno" as UT
+actor Usuario
 actor "Administrador" as Admin
 
-rectangle "Sistema de Gestión de Turnos" {
-  
-  (Registrar reserva turno) as reservar
-  (Registrar usuario) as registrar
-  (Registrar cancelacion turno) as cancelar
-  (Consultar turno) as consultar
-  (Gestionar estados de turno) as estados
-  (Gestionar especialidades) as especialidad
-  (Gestionar abogados) as gestAbogado
-  (Gestionar clientes) as gestCliente
-  (Gestionar horarios) as gestHorarios
-  (Reprogramar turno) as repro
-  (Consultar usurio) as consultarUsuario
-  (Generar y emitir reportes) as reportes
-  (Registrar abogado) as registrarAbogado
-  (Consultar abogado) as consultarAbogado
-  (Registrar especialidades) as registrarEspecialidad
-}
 
-Cliente --> reservar
-Cliente --> registrar
-Cliente --> cancelar
-Cliente --> consultar
-Cliente --> consultarUsuario
+Cliente --> (1. Registrar turno)
 
-Abogado --> consultar
-Abogado --> repro
-Abogado --> consultarUsuario
-Abogado --> consultarAbogado
+Cliente --> (11. Pagar turno)
+Cliente --|> UT
 
+Usuario --> (4. Consultar perfil)
+Usuario --> (19. Registrar perfil)
+Usuario --> (20. Iniciar Sesion)
+UT --|> Usuario
+UT --> (2. Cancelar turno)
+UT --> (3. Consultar turnos)
+UT --> (5. Reprogramar turno)
 
-Admin --> gestAbogado
-Admin --> gestCliente
-Admin --> especialidad
-Admin --> estados
-Admin --> gestHorarios
-Admin --> reportes
-Admin --> registrarAbogado
-Admin --> consultarAbogado
-Admin --> registrarEspecialidad
+(3. Consultar turnos) <.. (7. Consultar Detalle Turno): <<ext>>
+(7. Consultar Detalle Turno) <.. (8. Consultar Historial Turno): <<ext>>
+
+Abogado --|> UT
+Abogado --> (6. Registrar Turno Offline)
+(6. Registrar Turno Offline) ..> (16. Registrar Usuario Offline): <<include>>
+Abogado --> (12. Marcar Turno en Curso)
+Abogado --> (13. Finalizar Turno)
+Abogado --> (14. Marcar como No Asistio)
+Abogado --> (15. Marcar Turno como Pagado)
+Abogado --> (19. Buscar Cliente)
+
+Admin --|> Usuario
+Admin --> (9. Registrar Abogado)
+Admin --> (10. Modificar Abogado)
+Admin --> (17. Consultar Precio de Turnos)
+Admin --> (18. Modificar Precio de Turnos)
 
 
 @enduml
