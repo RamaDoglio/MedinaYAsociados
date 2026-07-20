@@ -390,6 +390,7 @@ public class Utils {
         dto.setObservacionesCliente(turno.getObservacionesCliente());
         dto.setObservacionesAbogado(turno.getObservacionesAbogado());
         dto.setEstado(turno.getEstadoActual().getNombreEstado());
+        dto.setIdAbogado(abogado.getIdUsuario());
 
         return dto;
     }
@@ -411,6 +412,7 @@ public class Utils {
         dto.setFechaHora(turno.getHorarioTurno());
         dto.setObservacionesCliente(turno.getObservacionesCliente());
         dto.setObservacionesAbogado(turno.getObservacionesAbogado());
+        dto.setIdAbogado(turno.getAbogadoTurno().getIdUsuario());
         dto.setEstado(turno.getEstadoActual().getNombreEstado());
 
         return dto;

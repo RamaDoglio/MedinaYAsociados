@@ -18,4 +18,5 @@ public class TurnoDetalleDTO {
     private String observacionesCliente;
     private String observacionesAbogado;
     private String estado;
+    private Long idAbogado;
 }
