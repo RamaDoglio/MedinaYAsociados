@@ -170,7 +170,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>${jacoco.agent.argLine} -Dnet.bytebuddy.experimental=true</argLine>
+					<argLine>${jacoco.agent.argLine} -Dnet.bytebuddy.experimental=true -Duser.timezone=America/Argentina/Buenos_Aires</argLine>
 				</configuration>
 			</plugin>
 
