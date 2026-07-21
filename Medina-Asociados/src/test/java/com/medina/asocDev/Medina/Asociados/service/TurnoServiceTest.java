@@ -448,6 +448,20 @@ class TurnoServiceTest {
     }
 
     @Test
+    void marcarNoAsistio_desdePendienteCobro_actualizaEstado() {
+        turno.setEstadoActual(estadoPendienteCobro);
+        when(turnoRepository.findById(1L)).thenReturn(Optional.of(turno));
+        when(estadoRepository.findByNombreAndAmbito("NO_ASISTIO", "TURNO"))
+                .thenReturn(Optional.of(estadoNoAsistio));
+        when(turnoRepository.save(any(Turno.class))).thenAnswer(i -> i.getArgument(0));
+
+        TurnoDTO resultado = turnoService.marcarNoAsistio(1L);
+
+        assertNotNull(resultado);
+        verify(historialTurnoService).registrarCambio(turno, estadoPendienteCobro, estadoNoAsistio);
+    }
+
+    @Test
     void marcarNoAsistio_desdePagado_throwsException() {
         turno.setEstadoActual(estadoPagadoTurno);
         when(turnoRepository.findById(1L)).thenReturn(Optional.of(turno));
