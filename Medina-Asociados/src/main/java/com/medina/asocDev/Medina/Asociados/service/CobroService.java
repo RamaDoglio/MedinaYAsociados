@@ -148,12 +148,12 @@ public class CobroService {
 	public CobroDTO marcarComoPagadoEfectivoTransferencia(Cobro cobro) {
 		// Idempotencia: si ya está marcado, devolver sin cambios o lanzar excepción según prefieras
 		if (cobro.getEstadoCobro() != null &&
-				"PAGADO EFECTIVO/TRANSFERENCIA".equals(cobro.getEstadoCobro().getNombreEstado())) {
+				"PAGADO_EFECTIVO/TRANSFERENCIA".equals(cobro.getEstadoCobro().getNombreEstado())) {
 			return Utils.mapCobroEntityToDTO(cobro);
 		}
 
 		Estado estadoPagadoEfectivo = estadoRepository
-				.findByNombreAndAmbito("PAGADO EFECTIVO/TRANSFERENCIA", "COBRO")
+				.findByNombreAndAmbito("PAGADO_EFECTIVO/TRANSFERENCIA", "COBRO")
 				.orElseThrow(() -> new RuntimeException("Estado PAGADO EFECTIVO/TRANSFERENCIA no encontrado"));
 
 		cobro.setEstadoCobro(estadoPagadoEfectivo);

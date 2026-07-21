@@ -162,6 +162,7 @@ public class TurnoController {
         }
     }
     @PostMapping("/{id}/marcar-pagado")
+    @PreAuthorize("@securityService.canAccessTurno(authentication, #id)")
     public ResponseEntity<TurnoDTO> marcarPagado(@PathVariable("id") Long id) {
         TurnoDTO turnoDTO = turnoService.marcarPagado(id);
         return ResponseEntity.ok(turnoDTO);
