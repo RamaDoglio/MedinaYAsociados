@@ -243,7 +243,7 @@ class TurnoControllerTest {
         TurnoDTO dto = new TurnoDTO();
         dto.setIdTurno(1L);
         when(turnoService.marcarPagado(1L)).thenReturn(dto);
-        when(securityService.canAccessClienteTurnos(any(), eq(1L))).thenReturn(true);
+        when(securityService.isAbogado(any())).thenReturn(true);
 
         mockMvc.perform(post(BASE_URL + "/1/marcar-pagado"))
                 .andExpect(status().isOk());
