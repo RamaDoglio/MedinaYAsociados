@@ -334,8 +334,9 @@ public class TurnoService {
     public TurnoDTO marcarNoAsistio(Long idTurno) {
         Turno turno = obtenerPorId(idTurno);
 
-        if (!turno.getEstadoActual().getNombreEstado().equals("EN_CURSO")) {
-            throw new IllegalStateException("Solo un turno en curso puede marcarse como NO_ASISTIO");
+        String estado = turno.getEstadoActual().getNombreEstado();
+        if (!List.of("EN_CURSO", "PENDIENTE_COBRO").contains(estado)) {
+            throw new IllegalStateException("Solo un turno en curso o pendiente de cobro puede marcarse como NO_ASISTIO");
         }
 
         Estado noAsistio = estadoRepository.findByNombreAndAmbito("NO_ASISTIO", "TURNO")
